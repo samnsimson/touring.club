@@ -19,7 +19,7 @@
             "path": "./library/core"
         },
         {
-            "path": "./e2e/auth-service-e2e"
+            "path": "./apps/auth-service/e2e"
         },
         {
             "path": "./apps/auth-service"

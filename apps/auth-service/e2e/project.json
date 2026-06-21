@@ -1,6 +1,6 @@
 {
     "name": "auth-service-e2e",
-    "$schema": "../../node_modules/nx/schemas/project-schema.json",
+    "$schema": "../../../node_modules/nx/schemas/project-schema.json",
     "projectType": "application",
     "implicitDependencies": ["auth-service"],
     "targets": {
@@ -9,7 +9,7 @@
             "outputs": ["{workspaceRoot}/coverage/{e2eProjectRoot}"],
             "dependsOn": ["auth-service:build", "auth-service:serve"],
             "options": {
-                "jestConfig": "e2e/auth-service-e2e/jest.config.cts",
+                "jestConfig": "apps/auth-service/e2e/jest.config.cts",
                 "passWithNoTests": true
             }
         }

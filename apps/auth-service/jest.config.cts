@@ -11,6 +11,7 @@ module.exports = {
     displayName: 'auth-service',
     preset: '../../jest.preset.js',
     testEnvironment: 'node',
+    roots: ['<rootDir>/specs'],
     transform: {
         '^.+\\.[tj]s$': ['@swc/jest', swcJestConfig],
     },

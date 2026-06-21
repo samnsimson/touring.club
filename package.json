@@ -77,7 +77,6 @@
     },
     "workspaces": [
         "apps/*",
-        "e2e/*",
         "library/*"
     ]
 }
