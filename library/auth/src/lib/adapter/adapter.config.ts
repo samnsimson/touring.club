@@ -4,4 +4,7 @@ export interface AdapterConfig {
     usePlural?: boolean;
     useDebugLog?: DBAdapterDebugLogOption;
     transaction?: boolean;
+    outputDir?: string;
+    entitiesDir?: string;
+    migrationsDir?: string;
 }

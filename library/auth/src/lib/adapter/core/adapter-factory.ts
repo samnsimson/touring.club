@@ -4,6 +4,7 @@ import type { AdapterFactoryConfig, AdapterFactoryOptions, DBTransactionAdapter 
 import { DataSource, EntityManager } from 'typeorm';
 import { AdapterConfig } from '../adapter.config';
 import { createTypeormAdapterMethods } from './adapter-methods';
+import { createTypeormSchema } from '../schema/create-schema';
 
 export type LazyAdapterOptions = Parameters<ReturnType<typeof createAdapterFactory>>[0];
 
@@ -31,19 +32,22 @@ export function createBaseAdapterConfig(config: AdapterConfig, dbType: string): 
 export function createCustomAdapterFactory({
     dbType,
     config,
+    dataSource,
 }: {
     dbType: string;
     config: AdapterConfig;
+    dataSource: DataSource;
 }): (manager: EntityManager, inTransaction?: boolean) => CustomAdapterCreator {
     return (manager, inTransaction = false) =>
-        ({ getFieldName, getModelName, getDefaultModelName, getFieldAttributes, schema }) =>
-            createTypeormAdapterMethods(
-                manager,
-                dbType,
-                { getFieldName, getModelName, getDefaultModelName, getFieldAttributes, schema },
-                inTransaction,
-                config,
-            );
+        ({ getFieldName, getModelName, getDefaultModelName, getFieldAttributes, schema }) => {
+            const context = { getFieldName, getModelName, getDefaultModelName, getFieldAttributes, schema };
+
+            return {
+                ...createTypeormAdapterMethods(manager, dbType, context, inTransaction, config),
+                createSchema: async ({ file, tables }) =>
+                    createTypeormSchema({ dataSource, dbType, config, tables, file }),
+            };
+        };
 }
 
 type TransactionSupportParams = {
