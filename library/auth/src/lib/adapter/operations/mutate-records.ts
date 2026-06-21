@@ -3,7 +3,7 @@ import { ObjectLiteral, type QueryDeepPartialEntity } from 'typeorm';
 import type { AdapterMethodHandles } from '../core/adapter-handles';
 import type { AdapterRuntime } from '../core/adapter.context';
 import { tableFor } from '../core/adapter.context';
-import { applyWhereClause, hasRootUniqueWhereCondition, supportsReturning } from '../query/where-clause';
+import { applyWhereClause, buildPostUpdateWhere, hasRootUniqueWhereCondition, supportsReturning } from '../query/where-clause';
 
 export async function updateRecord<T>(
     runtime: AdapterRuntime,
@@ -42,7 +42,7 @@ export async function updateRecord<T>(
         return null;
     }
 
-    return handles.findOne<T>({ model, where });
+    return handles.findOne<T>({ model, where: buildPostUpdateWhere(where, update as Record<string, unknown>) });
 }
 
 export async function updateManyRecords(

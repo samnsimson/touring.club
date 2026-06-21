@@ -1,6 +1,6 @@
 import type { EntityManager } from 'typeorm';
 
-export const PRIMARY_ALIAS = 'primary';
+export const PRIMARY_ALIAS = 'base';
 
 export type AdapterContext = {
     getFieldName: (args: { model: string; field: string }) => string;

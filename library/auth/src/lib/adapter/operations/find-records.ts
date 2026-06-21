@@ -32,23 +32,53 @@ export async function findOneRecord<T>(runtime: AdapterRuntime, { model, where, 
 export async function findManyRecords<T>(runtime: AdapterRuntime, args: FindManyArgs): Promise<T[]> {
     const { model, where, limit, select, offset, sortBy, join } = args;
     const { selects: joinSelects, meta } = buildJoinSelects(join, runtime.context.schema, runtime.context.getDefaultModelName);
+    const table = tableFor(runtime.context, model);
 
-    const qb = runtime.manager
+    const baseQb = runtime.manager
         .createQueryBuilder()
         .select(buildSelectColumns(PRIMARY_ALIAS, model, select, runtime.context))
-        .from(tableFor(runtime.context, model), PRIMARY_ALIAS);
+        .from(table, PRIMARY_ALIAS);
 
-    applyWhereClause(qb, PRIMARY_ALIAS, model, where, runtime.context.getFieldName, runtime.dbType, 'findMany');
+    applyWhereClause(baseQb, PRIMARY_ALIAS, model, where, runtime.context.getFieldName, runtime.dbType, 'findMany');
 
     if (sortBy?.field) {
-        qb.orderBy(`${PRIMARY_ALIAS}.${runtime.context.getFieldName({ model, field: sortBy.field })}`, sortBy.direction.toUpperCase() as 'ASC' | 'DESC');
+        baseQb.orderBy(
+            `${PRIMARY_ALIAS}.${runtime.context.getFieldName({ model, field: sortBy.field })}`,
+            sortBy.direction.toUpperCase() as 'ASC' | 'DESC',
+        );
     }
 
-    if (offset !== undefined) {
-        qb.offset(offset);
+    if (join) {
+        if (offset !== undefined) {
+            baseQb.offset(offset);
+        }
+
+        if (limit !== undefined) {
+            baseQb.limit(limit);
+        }
+    } else {
+        if (offset !== undefined) {
+            baseQb.offset(offset);
+        }
+
+        baseQb.limit(limit ?? 100);
     }
 
-    qb.limit(limit ?? 100);
+    const qb = join
+        ? runtime.manager
+              .createQueryBuilder()
+              .select(buildSelectColumns(PRIMARY_ALIAS, model, select, runtime.context))
+              .from(`(${baseQb.getQuery()})`, PRIMARY_ALIAS)
+              .setParameters(baseQb.getParameters())
+        : baseQb;
+
+    if (join && sortBy?.field) {
+        qb.orderBy(
+            `${PRIMARY_ALIAS}.${runtime.context.getFieldName({ model, field: sortBy.field })}`,
+            sortBy.direction.toUpperCase() as 'ASC' | 'DESC',
+        );
+    }
+
     applyJoins(qb, PRIMARY_ALIAS, join, runtime.context, joinSelects);
 
     const rows = await qb.getRawMany();

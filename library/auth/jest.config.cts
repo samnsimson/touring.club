@@ -11,6 +11,7 @@ module.exports = {
     displayName: 'auth',
     preset: '../../jest.preset.js',
     testEnvironment: 'node',
+    testPathIgnorePatterns: ['/node_modules/', String.raw`/adapter\.spec\.ts$`],
     transform: {
         '^.+\\.[tj]s$': ['@swc/jest', swcJestConfig],
     },

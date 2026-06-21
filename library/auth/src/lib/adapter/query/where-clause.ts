@@ -4,11 +4,34 @@ import type { Where } from 'better-auth/adapters';
 type FieldNameResolver = (args: { model: string; field: string }) => string;
 
 export function getDatabaseType(type: string | undefined): string {
-    return type ?? 'postgres';
+    if (!type || type === 'better-sqlite3' || type === 'sqlite') {
+        return 'sqlite';
+    }
+
+    if (type === 'mariadb') {
+        return 'mysql';
+    }
+
+    return type;
 }
 
 export function supportsReturning(dbType: string): boolean {
     return dbType === 'postgres';
+}
+
+export function buildPostUpdateWhere(where: Where[], update: Record<string, unknown>): Where[] {
+    const idCondition = where.find((condition) => condition.field === 'id');
+    if (idCondition) {
+        return [idCondition];
+    }
+
+    return where.map((condition) => {
+        if (Object.prototype.hasOwnProperty.call(update, condition.field)) {
+            return { ...condition, value: update[condition.field] };
+        }
+
+        return condition;
+    });
 }
 
 function buildConditionSql(

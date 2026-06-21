@@ -21,7 +21,7 @@ export function createBaseAdapterConfig(config: AdapterConfig, dbType: string): 
         adapterName: 'typeorm-adapter',
         usePlural: config.usePlural,
         debugLogs: config.useDebugLog,
-        supportsUUIDs: true,
+        supportsUUIDs: false,
         supportsJSON: dbType === 'postgres',
         supportsDates: dbType !== 'sqlite' && dbType !== 'mssql',
         supportsBooleans: dbType !== 'sqlite' && dbType !== 'mssql' && dbType !== 'mysql' && dbType !== 'mariadb',
@@ -65,16 +65,21 @@ export function createTransactionSupport({
         return false;
     }
 
-    return <R>(callback: (trx: DBTransactionAdapter) => Promise<R>) =>
-        dataSource.transaction(async (activeManager) => {
-            const lazyOptions = getLazyOptions();
-            if (!lazyOptions) throw new BetterAuthError('Adapter has not been initialized yet.');
+    return async <R>(callback: (trx: DBTransactionAdapter) => Promise<R>) => {
+        const lazyOptions = getLazyOptions();
+        if (!lazyOptions) {
+            throw new BetterAuthError('Adapter has not been initialized yet.');
+        }
+
+        return dataSource.manager.transaction(async (activeManager) => {
             const transactionalFactory = createAdapterFactory({
                 config: { ...baseAdapterConfig, transaction: false },
                 adapter: createCustomAdapter(activeManager, true),
             });
+
             return callback(transactionalFactory(lazyOptions));
         });
+    };
 }
 
 export function createAdapterOptions({
