@@ -1,13 +1,16 @@
 {
-  "extends": "./tsconfig.base.json",
-  "compileOnSave": false,
-  "files": [],
-  "references": [
-    {
-      "path": "./apps/gateway-service-e2e"
-    },
-    {
-      "path": "./apps/gateway-service"
-    }
-  ]
+    "extends": "./tsconfig.base.json",
+    "compileOnSave": false,
+    "files": [],
+    "references": [
+        {
+            "path": "./apps/gateway-service-e2e"
+        },
+        {
+            "path": "./apps/gateway-service"
+        },
+        {
+            "path": "./library/database"
+        }
+    ]
 }

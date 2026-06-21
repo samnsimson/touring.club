@@ -1,26 +1,26 @@
 {
-  "name": "@touring.club/gateway-service-e2e",
-  "version": "0.0.1",
-  "private": true,
-  "nx": {
-    "implicitDependencies": [
-      "@touring.club/gateway-service"
-    ],
-    "targets": {
-      "e2e": {
-        "executor": "@nx/jest:jest",
-        "outputs": [
-          "{projectRoot}/test-output/jest/coverage"
+    "name": "@touring.club/gateway-service-e2e",
+    "version": "0.0.1",
+    "private": true,
+    "nx": {
+        "implicitDependencies": [
+            "@touring.club/gateway-service"
         ],
-        "dependsOn": [
-          "@touring.club/gateway-service:build",
-          "@touring.club/gateway-service:serve"
-        ],
-        "options": {
-          "jestConfig": "apps/gateway-service-e2e/jest.config.cts",
-          "passWithNoTests": true
+        "targets": {
+            "e2e": {
+                "executor": "@nx/jest:jest",
+                "outputs": [
+                    "{projectRoot}/test-output/jest/coverage"
+                ],
+                "dependsOn": [
+                    "@touring.club/gateway-service:build",
+                    "@touring.club/gateway-service:serve"
+                ],
+                "options": {
+                    "jestConfig": "apps/gateway-service-e2e/jest.config.cts",
+                    "passWithNoTests": true
+                }
+            }
         }
-      }
     }
-  }
 }
