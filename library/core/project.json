@@ -13,7 +13,8 @@
                 "main": "library/core/src/index.ts",
                 "tsConfig": "library/core/tsconfig.lib.json",
                 "format": ["esm"],
-                "declarationRootDir": "library/core/src"
+                "declarationRootDir": "library/core/src",
+                "external": ["@tc/*"]
             }
         }
     }

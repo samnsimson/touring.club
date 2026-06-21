@@ -13,7 +13,8 @@
                 "main": "library/database/src/index.ts",
                 "tsConfig": "library/database/tsconfig.lib.json",
                 "format": ["esm"],
-                "declarationRootDir": "library/database/src"
+                "declarationRootDir": "library/database/src",
+                "external": ["@tc/*"]
             }
         },
         "migration:run": {
