@@ -1,6 +1,6 @@
 import { DynamicModule, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigService } from '@tc/config';
+import { ConfigModule, ConfigService } from '@tc/config';
 import { DatabaseModuleOptions } from './database.contract';
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { DatabaseUtils } from './database.utils';
@@ -13,6 +13,7 @@ export class DatabaseModule {
             module: DatabaseModule,
             imports: [
                 TypeOrmModule.forRootAsync({
+                    imports: [ConfigModule],
                     inject: [ConfigService],
                     useFactory: (config: ConfigService) => {
                         return DatabaseUtils.createDataSourceOptions({

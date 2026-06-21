@@ -1,10 +1,11 @@
-import { DynamicModule } from '@nestjs/common';
+import { DynamicModule, Module } from '@nestjs/common';
 import { ConfigModule as NestConfigModule, ConfigService as NestConfigService } from '@nestjs/config';
 import { CONFIG_ENV, ConfigModuleOptions } from './config.contract';
 import { ConfigService } from './config.service';
 import { Env, envKeys } from './env.schema';
 import { validateEnv } from './validate-env';
 
+@Module({})
 export class ConfigModule {
     static forRoot(options: ConfigModuleOptions = {}): DynamicModule {
         return {
@@ -12,7 +13,7 @@ export class ConfigModule {
             global: options.isGlobal ?? true,
             imports: [
                 NestConfigModule.forRoot({
-                    isGlobal: false,
+                    isGlobal: true,
                     envFilePath: options.envFilePath,
                     expandVariables: true,
                     load: options.load,
