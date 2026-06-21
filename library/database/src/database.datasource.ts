@@ -1,6 +1,6 @@
-import { join } from 'path';
-import { DatabaseUtils } from './database.utils';
+import { join } from 'node:path';
 import { validateEnv } from '@tc/config';
+import { DatabaseUtils } from './database.utils';
 
 const env = validateEnv(process.env);
 

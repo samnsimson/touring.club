@@ -18,15 +18,17 @@
         },
         "migration:run": {
             "executor": "nx:run-commands",
+            "dependsOn": ["config:build", "utils:build"],
             "options": {
-                "command": "bunx typeorm migration:run --dataSource=library/database/src/database.datasource.ts",
+                "command": "bunx typeorm-ts-node-esm migration:run --dataSource=library/database/src/database.datasource.ts",
                 "cwd": "{workspaceRoot}"
             }
         },
         "migration:generate": {
             "executor": "nx:run-commands",
+            "dependsOn": ["config:build", "utils:build"],
             "options": {
-                "command": "bunx typeorm migration:generate library/database/src/migrations/{args.name} --dataSource=library/database/src/database.datasource.ts",
+                "command": "bunx typeorm-ts-node-esm migration:generate library/database/src/migrations/{args.name} --dataSource=library/database/src/database.datasource.ts",
                 "cwd": "{workspaceRoot}"
             }
         }
