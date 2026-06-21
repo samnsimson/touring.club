@@ -22,6 +22,13 @@
                 "format": ["esm"],
                 "declarationRootDir": "library/auth/src"
             }
+        },
+        "generate": {
+            "executor": "@nx/workspace:run-commands",
+            "options": {
+                "command": "bunx auth@latest generate --config library/auth/src/lib/auth.config.ts",
+                "cwd": "{workspaceRoot}"
+            }
         }
     }
 }
