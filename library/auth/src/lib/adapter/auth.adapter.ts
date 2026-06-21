@@ -13,17 +13,22 @@ import {
 export const typeormAdapter = (dataSource: DataSource, config: AdapterConfig = {}) => {
     assertDataSourceInitialized(dataSource);
 
+    const adapterConfig: AdapterConfig = {
+        ...config,
+        namingStrategy: config.namingStrategy ?? dataSource.options.namingStrategy,
+    };
+
     let lazyOptions: LazyAdapterOptions | null = null;
     const dbType = getDatabaseType(dataSource.options.type);
-    const baseAdapterConfig = createBaseAdapterConfig(config, dbType);
-    const createCustomAdapter = createCustomAdapterFactory({ dbType, config });
+    const baseAdapterConfig = createBaseAdapterConfig(adapterConfig, dbType);
+    const createCustomAdapter = createCustomAdapterFactory({ dbType, config: adapterConfig });
 
     const adapter = createAdapterFactory(
         createAdapterOptions({
             baseAdapterConfig,
             createCustomAdapter,
             dataSource,
-            transactionEnabled: config.transaction ?? false,
+            transactionEnabled: adapterConfig.transaction ?? false,
             getLazyOptions: () => lazyOptions,
         }),
     );

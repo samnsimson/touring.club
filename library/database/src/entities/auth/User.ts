@@ -2,25 +2,24 @@ import { Column, Entity, PrimaryColumn } from 'typeorm';
 
 @Entity('users', { schema: 'auth' })
 export class User {
-  @PrimaryColumn('text')
-  id!: string;
+    @PrimaryColumn('text')
+    id!: string;
 
-  @Column('text', { name: 'name', nullable: false })
-  name!: string;
+    @Column('text', { nullable: false })
+    name!: string;
 
-  @Column('text', { name: 'email', nullable: false, unique: true })
-  email!: string;
+    @Column('text', { nullable: false, unique: true })
+    email!: string;
 
-  @Column('boolean', { name: 'emailVerified', nullable: false })
-  emailVerified!: boolean;
+    @Column('boolean', { name: 'email_verified', nullable: false })
+    emailVerified!: boolean;
 
-  @Column('text', { name: 'image', nullable: true })
-  image!: string;
+    @Column('text', { nullable: true })
+    image!: string;
 
-  @Column('timestamp', { name: 'createdAt', nullable: false })
-  createdAt!: Date;
+    @Column('timestamp', { name: 'created_at', nullable: false })
+    createdAt!: Date;
 
-  @Column('timestamp', { name: 'updatedAt', nullable: false })
-  updatedAt!: Date;
-
+    @Column('timestamp', { name: 'updated_at', nullable: false })
+    updatedAt!: Date;
 }

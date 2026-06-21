@@ -4,6 +4,7 @@ import type { AdapterFactoryConfig, AdapterFactoryOptions, DBTransactionAdapter 
 import { DataSource, EntityManager } from 'typeorm';
 import { AdapterConfig } from '../adapter.config';
 import { createTypeormAdapterMethods } from './adapter-methods';
+import { createNamingAwareContext } from './naming-context';
 import { createTypeormSchema } from '../schema/create-schema';
 
 export type LazyAdapterOptions = Parameters<ReturnType<typeof createAdapterFactory>>[0];
@@ -38,7 +39,7 @@ export function createCustomAdapterFactory({
 }): (manager: EntityManager, inTransaction?: boolean) => CustomAdapterCreator {
     return (manager, inTransaction = false) =>
         ({ getFieldName, getModelName, getDefaultModelName, getFieldAttributes, schema }) => {
-            const context = { getFieldName, getModelName, getDefaultModelName, getFieldAttributes, schema };
+            const context = createNamingAwareContext({ getFieldName, getModelName, getDefaultModelName, getFieldAttributes, schema }, config.namingStrategy);
 
             return {
                 ...createTypeormAdapterMethods(manager, dbType, context, inTransaction, config),

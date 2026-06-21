@@ -14,7 +14,7 @@ import {
 import Database from 'better-sqlite3';
 import { getMigrations } from 'better-auth/db/migration';
 import { DataSource } from 'typeorm';
-import { typeormAdapter } from './auth.adapter.js';
+import { typeormAdapter } from '../auth.adapter.js';
 
 const testDir = join(dirname(fileURLToPath(import.meta.url)), '__test-data__');
 const dbPath = join(testDir, 'adapter.spec.db');

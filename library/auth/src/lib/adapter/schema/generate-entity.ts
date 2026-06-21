@@ -1,5 +1,7 @@
+import type { NamingStrategyInterface } from 'typeorm';
 import type { DBFieldAttribute } from 'better-auth/db';
 import { mapFieldToTypeormColumn } from './column-type';
+import { resolveColumnName, resolveTableName } from './naming';
 import { toEntityClassName } from './schema-paths';
 
 type TableDefinition = {
@@ -11,14 +13,19 @@ export function generateEntitySource(
     modelKey: string,
     table: TableDefinition,
     dbType: string,
-    schema = 'auth',
+    options: {
+        schema?: string;
+        namingStrategy?: NamingStrategyInterface;
+    } = {},
 ): string {
+    const { schema = 'auth', namingStrategy } = options;
     const className = toEntityClassName(modelKey);
+    const tableName = resolveTableName(namingStrategy, modelKey, table.modelName);
     const entityOptions = schema ? `, { schema: '${schema}' }` : '';
     const lines = [
         `import { Column, Entity, PrimaryColumn } from 'typeorm';`,
         '',
-        `@Entity('${table.modelName}'${entityOptions})`,
+        `@Entity('${tableName}'${entityOptions})`,
         `export class ${className} {`,
         `  @PrimaryColumn('text')`,
         `  id!: string;`,
@@ -28,21 +35,25 @@ export function generateEntitySource(
     for (const [fieldKey, field] of Object.entries(table.fields)) {
         if (fieldKey === 'id') continue;
 
-        const columnName = field.fieldName ?? fieldKey;
+        const columnName = resolveColumnName(namingStrategy, fieldKey, field.fieldName);
         const { columnType, tsType } = mapFieldToTypeormColumn(field, dbType);
-        const options: string[] = [`name: '${columnName}'`];
+        const columnOptions: string[] = [];
+
+        if (columnName !== fieldKey) {
+            columnOptions.push(`name: '${columnName}'`);
+        }
 
         if (field.required === false) {
-            options.push('nullable: true');
+            columnOptions.push('nullable: true');
         } else {
-            options.push('nullable: false');
+            columnOptions.push('nullable: false');
         }
 
         if (field.unique || columnName === 'email' || columnName === 'token') {
-            options.push('unique: true');
+            columnOptions.push('unique: true');
         }
 
-        const decoratorArgs = options.length > 0 ? `, { ${options.join(', ')} }` : '';
+        const decoratorArgs = columnOptions.length > 0 ? `, { ${columnOptions.join(', ')} }` : '';
         lines.push(`  @Column('${columnType}'${decoratorArgs})`);
         lines.push(`  ${fieldKey}!: ${tsType};`);
         lines.push('');

@@ -6,7 +6,7 @@ export type AdapterContext = {
     getFieldName: (args: { model: string; field: string }) => string;
     getModelName: (model: string) => string;
     getDefaultModelName: (model: string) => string;
-    getFieldAttributes: (args: { model: string; field: string }) => { unique?: boolean };
+    getFieldAttributes: (args: { model: string; field: string }) => { unique?: boolean; fieldName?: string };
     schema: Record<string, { fields?: Record<string, { fieldName?: string }> }>;
 };
 

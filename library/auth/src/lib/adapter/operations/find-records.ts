@@ -42,10 +42,7 @@ export async function findManyRecords<T>(runtime: AdapterRuntime, args: FindMany
     applyWhereClause(baseQb, PRIMARY_ALIAS, model, where, runtime.context.getFieldName, runtime.dbType, 'findMany');
 
     if (sortBy?.field) {
-        baseQb.orderBy(
-            `${PRIMARY_ALIAS}.${runtime.context.getFieldName({ model, field: sortBy.field })}`,
-            sortBy.direction.toUpperCase() as 'ASC' | 'DESC',
-        );
+        baseQb.orderBy(`${PRIMARY_ALIAS}.${runtime.context.getFieldName({ model, field: sortBy.field })}`, sortBy.direction.toUpperCase() as 'ASC' | 'DESC');
     }
 
     if (join) {
@@ -73,10 +70,7 @@ export async function findManyRecords<T>(runtime: AdapterRuntime, args: FindMany
         : baseQb;
 
     if (join && sortBy?.field) {
-        qb.orderBy(
-            `${PRIMARY_ALIAS}.${runtime.context.getFieldName({ model, field: sortBy.field })}`,
-            sortBy.direction.toUpperCase() as 'ASC' | 'DESC',
-        );
+        qb.orderBy(`${PRIMARY_ALIAS}.${runtime.context.getFieldName({ model, field: sortBy.field })}`, sortBy.direction.toUpperCase() as 'ASC' | 'DESC');
     }
 
     applyJoins(qb, PRIMARY_ALIAS, join, runtime.context, joinSelects, runtime.dbType, runtime.tableSchema);

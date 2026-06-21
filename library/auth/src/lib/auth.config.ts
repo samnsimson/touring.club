@@ -1,4 +1,5 @@
 import { betterAuth } from 'better-auth';
+import { SnakeNamingStrategy } from '@tc/utils';
 import { typeormAdapter } from './adapter/auth.adapter';
 import { dataSource, env } from './auth.datasource';
 
@@ -11,6 +12,7 @@ export const auth = betterAuth({
         schema: 'auth',
         usePlural: true,
         transaction: true,
+        namingStrategy: new SnakeNamingStrategy(),
         entitiesDir: 'library/database/src/entities/auth',
     }),
     emailAndPassword: { enabled: true, requireEmailVerification: true, autoSignIn: true },

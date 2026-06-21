@@ -20,12 +20,7 @@ type TableDefinition = {
     fields: Record<string, DBFieldAttribute>;
 };
 
-export async function createTypeormSchema({
-    dbType,
-    config,
-    tables,
-    file,
-}: CreateSchemaParams): Promise<DBAdapterSchemaCreation> {
+export async function createTypeormSchema({ dbType, config, tables, file }: CreateSchemaParams): Promise<DBAdapterSchemaCreation> {
     try {
         const cwd = process.cwd();
         const { entitiesDir } = resolveSchemaPaths(config, cwd);
@@ -44,7 +39,10 @@ export async function createTypeormSchema({
             };
             const entityFileName = `${toEntityClassName(modelKey)}.ts`;
             const entityPath = join(entitiesDir, entityFileName);
-            const content = generateEntitySource(modelKey, table, dbType, config.schema ?? 'auth');
+            const content = generateEntitySource(modelKey, table, dbType, {
+                schema: config.schema ?? 'auth',
+                namingStrategy: config.namingStrategy,
+            });
             const existed = existsSync(entityPath);
             const unchanged = existed && readFileSync(entityPath, 'utf8') === content;
 

@@ -2,28 +2,27 @@ import { Column, Entity, PrimaryColumn } from 'typeorm';
 
 @Entity('sessions', { schema: 'auth' })
 export class Session {
-  @PrimaryColumn('text')
-  id!: string;
+    @PrimaryColumn('text')
+    id!: string;
 
-  @Column('timestamp', { name: 'expiresAt', nullable: false })
-  expiresAt!: Date;
+    @Column('timestamp', { name: 'expires_at', nullable: false })
+    expiresAt!: Date;
 
-  @Column('text', { name: 'token', nullable: false, unique: true })
-  token!: string;
+    @Column('text', { nullable: false, unique: true })
+    token!: string;
 
-  @Column('timestamp', { name: 'createdAt', nullable: false })
-  createdAt!: Date;
+    @Column('timestamp', { name: 'created_at', nullable: false })
+    createdAt!: Date;
 
-  @Column('timestamp', { name: 'updatedAt', nullable: false })
-  updatedAt!: Date;
+    @Column('timestamp', { name: 'updated_at', nullable: false })
+    updatedAt!: Date;
 
-  @Column('text', { name: 'ipAddress', nullable: true })
-  ipAddress!: string;
+    @Column('text', { name: 'ip_address', nullable: true })
+    ipAddress!: string;
 
-  @Column('text', { name: 'userAgent', nullable: true })
-  userAgent!: string;
+    @Column('text', { name: 'user_agent', nullable: true })
+    userAgent!: string;
 
-  @Column('text', { name: 'userId', nullable: false })
-  userId!: string;
-
+    @Column('text', { name: 'user_id', nullable: false })
+    userId!: string;
 }

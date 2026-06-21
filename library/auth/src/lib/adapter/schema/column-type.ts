@@ -17,9 +17,7 @@ export function mapFieldToTypeormColumn(field: DBFieldAttribute, dbType: string)
         case 'boolean':
             return { columnType: dbType === 'sqlite' ? 'boolean' : 'boolean', tsType: 'boolean' };
         case 'number':
-            return field.bigint
-                ? { columnType: 'bigint', tsType: 'string' }
-                : { columnType: 'integer', tsType: 'number' };
+            return field.bigint ? { columnType: 'bigint', tsType: 'string' } : { columnType: 'integer', tsType: 'number' };
         case 'date':
             return {
                 columnType: dbType === 'postgres' ? 'timestamp' : dbType === 'sqlite' ? 'datetime' : 'timestamp',

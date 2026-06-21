@@ -7,6 +7,7 @@
     "targets": {
         "test": {
             "executor": "nx:run-commands",
+            "dependsOn": ["utils:build"],
             "options": {
                 "command": "vitest run --config library/auth/vitest.config.ts",
                 "cwd": "{workspaceRoot}"
@@ -25,6 +26,7 @@
         },
         "generate": {
             "executor": "nx:run-commands",
+            "dependsOn": ["utils:build"],
             "options": {
                 "command": "bun --env-file=.env x auth@latest generate --config library/auth/src/lib/auth.config.ts --yes",
                 "cwd": "{workspaceRoot}"
