@@ -24,9 +24,9 @@
             }
         },
         "generate": {
-            "executor": "@nx/workspace:run-commands",
+            "executor": "nx:run-commands",
             "options": {
-                "command": "bunx auth@latest generate --config library/auth/src/lib/auth.config.ts",
+                "command": "bun --env-file=.env x auth@latest generate --config library/auth/src/lib/auth.config.ts",
                 "cwd": "{workspaceRoot}"
             }
         }

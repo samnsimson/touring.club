@@ -1,10 +1,11 @@
+import { validateEnv } from '@tc/config';
 import { DataSource } from 'typeorm';
+
+export const env = validateEnv(process.env);
 
 export const dataSource = new DataSource({
     type: 'postgres',
-    host: 'localhost',
-    port: 5432,
-    username: 'postgres',
-    password: 'postgres',
-    database: 'postgres',
+    url: env.DATABASE_URL,
 });
+
+await dataSource.initialize();

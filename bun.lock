@@ -87,6 +87,7 @@
       "name": "@tc/auth",
       "version": "0.0.1",
       "dependencies": {
+        "@tc/config": "workspace:*",
         "better-auth": "^1.6.20",
         "typeorm": "^0.3.20",
       },
