@@ -21,8 +21,8 @@
                 "main": "library/auth/src/index.ts",
                 "tsConfig": "library/auth/tsconfig.lib.json",
                 "declarationRootDir": "library/auth/src",
-                "format": ["esm", "cjs"],
-                "external": ["@tc/*"]
+                "external": ["@tc/*"],
+                "format": ["esm"]
             }
         },
         "generate": {
