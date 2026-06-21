@@ -15,5 +15,8 @@
             "default": "./dist/index.js"
         }
     },
-    "dependencies": {}
+    "dependencies": {
+        "better-auth": "^1.6.20",
+        "typeorm": "^0.3.20"
+    }
 }

@@ -1,28 +1,35 @@
-import { AdapterConfig } from './adapter.config';
 import { createAdapterFactory } from 'better-auth/adapters';
 import { DataSource } from 'typeorm';
+import { AdapterConfig } from './adapter.config';
+import { getDatabaseType } from './query/where-clause';
+import {
+    assertDataSourceInitialized,
+    createAdapterOptions,
+    createBaseAdapterConfig,
+    createCustomAdapterFactory,
+    LazyAdapterOptions,
+} from './core/adapter-factory';
 
-export const typeormAdapter = (dataSource: DataSource, config: AdapterConfig) => {
-    return createAdapterFactory({
-        config: {
-            adapterId: 'typeorm-adapter',
-            adapterName: 'typeorm-adapter',
-            usePlural: config.usePlural,
-            debugLogs: config.useDebugLog,
-            supportsUUIDs: true,
-            supportsJSON: true,
-        },
-        adapter: (options) => {
-            return {
-                create: async ({ data, model, select }) => {},
-                update: async ({ model, where, update }) => {},
-                updateMany: async ({ model, where, update }) => {},
-                delete: async ({ model, where }) => {},
-                deleteMany: async ({ model, where }) => {},
-                findOne: async ({ model, where, select }) => {},
-                findMany: async ({ model, where, select }) => {},
-                count: async ({ model, where }) => {},
-            };
-        },
-    });
+export const typeormAdapter = (dataSource: DataSource, config: AdapterConfig = {}) => {
+    assertDataSourceInitialized(dataSource);
+
+    let lazyOptions: LazyAdapterOptions | null = null;
+    const dbType = getDatabaseType(dataSource.options.type);
+    const baseAdapterConfig = createBaseAdapterConfig(config, dbType);
+    const createCustomAdapter = createCustomAdapterFactory({ dbType, config });
+
+    const adapter = createAdapterFactory(
+        createAdapterOptions({
+            baseAdapterConfig,
+            createCustomAdapter,
+            dataSource,
+            transactionEnabled: config.transaction ?? false,
+            getLazyOptions: () => lazyOptions,
+        }),
+    );
+
+    return (options: Parameters<typeof adapter>[0]) => {
+        lazyOptions = options;
+        return adapter(options);
+    };
 };

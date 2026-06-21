@@ -24,6 +24,7 @@
         "zod": "^4.4.3"
     },
     "devDependencies": {
+        "@better-auth/test-utils": "^1.6.20",
         "@eslint/js": "^9.8.0",
         "@nestjs/schematics": "^11.0.0",
         "@nestjs/testing": "^11.0.0",
