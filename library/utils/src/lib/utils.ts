@@ -42,3 +42,7 @@ export class SnakeNamingStrategy extends DefaultNamingStrategy implements Naming
         return `${alias}_${propertyPath.replace('.', '_')}`;
     }
 }
+
+export function usernameValidator(username: string): boolean {
+    return /^[a-zA-Z0-9]+$/.test(username);
+}
