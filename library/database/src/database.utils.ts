@@ -11,9 +11,11 @@ const env = validateEnv(process.env);
 export class DatabaseUtils {
     static createDataSourceOptions(options: DatabaseUtilsOptions): TypeOrmModuleOptions {
         return {
-            type: options.type as 'postgres',
+            type: (options.type ?? 'postgres') as 'postgres',
             url: options.url ?? env.DATABASE_URL,
             entities: options.entities,
+            migrations: options.migrations,
+            migrationsRun: options.migrationsRun,
             namingStrategy: new SnakeNamingStrategy(),
             synchronize: options.synchronize,
             logging: options.logging,
