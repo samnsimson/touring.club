@@ -32,11 +32,9 @@ export function createBaseAdapterConfig(config: AdapterConfig, dbType: string): 
 export function createCustomAdapterFactory({
     dbType,
     config,
-    dataSource,
 }: {
     dbType: string;
     config: AdapterConfig;
-    dataSource: DataSource;
 }): (manager: EntityManager, inTransaction?: boolean) => CustomAdapterCreator {
     return (manager, inTransaction = false) =>
         ({ getFieldName, getModelName, getDefaultModelName, getFieldAttributes, schema }) => {
@@ -44,8 +42,7 @@ export function createCustomAdapterFactory({
 
             return {
                 ...createTypeormAdapterMethods(manager, dbType, context, inTransaction, config),
-                createSchema: async ({ file, tables }) =>
-                    createTypeormSchema({ dataSource, dbType, config, tables, file }),
+                createSchema: async ({ file, tables }) => createTypeormSchema({ dbType, config, tables, file }),
             };
         };
 }

@@ -10,9 +10,7 @@ export const auth = betterAuth({
     database: typeormAdapter(dataSource, {
         usePlural: true,
         transaction: true,
-        outputDir: 'library/database/src',
         entitiesDir: 'library/database/src/entities',
-        migrationsDir: 'library/database/src/migrations',
     }),
     emailAndPassword: { enabled: true, requireEmailVerification: true, autoSignIn: true },
 });

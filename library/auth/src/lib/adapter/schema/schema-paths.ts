@@ -6,9 +6,8 @@ const DEFAULT_OUTPUT_DIR = 'library/database/src';
 export function resolveSchemaPaths(config: AdapterConfig, cwd = process.cwd()) {
     const outputDir = resolve(cwd, config.outputDir ?? DEFAULT_OUTPUT_DIR);
     const entitiesDir = resolve(cwd, config.entitiesDir ?? `${config.outputDir ?? DEFAULT_OUTPUT_DIR}/entities`);
-    const migrationsDir = resolve(cwd, config.migrationsDir ?? `${config.outputDir ?? DEFAULT_OUTPUT_DIR}/migrations`);
 
-    return { outputDir, entitiesDir, migrationsDir };
+    return { outputDir, entitiesDir };
 }
 
 export function toEntityClassName(modelKey: string): string {

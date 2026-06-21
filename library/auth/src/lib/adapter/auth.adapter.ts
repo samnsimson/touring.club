@@ -16,7 +16,7 @@ export const typeormAdapter = (dataSource: DataSource, config: AdapterConfig = {
     let lazyOptions: LazyAdapterOptions | null = null;
     const dbType = getDatabaseType(dataSource.options.type);
     const baseAdapterConfig = createBaseAdapterConfig(config, dbType);
-    const createCustomAdapter = createCustomAdapterFactory({ dbType, config, dataSource });
+    const createCustomAdapter = createCustomAdapterFactory({ dbType, config });
 
     const adapter = createAdapterFactory(
         createAdapterOptions({
