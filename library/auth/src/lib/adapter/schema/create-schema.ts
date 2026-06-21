@@ -44,7 +44,7 @@ export async function createTypeormSchema({
             };
             const entityFileName = `${toEntityClassName(modelKey)}.ts`;
             const entityPath = join(entitiesDir, entityFileName);
-            const content = generateEntitySource(modelKey, table, dbType);
+            const content = generateEntitySource(modelKey, table, dbType, config.schema ?? 'auth');
             const existed = existsSync(entityPath);
             const unchanged = existed && readFileSync(entityPath, 'utf8') === content;
 

@@ -11,10 +11,10 @@ export async function findOneRecord<T>(runtime: AdapterRuntime, { model, where, 
     const qb = runtime.manager
         .createQueryBuilder()
         .select(buildSelectColumns(PRIMARY_ALIAS, model, select, runtime.context))
-        .from(tableFor(runtime.context, model), PRIMARY_ALIAS);
+        .from(tableFor(runtime, model), PRIMARY_ALIAS);
 
     applyWhereClause(qb, PRIMARY_ALIAS, model, where, runtime.context.getFieldName, runtime.dbType, 'findOne');
-    applyJoins(qb, PRIMARY_ALIAS, join, runtime.context, joinSelects);
+    applyJoins(qb, PRIMARY_ALIAS, join, runtime.context, joinSelects, runtime.dbType, runtime.tableSchema);
 
     const rows = await qb.getRawMany();
 
@@ -32,7 +32,7 @@ export async function findOneRecord<T>(runtime: AdapterRuntime, { model, where, 
 export async function findManyRecords<T>(runtime: AdapterRuntime, args: FindManyArgs): Promise<T[]> {
     const { model, where, limit, select, offset, sortBy, join } = args;
     const { selects: joinSelects, meta } = buildJoinSelects(join, runtime.context.schema, runtime.context.getDefaultModelName);
-    const table = tableFor(runtime.context, model);
+    const table = tableFor(runtime, model);
 
     const baseQb = runtime.manager
         .createQueryBuilder()
@@ -79,7 +79,7 @@ export async function findManyRecords<T>(runtime: AdapterRuntime, args: FindMany
         );
     }
 
-    applyJoins(qb, PRIMARY_ALIAS, join, runtime.context, joinSelects);
+    applyJoins(qb, PRIMARY_ALIAS, join, runtime.context, joinSelects, runtime.dbType, runtime.tableSchema);
 
     const rows = await qb.getRawMany();
 
@@ -91,7 +91,7 @@ export async function findManyRecords<T>(runtime: AdapterRuntime, args: FindMany
 }
 
 export async function countRecords(runtime: AdapterRuntime, { model, where }: { model: string; where?: FindManyArgs['where'] }): Promise<number> {
-    const qb = runtime.manager.createQueryBuilder().select(`COUNT(${PRIMARY_ALIAS}.id)`, 'count').from(tableFor(runtime.context, model), PRIMARY_ALIAS);
+    const qb = runtime.manager.createQueryBuilder().select(`COUNT(${PRIMARY_ALIAS}.id)`, 'count').from(tableFor(runtime, model), PRIMARY_ALIAS);
 
     applyWhereClause(qb, PRIMARY_ALIAS, model, where, runtime.context.getFieldName, runtime.dbType, 'count');
     const result = await qb.getRawOne<{ count: string | number | bigint }>();

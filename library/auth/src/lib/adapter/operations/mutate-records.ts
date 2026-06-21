@@ -10,7 +10,7 @@ export async function updateRecord<T>(
     handles: AdapterMethodHandles,
     { model, where, update }: { model: string; where: Where[]; update: T },
 ): Promise<T | null> {
-    const table = tableFor(runtime.context, model);
+    const table = tableFor(runtime, model);
 
     if (!hasRootUniqueWhereCondition(model, where, runtime.context.getFieldAttributes, runtime.dbType)) {
         const affected = await handles.updateMany({
@@ -49,7 +49,7 @@ export async function updateManyRecords(
     runtime: AdapterRuntime,
     { model, where, update }: { model: string; where: Where[]; update: Record<string, unknown> },
 ): Promise<number> {
-    const table = tableFor(runtime.context, model);
+    const table = tableFor(runtime, model);
     const qb = runtime.manager.createQueryBuilder().update(table).set(update);
     applyWhereClause(qb, table, model, where, runtime.context.getFieldName, runtime.dbType, 'updateMany');
 
@@ -58,7 +58,7 @@ export async function updateManyRecords(
 }
 
 export async function deleteRecord(runtime: AdapterRuntime, { model, where }: { model: string; where: Where[] }): Promise<void> {
-    const table = tableFor(runtime.context, model);
+    const table = tableFor(runtime, model);
     const qb = runtime.manager.createQueryBuilder().delete().from(table);
     applyWhereClause(qb, table, model, where, runtime.context.getFieldName, runtime.dbType, 'delete');
 
@@ -66,7 +66,7 @@ export async function deleteRecord(runtime: AdapterRuntime, { model, where }: { 
 }
 
 export async function deleteManyRecords(runtime: AdapterRuntime, { model, where }: { model: string; where: Where[] }): Promise<number> {
-    const table = tableFor(runtime.context, model);
+    const table = tableFor(runtime, model);
     const qb = runtime.manager.createQueryBuilder().delete().from(table);
     applyWhereClause(qb, table, model, where, runtime.context.getFieldName, runtime.dbType, 'deleteMany');
 

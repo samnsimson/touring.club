@@ -1,6 +1,6 @@
 import { Column, Entity, PrimaryColumn } from 'typeorm';
 
-@Entity('verifications')
+@Entity('verifications', { schema: 'auth' })
 export class Verification {
   @PrimaryColumn('text')
   id!: string;

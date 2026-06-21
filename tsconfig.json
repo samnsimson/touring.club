@@ -17,6 +17,9 @@
         },
         {
             "path": "./library/auth"
+        },
+        {
+            "path": "./library/utils"
         }
     ]
 }

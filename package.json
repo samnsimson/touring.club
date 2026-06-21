@@ -24,6 +24,7 @@
         "reflect-metadata": "^0.2.0",
         "rxjs": "^7.8.0",
         "typeorm": "^1.0.0",
+        "typeorm-naming-strategy": "^2.0.19",
         "zod": "^4.4.3"
     },
     "devDependencies": {

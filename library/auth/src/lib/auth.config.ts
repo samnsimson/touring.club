@@ -8,9 +8,10 @@ export const auth = betterAuth({
     basePath: '/api/auth',
     secret: env.BETTER_AUTH_SECRET,
     database: typeormAdapter(dataSource, {
+        schema: 'auth',
         usePlural: true,
         transaction: true,
-        entitiesDir: 'library/database/src/entities',
+        entitiesDir: 'library/database/src/entities/auth',
     }),
     emailAndPassword: { enabled: true, requireEmailVerification: true, autoSignIn: true },
 });

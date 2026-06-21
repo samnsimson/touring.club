@@ -15,8 +15,17 @@ export type AdapterRuntime = {
     dbType: string;
     context: AdapterContext;
     inTransaction: boolean;
+    tableSchema?: string;
 };
 
-export function tableFor(context: AdapterContext, model: string): string {
-    return context.getModelName(model);
+export function qualifyTable(table: string, dbType: string, tableSchema?: string): string {
+    if (tableSchema && dbType === 'postgres') {
+        return `${tableSchema}.${table}`;
+    }
+
+    return table;
+}
+
+export function tableFor(runtime: AdapterRuntime, model: string): string {
+    return qualifyTable(runtime.context.getModelName(model), runtime.dbType, runtime.tableSchema);
 }

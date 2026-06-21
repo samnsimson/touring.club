@@ -1,5 +1,5 @@
 {
-    "name": "@tc/auth",
+    "name": "@tc/utils",
     "version": "0.0.1",
     "private": true,
     "type": "module",
@@ -16,10 +16,6 @@
         }
     },
     "dependencies": {
-        "@tc/config": "workspace:*",
-        "@tc/utils": "workspace:*",
-        "better-auth": "^1.6.20",
-        "typeorm": "^0.3.20",
-        "vitest": "^4.1.9"
+        "typeorm": "^0.3.20"
     }
 }

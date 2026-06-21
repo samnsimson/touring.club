@@ -1,76 +1,60 @@
 import { BetterAuthError } from 'better-auth';
 import type { Where } from 'better-auth/adapters';
-import type { EntityManager } from 'typeorm';
 import { ObjectLiteral, type QueryDeepPartialEntity } from 'typeorm';
-import { AdapterContext, PRIMARY_ALIAS, tableFor } from '../core/adapter.context';
+import { AdapterRuntime, PRIMARY_ALIAS, tableFor } from '../core/adapter.context';
 import { buildSelectColumns } from '../query/query-builder.utils';
 import { applyWhereClause, supportsReturning } from '../query/where-clause';
 
 export async function insertRecord(
-    manager: EntityManager,
-    dbType: string,
-    context: AdapterContext,
+    runtime: AdapterRuntime,
     model: string,
     data: Record<string, unknown>,
     where: Where[] = [],
 ): Promise<Record<string, unknown>> {
-    const table = tableFor(context, model);
-    let insertQb = manager
+    const table = tableFor(runtime, model);
+    let insertQb = runtime.manager
         .createQueryBuilder()
         .insert()
         .into(table)
         .values(data as QueryDeepPartialEntity<ObjectLiteral>);
 
-    if (supportsReturning(dbType)) insertQb = insertQb.returning('*');
+    if (supportsReturning(runtime.dbType)) insertQb = insertQb.returning('*');
 
     const insertResult = await insertQb.execute();
-    if (supportsReturning(dbType) && insertResult.raw[0]) return insertResult.raw[0];
+    if (supportsReturning(runtime.dbType) && insertResult.raw[0]) return insertResult.raw[0];
 
-    const rowByWhere = await findInsertedRowByWhere(manager, dbType, context, model, table, where);
+    const rowByWhere = await findInsertedRowByWhere(runtime, model, table, where);
     if (rowByWhere) return rowByWhere;
 
-    const rowById = await findInsertedRowById(manager, context, model, table, data.id);
+    const rowById = await findInsertedRowById(runtime, model, table, data.id);
     if (rowById) return rowById;
 
-    const rowByValues = await findInsertedRowByValues(manager, context, model, table, data);
+    const rowByValues = await findInsertedRowByValues(runtime, model, table, data);
     if (rowByValues) return rowByValues;
 
     throw new BetterAuthError(`Failed to retrieve inserted row for model "${model}".`);
 }
 
-async function findInsertedRowByWhere(
-    manager: EntityManager,
-    dbType: string,
-    context: AdapterContext,
-    model: string,
-    table: string,
-    where: Where[],
-): Promise<Record<string, unknown> | undefined> {
+async function findInsertedRowByWhere(runtime: AdapterRuntime, model: string, table: string, where: Where[]): Promise<Record<string, unknown> | undefined> {
     if (!where.length) return undefined;
 
-    const qb = manager
+    const qb = runtime.manager
         .createQueryBuilder()
-        .select(buildSelectColumns(PRIMARY_ALIAS, model, undefined, context))
+        .select(buildSelectColumns(PRIMARY_ALIAS, model, undefined, runtime.context))
         .from(table, PRIMARY_ALIAS)
         .limit(1);
 
-    applyWhereClause(qb, PRIMARY_ALIAS, model, where, context.getFieldName, dbType, 'insert');
+    applyWhereClause(qb, PRIMARY_ALIAS, model, where, runtime.context.getFieldName, runtime.dbType, 'insert');
     return (await qb.getRawOne()) ?? undefined;
 }
 
-async function findInsertedRowById(
-    manager: EntityManager,
-    context: AdapterContext,
-    model: string,
-    table: string,
-    id: unknown,
-): Promise<Record<string, unknown> | undefined> {
+async function findInsertedRowById(runtime: AdapterRuntime, model: string, table: string, id: unknown): Promise<Record<string, unknown> | undefined> {
     if (!id) return undefined;
 
     return (
-        (await manager
+        (await runtime.manager
             .createQueryBuilder()
-            .select(buildSelectColumns(PRIMARY_ALIAS, model, undefined, context))
+            .select(buildSelectColumns(PRIMARY_ALIAS, model, undefined, runtime.context))
             .from(table, PRIMARY_ALIAS)
             .where(`${PRIMARY_ALIAS}.id = :id`, { id })
             .limit(1)
@@ -79,15 +63,14 @@ async function findInsertedRowById(
 }
 
 async function findInsertedRowByValues(
-    manager: EntityManager,
-    context: AdapterContext,
+    runtime: AdapterRuntime,
     model: string,
     table: string,
     data: Record<string, unknown>,
 ): Promise<Record<string, unknown> | undefined> {
-    let qb = manager
+    let qb = runtime.manager
         .createQueryBuilder()
-        .select(buildSelectColumns(PRIMARY_ALIAS, model, undefined, context))
+        .select(buildSelectColumns(PRIMARY_ALIAS, model, undefined, runtime.context))
         .from(table, PRIMARY_ALIAS)
         .limit(1);
 

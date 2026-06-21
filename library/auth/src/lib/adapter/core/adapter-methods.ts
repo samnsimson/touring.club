@@ -12,7 +12,7 @@ export function createTypeormAdapterMethods(
     inTransaction = false,
     config: AdapterConfig = {},
 ) {
-    const runtime: AdapterRuntime = { manager, dbType, context, inTransaction };
+    const runtime: AdapterRuntime = { manager, dbType, context, inTransaction, tableSchema: config.schema ?? 'auth' };
 
     const methods = {
         create: <T extends Record<string, unknown>>(args: { data: T; model: string }) => createRecord(runtime, args),

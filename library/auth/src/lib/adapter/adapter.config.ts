@@ -8,4 +8,6 @@ export interface AdapterConfig {
     outputDir?: string;
     /** Directory for generated entity files. Default: `{outputDir}/entities` */
     entitiesDir?: string;
+    /** Postgres schema for generated entities and queries. Default: `auth` */
+    schema?: string;
 }

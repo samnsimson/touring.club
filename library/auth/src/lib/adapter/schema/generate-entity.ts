@@ -7,12 +7,18 @@ type TableDefinition = {
     fields: Record<string, DBFieldAttribute>;
 };
 
-export function generateEntitySource(modelKey: string, table: TableDefinition, dbType: string): string {
+export function generateEntitySource(
+    modelKey: string,
+    table: TableDefinition,
+    dbType: string,
+    schema = 'auth',
+): string {
     const className = toEntityClassName(modelKey);
+    const entityOptions = schema ? `, { schema: '${schema}' }` : '';
     const lines = [
         `import { Column, Entity, PrimaryColumn } from 'typeorm';`,
         '',
-        `@Entity('${table.modelName}')`,
+        `@Entity('${table.modelName}'${entityOptions})`,
         `export class ${className} {`,
         `  @PrimaryColumn('text')`,
         `  id!: string;`,

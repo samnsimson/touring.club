@@ -10,7 +10,7 @@ export async function consumeOneRecord<T>(runtime: AdapterRuntime, { model, wher
         const selectQb = manager
             .createQueryBuilder()
             .select(buildSelectColumns(PRIMARY_ALIAS, model, undefined, runtime.context))
-            .from(tableFor(runtime.context, model), PRIMARY_ALIAS);
+            .from(tableFor(runtime, model), PRIMARY_ALIAS);
 
         applyWhereClause(selectQb, PRIMARY_ALIAS, model, where, runtime.context.getFieldName, runtime.dbType, 'consume');
 
@@ -30,7 +30,7 @@ export async function consumeOneRecord<T>(runtime: AdapterRuntime, { model, wher
             return null;
         }
 
-        const table = tableFor(runtime.context, model);
+        const table = tableFor(runtime, model);
         const deleteQb = manager.createQueryBuilder().delete().from(table).where(`${table}.${idField} = :id`, { id: targetId });
 
         if (supportsReturning(runtime.dbType)) {
@@ -64,7 +64,7 @@ export async function incrementOneRecord<T>(
         set?: Record<string, unknown>;
     },
 ): Promise<T | null> {
-    const table = tableFor(runtime.context, model);
+    const table = tableFor(runtime, model);
 
     const mutate = async (manager: AdapterRuntime['manager']): Promise<T | null> => {
         const selectQb = manager

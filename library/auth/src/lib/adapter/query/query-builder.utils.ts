@@ -1,6 +1,6 @@
 import { ObjectLiteral, SelectQueryBuilder, type QueryDeepPartialEntity } from 'typeorm';
 import type { JoinConfig } from 'better-auth/adapters';
-import { AdapterContext, PRIMARY_ALIAS } from '../core/adapter.context';
+import { AdapterContext, PRIMARY_ALIAS, qualifyTable } from '../core/adapter.context';
 
 export function buildSelectColumns(alias: string, model: string, select: string[] | undefined, context: AdapterContext): string[] {
     if (select?.length) {
@@ -25,6 +25,8 @@ export function applyJoins(
     join: JoinConfig | undefined,
     context: AdapterContext,
     joinSelects: string[],
+    dbType: string,
+    tableSchema?: string,
 ): void {
     if (!join) {
         return;
@@ -32,7 +34,7 @@ export function applyJoins(
 
     for (const [joinModel, joinAttr] of Object.entries(join)) {
         const [, joinModelRef = joinModel] = joinModel.includes('.') ? joinModel.split('.') : [undefined, joinModel];
-        const joinTable = context.getModelName(joinModel);
+        const joinTable = qualifyTable(context.getModelName(joinModel), dbType, tableSchema);
         const joinAlias = `join_${joinModelRef}`;
 
         qb.leftJoin(joinTable, joinAlias, `${joinAlias}.${joinAttr.on.to} = ${alias}.${joinAttr.on.from}`);
