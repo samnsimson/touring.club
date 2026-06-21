@@ -15,6 +15,20 @@
                 "format": ["esm"],
                 "declarationRootDir": "library/database/src"
             }
+        },
+        "migration:run": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "bunx typeorm migration:run --dataSource=library/database/src/database.datasource.ts",
+                "cwd": "{workspaceRoot}"
+            }
+        },
+        "migration:generate": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "bunx typeorm migration:generate library/database/src/migrations/{args.name} --dataSource=library/database/src/database.datasource.ts",
+                "cwd": "{workspaceRoot}"
+            }
         }
     }
 }

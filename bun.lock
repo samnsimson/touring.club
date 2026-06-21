@@ -111,6 +111,7 @@
         "@nestjs/common": "^11.0.0",
         "@nestjs/typeorm": "^11.0.2",
         "@tc/config": "workspace:*",
+        "@tc/utils": "workspace:*",
         "typeorm": "^1.0.0",
       },
     },

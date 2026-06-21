@@ -6,7 +6,9 @@
         "format": "prettier --write \"**/*.{js,ts,json}\"",
         "test": "nx run-many --target=test",
         "build": "nx run-many --target=build",
-        "auth:generate": "nx run auth:generate"
+        "auth:generate": "nx run auth:generate",
+        "migration:run": "nx run database:migration:run",
+        "migration:generate": "nx run database:migration:generate --name=Migration"
     },
     "private": true,
     "dependencies": {
