@@ -1,0 +1,20 @@
+{
+    "name": "auth",
+    "$schema": "../../node_modules/nx/schemas/project-schema.json",
+    "sourceRoot": "library/auth/src",
+    "projectType": "library",
+    "tags": ["auth", "shared"],
+    "targets": {
+        "build": {
+            "executor": "@nx/esbuild:esbuild",
+            "outputs": ["{options.outputPath}"],
+            "options": {
+                "outputPath": "library/auth/dist",
+                "main": "library/auth/src/index.ts",
+                "tsConfig": "library/auth/tsconfig.lib.json",
+                "format": ["esm"],
+                "declarationRootDir": "library/auth/src"
+            }
+        }
+    }
+}

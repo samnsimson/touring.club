@@ -11,6 +11,12 @@
         },
         {
             "path": "./library/database"
+        },
+        {
+            "path": "./library/config"
+        },
+        {
+            "path": "./library/auth"
         }
     ]
 }
