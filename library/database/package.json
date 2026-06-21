@@ -15,5 +15,10 @@
             "default": "./dist/index.js"
         }
     },
-    "dependencies": {}
+    "dependencies": {
+        "@nestjs/common": "^11.0.0",
+        "@nestjs/typeorm": "^11.0.2",
+        "@tc/config": "workspace:*",
+        "typeorm": "^1.0.0"
+    }
 }

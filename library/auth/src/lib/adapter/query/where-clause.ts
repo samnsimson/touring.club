@@ -27,7 +27,7 @@ export function buildPostUpdateWhere(where: Where[], update: Record<string, unkn
 
     return where.map((condition) => {
         if (Object.prototype.hasOwnProperty.call(update, condition.field)) {
-            return { ...condition, value: update[condition.field] };
+            return { ...condition, value: update[condition.field] as Where['value'] };
         }
 
         return condition;

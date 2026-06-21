@@ -3,7 +3,9 @@
     "version": "0.0.0",
     "license": "MIT",
     "scripts": {
-        "format": "prettier --write \"**/*.{js,ts,json}\""
+        "format": "prettier --write \"**/*.{js,ts,json}\"",
+        "test": "bun run nx run-many --target=test",
+        "build": "bun run nx run-many --target=build"
     },
     "private": true,
     "dependencies": {

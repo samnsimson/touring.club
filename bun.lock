@@ -103,6 +103,12 @@
     "library/database": {
       "name": "@tc/database",
       "version": "0.0.1",
+      "dependencies": {
+        "@nestjs/common": "^11.0.0",
+        "@nestjs/typeorm": "^11.0.2",
+        "@tc/config": "workspace:*",
+        "typeorm": "^1.0.0",
+      },
     },
   },
   "packages": {
