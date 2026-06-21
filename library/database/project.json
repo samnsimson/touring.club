@@ -12,8 +12,8 @@
                 "outputPath": "library/database/dist",
                 "main": "library/database/src/index.ts",
                 "tsConfig": "library/database/tsconfig.lib.json",
-                "format": ["esm"],
                 "declarationRootDir": "library/database/src",
+                "format": ["esm", "cjs"],
                 "external": ["@tc/*"]
             }
         },

@@ -12,8 +12,8 @@
                 "outputPath": "library/utils/dist",
                 "main": "library/utils/src/index.ts",
                 "tsConfig": "library/utils/tsconfig.lib.json",
-                "format": ["esm"],
                 "declarationRootDir": "library/utils/src",
+                "format": ["esm", "cjs"],
                 "external": ["@tc/*"]
             }
         },
