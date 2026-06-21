@@ -17,7 +17,7 @@
                     "@touring.club/gateway-service:serve"
                 ],
                 "options": {
-                    "jestConfig": "apps/gateway-service-e2e/jest.config.cts",
+                    "jestConfig": "e2e/gateway-service-e2e/jest.config.cts",
                     "passWithNoTests": true
                 }
             }

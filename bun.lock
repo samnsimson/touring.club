@@ -68,6 +68,21 @@
         "webpack-dev-server": "^5.2.1",
       },
     },
+    "apps/auth-service": {
+      "name": "@touring.club/auth-service",
+      "version": "0.0.1",
+      "dependencies": {
+        "@nestjs/common": "^11.0.0",
+        "@nestjs/core": "^11.0.0",
+        "@nestjs/platform-express": "^11.0.0",
+        "reflect-metadata": "^0.2.0",
+        "rxjs": "^7.8.0",
+        "tslib": "^2.3.0",
+      },
+      "devDependencies": {
+        "@nestjs/testing": "^11.0.0",
+      },
+    },
     "apps/gateway-service": {
       "name": "@touring.club/gateway-service",
       "version": "0.0.1",
@@ -85,7 +100,11 @@
         "@nestjs/testing": "^11.0.0",
       },
     },
-    "apps/gateway-service-e2e": {
+    "e2e/auth-service-e2e": {
+      "name": "@touring.club/auth-service-e2e",
+      "version": "0.0.1",
+    },
+    "e2e/gateway-service-e2e": {
       "name": "@touring.club/gateway-service-e2e",
       "version": "0.0.1",
     },
@@ -804,9 +823,13 @@
 
     "@tokenizer/token": ["@tokenizer/token@0.3.0", "", {}, "sha512-OvjF+z51L3ov0OyAU0duzsYuvO01PH7x4t6DJx+guahgTnBHkhJdG7soQeTSFLWN3efnHyibZ4Z8l2EuWwJN3A=="],
 
+    "@touring.club/auth-service": ["@touring.club/auth-service@workspace:apps/auth-service"],
+
+    "@touring.club/auth-service-e2e": ["@touring.club/auth-service-e2e@workspace:e2e/auth-service-e2e"],
+
     "@touring.club/gateway-service": ["@touring.club/gateway-service@workspace:apps/gateway-service"],
 
-    "@touring.club/gateway-service-e2e": ["@touring.club/gateway-service-e2e@workspace:apps/gateway-service-e2e"],
+    "@touring.club/gateway-service-e2e": ["@touring.club/gateway-service-e2e@workspace:e2e/gateway-service-e2e"],
 
     "@tsconfig/node10": ["@tsconfig/node10@1.0.12", "", {}, "sha512-UCYBaeFvM11aU2y3YPZ//O5Rhj+xKyzy7mvcIoAjASbigy8mHMryP5cK7dgjlz2hWxh1g5pLw084E0a/wlUSFQ=="],
 

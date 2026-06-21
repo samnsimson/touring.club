@@ -4,7 +4,7 @@
     "files": [],
     "references": [
         {
-            "path": "./apps/gateway-service-e2e"
+            "path": "./e2e/gateway-service-e2e"
         },
         {
             "path": "./apps/gateway-service"
@@ -23,6 +23,12 @@
         },
         {
             "path": "./library/core"
+        },
+        {
+            "path": "./e2e/auth-service-e2e"
+        },
+        {
+            "path": "./apps/auth-service"
         }
     ]
 }
