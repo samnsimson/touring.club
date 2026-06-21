@@ -12,9 +12,7 @@
                 "outputPath": "library/config/dist",
                 "main": "library/config/src/index.ts",
                 "tsConfig": "library/config/tsconfig.lib.json",
-                "declarationRootDir": "library/config/src",
-                "format": ["esm", "cjs"],
-                "external": ["@tc/*"]
+                "declarationRootDir": "library/config/src"
             }
         }
     }

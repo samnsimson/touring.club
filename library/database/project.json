@@ -12,9 +12,7 @@
                 "outputPath": "library/database/dist",
                 "main": "library/database/src/index.ts",
                 "tsConfig": "library/database/tsconfig.lib.json",
-                "declarationRootDir": "library/database/src",
-                "format": ["esm", "cjs"],
-                "external": ["@tc/*"]
+                "declarationRootDir": "library/database/src"
             }
         },
         "migration:run": {

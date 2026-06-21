@@ -20,9 +20,7 @@
                 "outputPath": "library/auth/dist",
                 "main": "library/auth/src/index.ts",
                 "tsConfig": "library/auth/tsconfig.lib.json",
-                "declarationRootDir": "library/auth/src",
-                "external": ["@tc/*"],
-                "format": ["esm"]
+                "declarationRootDir": "library/auth/src"
             }
         },
         "generate": {

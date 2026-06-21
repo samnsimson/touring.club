@@ -75,6 +75,8 @@
             "dependsOn": ["^build"],
             "inputs": ["production", "^production"],
             "options": {
+                "format": ["esm"],
+                "external": ["@tc/*"],
                 "esbuildOptions": {
                     "keepNames": true
                 }
