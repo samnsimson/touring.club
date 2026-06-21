@@ -1,0 +1,20 @@
+{
+    "name": "core",
+    "$schema": "../../node_modules/nx/schemas/project-schema.json",
+    "sourceRoot": "library/core/src",
+    "projectType": "library",
+    "tags": ["core"],
+    "targets": {
+        "build": {
+            "executor": "@nx/esbuild:esbuild",
+            "outputs": ["{options.outputPath}"],
+            "options": {
+                "outputPath": "library/core/dist",
+                "main": "library/core/src/index.ts",
+                "tsConfig": "library/core/tsconfig.lib.json",
+                "format": ["esm"],
+                "declarationRootDir": "library/core/src"
+            }
+        }
+    }
+}

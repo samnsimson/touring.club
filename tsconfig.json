@@ -20,6 +20,9 @@
         },
         {
             "path": "./library/utils"
+        },
+        {
+            "path": "./library/core"
         }
     ]
 }
