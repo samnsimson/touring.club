@@ -9,6 +9,13 @@
         "types": ["node"]
     },
     "include": ["src/**/*.ts"],
-    "references": [],
+    "references": [
+        {
+            "path": "../database/tsconfig.lib.json"
+        },
+        {
+            "path": "../config/tsconfig.lib.json"
+        }
+    ],
     "exclude": ["jest.config.ts", "jest.config.cts", "src/**/*.spec.ts", "src/**/*.test.ts"]
 }
