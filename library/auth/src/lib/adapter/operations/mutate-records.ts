@@ -3,6 +3,7 @@ import { ObjectLiteral, type QueryDeepPartialEntity } from 'typeorm';
 import type { AdapterMethodHandles } from '../core/adapter-handles';
 import type { AdapterRuntime } from '../core/adapter.context';
 import { tableFor } from '../core/adapter.context';
+import { mapFieldsToColumns, mapRowToFields } from '../query/query-builder.utils';
 import { applyWhereClause, buildPostUpdateWhere, hasRootUniqueWhereCondition, supportsReturning } from '../query/where-clause';
 
 export async function updateRecord<T>(
@@ -26,15 +27,18 @@ export async function updateRecord<T>(
         return handles.findOne<T>({ model, where });
     }
 
+    const columnUpdate = mapFieldsToColumns(runtime.context, model, update as Record<string, unknown>);
+
     const qb = runtime.manager
         .createQueryBuilder()
         .update(table)
-        .set(update as QueryDeepPartialEntity<ObjectLiteral>);
+        .set(columnUpdate as QueryDeepPartialEntity<ObjectLiteral>);
     applyWhereClause(qb, table, model, where, runtime.context.getFieldName, runtime.dbType, 'update');
 
     if (supportsReturning(runtime.dbType)) {
         const result = await qb.returning('*').execute();
-        return (result.raw[0] as T | undefined) ?? null;
+        const row = result.raw[0] as Record<string, unknown> | undefined;
+        return (row ? (mapRowToFields(runtime.context, model, row) as T) : null) ?? null;
     }
 
     const result = await qb.execute();
@@ -50,7 +54,8 @@ export async function updateManyRecords(
     { model, where, update }: { model: string; where: Where[]; update: Record<string, unknown> },
 ): Promise<number> {
     const table = tableFor(runtime, model);
-    const qb = runtime.manager.createQueryBuilder().update(table).set(update);
+    const columnUpdate = mapFieldsToColumns(runtime.context, model, update);
+    const qb = runtime.manager.createQueryBuilder().update(table).set(columnUpdate);
     applyWhereClause(qb, table, model, where, runtime.context.getFieldName, runtime.dbType, 'updateMany');
 
     const result = await qb.execute();

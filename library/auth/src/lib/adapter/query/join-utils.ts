@@ -13,6 +13,7 @@ export function buildJoinSelects(
     join: JoinConfig | undefined,
     schema: Record<string, { fields?: Record<string, { fieldName?: string }> }>,
     getDefaultModelName: ModelNameResolver,
+    getFieldName: FieldNameResolver,
 ): { selects: string[]; meta: JoinSelectMeta[] } {
     const selects: string[] = [];
     const meta: JoinSelectMeta[] = [];
@@ -31,8 +32,8 @@ export function buildJoinSelects(
 
         const fieldEntries = { ...fields, id: { fieldName: 'id' } };
 
-        for (const [field, fieldAttr] of Object.entries(fieldEntries)) {
-            const column = fieldAttr.fieldName || field;
+        for (const field of Object.keys(fieldEntries)) {
+            const column = getFieldName({ model: joinModel, field });
             selects.push(`join_${joinModelRef}.${column} AS _joined_${joinModelRef}_${column}`);
             meta.push({ joinModel, joinModelRef, fieldName: column });
         }

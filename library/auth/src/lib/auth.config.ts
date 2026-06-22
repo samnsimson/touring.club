@@ -18,7 +18,7 @@ export const auth = betterAuth({
         entitiesDir: 'library/database/src/entities/auth',
     }),
     onAPIError: { throw: true, onError: (error) => console.error(error) },
-    emailAndPassword: { enabled: true, requireEmailVerification: true, autoSignIn: true },
+    emailAndPassword: { enabled: true, requireEmailVerification: true, revokeSessionsOnPasswordReset: true },
     plugins: [
         bearer(),
         openAPI({ path: '/docs' }),

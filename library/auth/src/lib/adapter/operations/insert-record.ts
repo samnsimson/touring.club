@@ -2,7 +2,7 @@ import { BetterAuthError } from 'better-auth';
 import type { Where } from 'better-auth/adapters';
 import { ObjectLiteral, type QueryDeepPartialEntity } from 'typeorm';
 import { AdapterRuntime, PRIMARY_ALIAS, tableFor } from '../core/adapter.context';
-import { buildSelectColumns } from '../query/query-builder.utils';
+import { buildSelectColumns, mapFieldsToColumns, mapRowToFields } from '../query/query-builder.utils';
 import { applyWhereClause, supportsReturning } from '../query/where-clause';
 
 export async function insertRecord(
@@ -12,16 +12,19 @@ export async function insertRecord(
     where: Where[] = [],
 ): Promise<Record<string, unknown>> {
     const table = tableFor(runtime, model);
+    const columnData = mapFieldsToColumns(runtime.context, model, data);
     let insertQb = runtime.manager
         .createQueryBuilder()
         .insert()
         .into(table)
-        .values(data as QueryDeepPartialEntity<ObjectLiteral>);
+        .values(columnData as QueryDeepPartialEntity<ObjectLiteral>);
 
     if (supportsReturning(runtime.dbType)) insertQb = insertQb.returning('*');
 
     const insertResult = await insertQb.execute();
-    if (supportsReturning(runtime.dbType) && insertResult.raw[0]) return insertResult.raw[0];
+    if (supportsReturning(runtime.dbType) && insertResult.raw[0]) {
+        return mapRowToFields(runtime.context, model, insertResult.raw[0] as Record<string, unknown>);
+    }
 
     const rowByWhere = await findInsertedRowByWhere(runtime, model, table, where);
     if (rowByWhere) return rowByWhere;
@@ -74,10 +77,11 @@ async function findInsertedRowByValues(
         .from(table, PRIMARY_ALIAS)
         .limit(1);
 
-    for (const [key, value] of Object.entries(data)) {
+    for (const [field, value] of Object.entries(data)) {
         if (value === undefined) continue;
-        qb = qb.andWhere(`${PRIMARY_ALIAS}.${key} ${value === null ? 'IS NULL' : '= :value_' + key}`, {
-            [`value_${key}`]: value,
+        const column = runtime.context.getFieldName({ model, field });
+        qb = qb.andWhere(`${PRIMARY_ALIAS}.${column} ${value === null ? 'IS NULL' : '= :value_' + field}`, {
+            [`value_${field}`]: value,
         });
     }
 

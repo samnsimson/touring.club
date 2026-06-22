@@ -1,5 +1,5 @@
 import { auth } from '@tc/auth';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { SignInDto, SignUpDto, VerifyEmailDto } from './dto';
 import { AuthUtils } from './auth.utils';
 import { CookieOptions, Response } from 'express';
@@ -9,6 +9,7 @@ export class AppService {
     private readonly accessTokenMaxAge = 15 * 60 * 1000;
     private readonly sessionTokenMaxAge = 30 * 24 * 60 * 60 * 1000;
     private readonly cookieOptions: CookieOptions = { httpOnly: true, secure: true, sameSite: 'lax', path: '/' };
+    private readonly logger = new Logger(AppService.name);
 
     async setAuthCookies(response: Response, accessToken: string, sessionToken: string) {
         response.cookie('access-token', accessToken, { ...this.cookieOptions, maxAge: this.accessTokenMaxAge });
@@ -21,22 +22,25 @@ export class AppService {
         return response.token;
     }
 
-    async signUp(body: SignUpDto) {
-        const response = await auth.api.signUpEmail({ body });
+    async signUp(dto: SignUpDto) {
+        const response = await auth.api.signUpEmail({ body: { ...dto } });
+        this.logger.log(`Sign up response: ${JSON.stringify(response)}`);
         if (!response.token) throw new UnauthorizedException('Failed to sign up');
         const accessToken = await this.issueToken(response.token);
         return { ...response.user, sessionToken: response.token, accessToken };
     }
 
     async signIn(dto: SignInDto) {
-        const response = await auth.api.signInEmail({ body: dto });
+        const response = await auth.api.signInEmail({ body: { ...dto } });
+        this.logger.log(`Sign in response: ${JSON.stringify(response)}`);
         if (!response.token) throw new UnauthorizedException('Failed to sign in');
         const accessToken = await this.issueToken(response.token);
         return { ...response.user, sessionToken: response.token, accessToken };
     }
 
     async verifyEmail(dto: VerifyEmailDto) {
-        const response = await auth.api.verifyEmailOTP({ body: dto });
+        const response = await auth.api.verifyEmailOTP({ body: { ...dto } });
+        this.logger.log(`Verify email response: ${JSON.stringify(response)}`);
         if (!response.token) throw new UnauthorizedException('Failed to verify email');
         const accessToken = await this.issueToken(response.token);
         return { ...response.user, sessionToken: response.token, accessToken };

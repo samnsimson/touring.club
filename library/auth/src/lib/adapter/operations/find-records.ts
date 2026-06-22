@@ -2,11 +2,11 @@ import type { FindManyArgs, FindOneArgs } from '../core/adapter-handles';
 import type { AdapterRuntime } from '../core/adapter.context';
 import { tableFor } from '../core/adapter.context';
 import { buildJoinSelects, processJoinedResults } from '../query/join-utils';
-import { applyJoins, buildSelectColumns, parseCountResult, PRIMARY_ALIAS } from '../query/query-builder.utils';
+import { applyJoins, buildSelectColumns, parseCountResult, PRIMARY_ALIAS, resolvePhysicalColumn } from '../query/query-builder.utils';
 import { applyWhereClause } from '../query/where-clause';
 
 export async function findOneRecord<T>(runtime: AdapterRuntime, { model, where, select, join }: FindOneArgs): Promise<T | null> {
-    const { selects: joinSelects, meta } = buildJoinSelects(join, runtime.context.schema, runtime.context.getDefaultModelName);
+    const { selects: joinSelects, meta } = buildJoinSelects(join, runtime.context.schema, runtime.context.getDefaultModelName, runtime.context.getFieldName);
 
     const qb = runtime.manager
         .createQueryBuilder()
@@ -14,7 +14,7 @@ export async function findOneRecord<T>(runtime: AdapterRuntime, { model, where, 
         .from(tableFor(runtime, model), PRIMARY_ALIAS);
 
     applyWhereClause(qb, PRIMARY_ALIAS, model, where, runtime.context.getFieldName, runtime.dbType, 'findOne');
-    applyJoins(qb, PRIMARY_ALIAS, join, runtime.context, joinSelects, runtime.dbType, runtime.tableSchema);
+    applyJoins(qb, PRIMARY_ALIAS, model, join, runtime.context, joinSelects, runtime.dbType, runtime.tableSchema);
 
     const rows = await qb.getRawMany();
 
@@ -31,7 +31,7 @@ export async function findOneRecord<T>(runtime: AdapterRuntime, { model, where, 
 
 export async function findManyRecords<T>(runtime: AdapterRuntime, args: FindManyArgs): Promise<T[]> {
     const { model, where, limit, select, offset, sortBy, join } = args;
-    const { selects: joinSelects, meta } = buildJoinSelects(join, runtime.context.schema, runtime.context.getDefaultModelName);
+    const { selects: joinSelects, meta } = buildJoinSelects(join, runtime.context.schema, runtime.context.getDefaultModelName, runtime.context.getFieldName);
     const table = tableFor(runtime, model);
 
     const baseQb = runtime.manager
@@ -70,10 +70,11 @@ export async function findManyRecords<T>(runtime: AdapterRuntime, args: FindMany
         : baseQb;
 
     if (join && sortBy?.field) {
-        qb.orderBy(`${PRIMARY_ALIAS}.${runtime.context.getFieldName({ model, field: sortBy.field })}`, sortBy.direction.toUpperCase() as 'ASC' | 'DESC');
+        const sortColumn = resolvePhysicalColumn(runtime.context, model, sortBy.field);
+        qb.orderBy(`${PRIMARY_ALIAS}."${sortColumn}"`, sortBy.direction.toUpperCase() as 'ASC' | 'DESC');
     }
 
-    applyJoins(qb, PRIMARY_ALIAS, join, runtime.context, joinSelects, runtime.dbType, runtime.tableSchema);
+    applyJoins(qb, PRIMARY_ALIAS, model, join, runtime.context, joinSelects, runtime.dbType, runtime.tableSchema, Boolean(join));
 
     const rows = await qb.getRawMany();
 
@@ -85,7 +86,8 @@ export async function findManyRecords<T>(runtime: AdapterRuntime, args: FindMany
 }
 
 export async function countRecords(runtime: AdapterRuntime, { model, where }: { model: string; where?: FindManyArgs['where'] }): Promise<number> {
-    const qb = runtime.manager.createQueryBuilder().select(`COUNT(${PRIMARY_ALIAS}.id)`, 'count').from(tableFor(runtime, model), PRIMARY_ALIAS);
+    const idColumn = runtime.context.getFieldName({ model, field: 'id' });
+    const qb = runtime.manager.createQueryBuilder().select(`COUNT(${PRIMARY_ALIAS}.${idColumn})`, 'count').from(tableFor(runtime, model), PRIMARY_ALIAS);
 
     applyWhereClause(qb, PRIMARY_ALIAS, model, where, runtime.context.getFieldName, runtime.dbType, 'count');
     const result = await qb.getRawOne<{ count: string | number | bigint }>();

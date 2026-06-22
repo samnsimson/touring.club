@@ -2,7 +2,7 @@ import type { Where } from 'better-auth/adapters';
 import type { AdapterMethodHandles, FindOneArgs } from '../core/adapter-handles';
 import type { AdapterRuntime } from '../core/adapter.context';
 import { tableFor } from '../core/adapter.context';
-import { buildIncrementSetClause, buildSelectColumns, PRIMARY_ALIAS, shouldUsePessimisticLock } from '../query/query-builder.utils';
+import { buildIncrementSetClause, buildSelectColumns, mapRowToFields, PRIMARY_ALIAS, shouldUsePessimisticLock } from '../query/query-builder.utils';
 import { applyWhereClause, supportsReturning } from '../query/where-clause';
 
 export async function consumeOneRecord<T>(runtime: AdapterRuntime, { model, where }: { model: string; where: Where[] }): Promise<T | null> {
@@ -35,7 +35,8 @@ export async function consumeOneRecord<T>(runtime: AdapterRuntime, { model, wher
 
         if (supportsReturning(runtime.dbType)) {
             const result = await deleteQb.returning('*').execute();
-            return (result.raw[0] as T | undefined) ?? null;
+            const row = result.raw[0] as Record<string, unknown> | undefined;
+            return (row ? (mapRowToFields(runtime.context, model, row) as T) : null) ?? null;
         }
 
         const result = await deleteQb.execute();
@@ -91,7 +92,8 @@ export async function incrementOneRecord<T>(
 
         if (supportsReturning(runtime.dbType)) {
             const result = await updateQb.returning('*').execute();
-            return (result.raw[0] as T | undefined) ?? null;
+            const row = result.raw[0] as Record<string, unknown> | undefined;
+            return (row ? (mapRowToFields(runtime.context, model, row) as T) : null) ?? null;
         }
 
         const result = await updateQb.execute();
