@@ -1,0 +1,27 @@
+meta {
+  name: Verify Email
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/v1/auth/verify-email
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "email": "{{email}}",
+    "otp": "123456"
+  }
+}
+
+docs {
+  Verify an email address using the six-digit OTP sent after sign-up.
+  Replace the otp value with the code logged by the auth-service console.
+}

@@ -1,0 +1,28 @@
+meta {
+  name: Sign In
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/v1/auth/sign-in
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "email": "{{email}}",
+    "password": "{{password}}",
+    "rememberMe": true
+  }
+}
+
+docs {
+  Sign in with email and password.
+  Session cookies are returned in the Set-Cookie response header.
+}

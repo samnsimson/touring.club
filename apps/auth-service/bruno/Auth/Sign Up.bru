@@ -1,0 +1,30 @@
+meta {
+  name: Sign Up
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/auth/sign-up
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "name": "Jane Doe",
+    "email": "{{email}}",
+    "password": "{{password}}",
+    "username": "{{username}}",
+    "rememberMe": true
+  }
+}
+
+docs {
+  Register a new user with email and password.
+  A verification OTP is logged to the auth-service console when email verification is required.
+}
