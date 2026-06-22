@@ -70,9 +70,10 @@ describe('AppService', () => {
             expect(authApi.getToken).toHaveBeenCalledWith({ headers: expect.objectContaining({ get: expect.any(Function) }) });
         });
 
-        it('throws when sign-up does not return a session token', async () => {
+        it('returns user without tokens when email verification is required', async () => {
             authApi.signUpEmail.mockResolvedValue({ token: null, user });
-            await expect(service.signUp(dto)).rejects.toBeInstanceOf(UnauthorizedException);
+            await expect(service.signUp(dto)).resolves.toEqual(user);
+            expect(authApi.getToken).not.toHaveBeenCalled();
         });
     });
 

@@ -25,7 +25,7 @@ export class AppService {
     async signUp(dto: SignUpDto) {
         const response = await auth.api.signUpEmail({ body: { ...dto } });
         this.logger.log(`Sign up response: ${JSON.stringify(response)}`);
-        if (!response.token) throw new UnauthorizedException('Failed to sign up');
+        if (!response.token) return { ...response.user };
         const accessToken = await this.issueToken(response.token);
         return { ...response.user, sessionToken: response.token, accessToken };
     }

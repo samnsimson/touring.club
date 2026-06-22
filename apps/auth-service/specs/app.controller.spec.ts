@@ -57,6 +57,16 @@ describe('AppController', () => {
             expect(appService.setAuthCookies).toHaveBeenCalledWith(res, serviceResponse.accessToken, serviceResponse.sessionToken);
         });
 
+        it('does not set auth cookies when sign-up returns no tokens', async () => {
+            const dto = { name: 'Jane Doe', email: 'jane@example.com', password: 'Str0ngPass!', username: 'janedoe' };
+            const res = {} as Response;
+            const pendingVerification = { ...serviceResponse, sessionToken: undefined, accessToken: undefined };
+
+            appService.signUp.mockResolvedValue(pendingVerification);
+            await expect(controller.signUp(dto, res)).resolves.toEqual(pendingVerification);
+            expect(appService.setAuthCookies).not.toHaveBeenCalled();
+        });
+
         it('propagates service errors', async () => {
             const dto = { name: 'Jane Doe', email: 'jane@example.com', password: 'Str0ngPass!', username: 'janedoe' };
             const error = new HttpException({ message: 'User already exists' }, HttpStatus.CONFLICT);

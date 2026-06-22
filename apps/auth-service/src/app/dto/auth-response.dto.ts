@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { AuthUserDto } from './auth-user.dto';
 
 export class AuthSessionResponseDto extends AuthUserDto {
@@ -9,7 +9,13 @@ export class AuthSessionResponseDto extends AuthUserDto {
     accessToken!: string;
 }
 
-export class SignUpResponseDto extends AuthSessionResponseDto {}
+export class SignUpResponseDto extends AuthUserDto {
+    @ApiPropertyOptional({ description: 'Session token; omitted until email is verified' })
+    sessionToken?: string;
+
+    @ApiPropertyOptional({ description: 'JWT access token; omitted until email is verified' })
+    accessToken?: string;
+}
 
 export class SignInResponseDto extends AuthSessionResponseDto {}
 

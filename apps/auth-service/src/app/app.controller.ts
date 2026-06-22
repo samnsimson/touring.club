@@ -17,7 +17,8 @@ export class AppController {
     @ApiConflictResponse({ type: AuthErrorResponseDto, description: 'Email or username already in use' })
     async signUp(@Body() dto: SignUpDto, @Res({ passthrough: true }) res: Response) {
         const response = await this.appService.signUp(dto);
-        await this.appService.setAuthCookies(res, response.accessToken, response.sessionToken);
+        const isTokensInResponse = 'sessionToken' in response && 'accessToken' in response;
+        if (isTokensInResponse) await this.appService.setAuthCookies(res, response.accessToken, response.sessionToken);
         return response;
     }
 
