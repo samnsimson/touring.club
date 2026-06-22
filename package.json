@@ -9,7 +9,8 @@
         "start": "nx run-many --target=serve",
         "auth:generate": "nx run auth:generate",
         "migration:run": "nx run database:migration:run",
-        "migration:generate": "nx run database:migration:generate --name=Migration"
+        "migration:generate": "nx run database:migration:generate --name=Migration",
+        "prepare": "husky"
     },
     "private": true,
     "dependencies": {
@@ -58,11 +59,13 @@
         "esbuild": "^0.27.0",
         "eslint": "^9.8.0",
         "eslint-config-prettier": "^10.0.0",
+        "husky": "^9.1.7",
         "jest": "~30.3.0",
         "jest-environment-node": "~30.3.0",
         "jest-util": "~30.3.0",
         "jsonc-eslint-parser": "^2.1.0",
         "kysely": "^0.29.2",
+        "lint-staged": "^17.0.8",
         "nx": "23.0.0",
         "prettier": "~3.6.2",
         "ts-jest": "^29.4.0",
@@ -78,5 +81,14 @@
     "workspaces": [
         "apps/*",
         "library/*"
-    ]
+    ],
+    "lint-staged": {
+        "*.{js,jsx,ts,tsx,mjs,cjs,mts,cts}": [
+            "eslint --fix",
+            "prettier --write"
+        ],
+        "*.{json,md,yml,yaml,css,scss,html}": [
+            "prettier --write"
+        ]
+    }
 }
