@@ -1,8 +1,8 @@
-import { Body, Controller, HttpCode, HttpStatus, Post, Req, Res } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Post, Res } from '@nestjs/common';
 import { ApiBadRequestResponse, ApiConflictResponse, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
 import { AuthErrorResponseDto, SignInDto, SignInResponseDto, SignUpDto, SignUpResponseDto, VerifyEmailDto, VerifyEmailResponseDto } from './dto';
 import { AppService } from './app.service';
-import * as express from 'express';
+import type { Response } from 'express';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -15,8 +15,10 @@ export class AppController {
     @ApiCreatedResponse({ type: SignUpResponseDto, description: 'User created; verification OTP sent when required' })
     @ApiBadRequestResponse({ type: AuthErrorResponseDto })
     @ApiConflictResponse({ type: AuthErrorResponseDto, description: 'Email or username already in use' })
-    signUp(@Body() dto: SignUpDto, @Req() req: express.Request, @Res({ passthrough: true }) res: express.Response) {
-        return this.appService.signUp(dto, req.headers, res);
+    async signUp(@Body() dto: SignUpDto, @Res({ passthrough: true }) res: Response) {
+        const response = await this.appService.signUp(dto);
+        await this.appService.setAuthCookies(res, response.accessToken, response.sessionToken);
+        return response;
     }
 
     @Post('sign-in')
@@ -25,8 +27,10 @@ export class AppController {
     @ApiOkResponse({ type: SignInResponseDto })
     @ApiBadRequestResponse({ type: AuthErrorResponseDto })
     @ApiUnauthorizedResponse({ type: AuthErrorResponseDto })
-    signIn(@Body() dto: SignInDto, @Req() req: express.Request, @Res({ passthrough: true }) res: express.Response) {
-        return this.appService.signIn(dto, req.headers, res);
+    async signIn(@Body() dto: SignInDto, @Res({ passthrough: true }) res: Response) {
+        const response = await this.appService.signIn(dto);
+        await this.appService.setAuthCookies(res, response.accessToken, response.sessionToken);
+        return response;
     }
 
     @Post('verify-email')
@@ -34,7 +38,9 @@ export class AppController {
     @ApiOperation({ operationId: 'verifyEmail', summary: 'Verify email address using a one-time password' })
     @ApiOkResponse({ type: VerifyEmailResponseDto })
     @ApiBadRequestResponse({ type: AuthErrorResponseDto, description: 'Invalid or expired OTP' })
-    verifyEmail(@Body() dto: VerifyEmailDto, @Req() req: express.Request, @Res({ passthrough: true }) res: express.Response) {
-        return this.appService.verifyEmail(dto, req.headers, res);
+    async verifyEmail(@Body() dto: VerifyEmailDto, @Res({ passthrough: true }) res: Response) {
+        const response = await this.appService.verifyEmail(dto);
+        await this.appService.setAuthCookies(res, response.accessToken, response.sessionToken);
+        return response;
     }
 }

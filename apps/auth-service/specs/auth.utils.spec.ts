@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
 import type { Response } from 'express';
-import { applyAuthHeaders, mapAuthError } from '../src/app/auth.utils';
+import { AuthUtils } from '../src/app/auth.utils';
 
 const createMockResponse = (): jest.Mocked<Pick<Response, 'append' | 'setHeader'>> => ({
     append: jest.fn(),
@@ -12,7 +12,7 @@ describe('auth.utils', () => {
         it('appends Set-Cookie headers', () => {
             const res = createMockResponse();
             const authHeaders = new Headers({ 'set-cookie': 'session=abc; Path=/' });
-            applyAuthHeaders(authHeaders, res as unknown as Response);
+            AuthUtils.applyAuthHeaders(authHeaders, res as unknown as Response);
             expect(res.append).toHaveBeenCalledWith('Set-Cookie', 'session=abc; Path=/');
             expect(res.setHeader).not.toHaveBeenCalled();
         });
@@ -20,7 +20,7 @@ describe('auth.utils', () => {
         it('sets non-cookie headers', () => {
             const res = createMockResponse();
             const authHeaders = new Headers({ 'x-auth-token': 'token-value' });
-            applyAuthHeaders(authHeaders, res as unknown as Response);
+            AuthUtils.applyAuthHeaders(authHeaders, res as unknown as Response);
             expect(res.setHeader).toHaveBeenCalledWith('x-auth-token', 'token-value');
             expect(res.append).not.toHaveBeenCalled();
         });
@@ -29,7 +29,7 @@ describe('auth.utils', () => {
     describe('mapAuthError', () => {
         it('throws HttpException for Better Auth API errors', () => {
             try {
-                mapAuthError({ message: 'Invalid email or password', status: 'INVALID_EMAIL_OR_PASSWORD', statusCode: HttpStatus.UNAUTHORIZED });
+                AuthUtils.mapAuthError({ message: 'Invalid email or password', status: 'INVALID_EMAIL_OR_PASSWORD', statusCode: HttpStatus.UNAUTHORIZED });
                 throw new Error('expected mapAuthError to throw');
             } catch (error) {
                 expect(error).toBeInstanceOf(HttpException);
@@ -40,9 +40,9 @@ describe('auth.utils', () => {
 
         it('rethrows plain objects that are not auth API errors', () => {
             const error = { message: 'Bad request', status: 'BAD_REQUEST' };
-            expect(() => mapAuthError(error)).toThrow();
+            expect(() => AuthUtils.mapAuthError(error)).toThrow();
             try {
-                mapAuthError(error);
+                AuthUtils.mapAuthError(error);
             } catch (thrown) {
                 expect(thrown).toBe(error);
             }
@@ -50,7 +50,7 @@ describe('auth.utils', () => {
 
         it('rethrows unknown errors', () => {
             const error = new Error('unexpected');
-            expect(() => mapAuthError(error)).toThrow(error);
+            expect(() => AuthUtils.mapAuthError(error)).toThrow(error);
         });
     });
 });

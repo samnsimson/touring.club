@@ -1,46 +1,44 @@
 import { auth } from '@tc/auth';
-import { Injectable } from '@nestjs/common';
-import { fromNodeHeaders } from 'better-auth/node';
-import { IncomingHttpHeaders } from 'node:http';
-import { Response } from 'express';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { SignInDto, SignUpDto, VerifyEmailDto } from './dto';
-import { applyAuthHeaders, mapAuthError } from './auth.utils';
+import { AuthUtils } from './auth.utils';
+import { CookieOptions, Response } from 'express';
 
 @Injectable()
 export class AppService {
-    async signUp(body: SignUpDto, headers: IncomingHttpHeaders, res: Response) {
-        try {
-            const returnHeaders = true;
-            const nodeHeaders = fromNodeHeaders(headers);
-            const response = await auth.api.signUpEmail({ body, headers: nodeHeaders, returnHeaders });
-            applyAuthHeaders(response.headers, res);
-            return response.response;
-        } catch (error) {
-            return mapAuthError(error);
-        }
+    private readonly accessTokenMaxAge = 15 * 60 * 1000;
+    private readonly sessionTokenMaxAge = 30 * 24 * 60 * 60 * 1000;
+    private readonly cookieOptions: CookieOptions = { httpOnly: true, secure: true, sameSite: 'lax', path: '/' };
+
+    async setAuthCookies(response: Response, accessToken: string, sessionToken: string) {
+        response.cookie('access-token', accessToken, { ...this.cookieOptions, maxAge: this.accessTokenMaxAge });
+        response.cookie('refresh-token', sessionToken, { ...this.cookieOptions, maxAge: this.sessionTokenMaxAge });
     }
 
-    async signIn(dto: SignInDto, headers: IncomingHttpHeaders, res: Response) {
-        try {
-            const returnHeaders = true;
-            const nodeHeaders = fromNodeHeaders(headers);
-            const response = await auth.api.signInEmail({ body: dto, headers: nodeHeaders, returnHeaders });
-            applyAuthHeaders(response.headers, res);
-            return response.response;
-        } catch (error) {
-            return mapAuthError(error);
-        }
+    async issueToken(token: string | null) {
+        const headers = AuthUtils.getHeaders(token);
+        const response = await auth.api.getToken({ headers });
+        return response.token;
     }
 
-    async verifyEmail(dto: VerifyEmailDto, headers: IncomingHttpHeaders, res: Response) {
-        try {
-            const returnHeaders = true;
-            const nodeHeaders = fromNodeHeaders(headers);
-            const response = await auth.api.verifyEmailOTP({ body: dto, headers: nodeHeaders, returnHeaders });
-            applyAuthHeaders(response.headers, res);
-            return response.response;
-        } catch (error) {
-            return mapAuthError(error);
-        }
+    async signUp(body: SignUpDto) {
+        const response = await auth.api.signUpEmail({ body });
+        if (!response.token) throw new UnauthorizedException('Failed to sign up');
+        const accessToken = await this.issueToken(response.token);
+        return { ...response.user, sessionToken: response.token, accessToken };
+    }
+
+    async signIn(dto: SignInDto) {
+        const response = await auth.api.signInEmail({ body: dto });
+        if (!response.token) throw new UnauthorizedException('Failed to sign in');
+        const accessToken = await this.issueToken(response.token);
+        return { ...response.user, sessionToken: response.token, accessToken };
+    }
+
+    async verifyEmail(dto: VerifyEmailDto) {
+        const response = await auth.api.verifyEmailOTP({ body: dto });
+        if (!response.token) throw new UnauthorizedException('Failed to verify email');
+        const accessToken = await this.issueToken(response.token);
+        return { ...response.user, sessionToken: response.token, accessToken };
     }
 }
