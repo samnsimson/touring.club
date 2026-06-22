@@ -1,10 +1,12 @@
-import { MigrationInterface, QueryRunner } from "typeorm";
+import { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class Migration1782071544657 implements MigrationInterface {
-    name = 'Migration1782071544657'
+    name = 'Migration1782071544657';
 
     public async up(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(`CREATE TABLE "auth"."jwkss" ("id" text NOT NULL, "public_key" text NOT NULL, "private_key" text NOT NULL, "created_at" TIMESTAMP NOT NULL, "expires_at" TIMESTAMP, CONSTRAINT "PK_153da44a5aa0de1f20b9825a7b6" PRIMARY KEY ("id"))`);
+        await queryRunner.query(
+            `CREATE TABLE "auth"."jwkss" ("id" text NOT NULL, "public_key" text NOT NULL, "private_key" text NOT NULL, "created_at" TIMESTAMP NOT NULL, "expires_at" TIMESTAMP, CONSTRAINT "PK_153da44a5aa0de1f20b9825a7b6" PRIMARY KEY ("id"))`,
+        );
         await queryRunner.query(`ALTER TABLE "auth"."sessions" ADD "impersonated_by" text`);
         await queryRunner.query(`ALTER TABLE "auth"."users" ADD "role" text`);
         await queryRunner.query(`ALTER TABLE "auth"."users" ADD "banned" boolean`);
@@ -26,5 +28,4 @@ export class Migration1782071544657 implements MigrationInterface {
         await queryRunner.query(`ALTER TABLE "auth"."sessions" DROP COLUMN "impersonated_by"`);
         await queryRunner.query(`DROP TABLE "auth"."jwkss"`);
     }
-
 }
