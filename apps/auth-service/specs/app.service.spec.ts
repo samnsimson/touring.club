@@ -1,7 +1,17 @@
-import { HttpException, HttpStatus } from '@nestjs/common';
+jest.mock('@tc/auth', () => ({
+    auth: {
+        api: {
+            signUpEmail: jest.fn(),
+            signInEmail: jest.fn(),
+            verifyEmailOTP: jest.fn(),
+            getToken: jest.fn(),
+        },
+    },
+}));
+
+import { UnauthorizedException } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { auth } from '@tc/auth';
-import { fromNodeHeaders } from 'better-auth/node';
 import type { Response } from 'express';
 import { AppService } from '../src/app/app.service';
 
@@ -9,31 +19,16 @@ type AuthApiMock = {
     signUpEmail: jest.Mock;
     signInEmail: jest.Mock;
     verifyEmailOTP: jest.Mock;
+    getToken: jest.Mock;
 };
 
-const createMockResponse = (): jest.Mocked<Pick<Response, 'append' | 'setHeader'>> => ({
-    append: jest.fn(),
-    setHeader: jest.fn(),
+const createMockResponse = (): jest.Mocked<Pick<Response, 'cookie'>> => ({
+    cookie: jest.fn(),
 });
-
-jest.mock('@tc/auth', () => ({
-    auth: {
-        api: {
-            signUpEmail: jest.fn(),
-            signInEmail: jest.fn(),
-            verifyEmailOTP: jest.fn(),
-        },
-    },
-}));
-
-jest.mock('better-auth/node', () => ({
-    fromNodeHeaders: jest.fn(() => new Headers()),
-}));
 
 describe('AppService', () => {
     let service: AppService;
     const authApi = auth.api as unknown as AuthApiMock;
-    const mockFromNodeHeaders = fromNodeHeaders as jest.MockedFunction<typeof fromNodeHeaders>;
 
     beforeAll(async () => {
         const app = await Test.createTestingModule({ providers: [AppService] }).compile();
@@ -42,7 +37,26 @@ describe('AppService', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
-        mockFromNodeHeaders.mockReturnValue(new Headers());
+        authApi.getToken.mockResolvedValue({ token: 'jwt-access-token' });
+    });
+
+    describe('setAuthCookies', () => {
+        it('sets access and refresh token cookies', async () => {
+            const res = createMockResponse();
+
+            await service.setAuthCookies(res as unknown as Response, 'jwt-access-token', 'session-token');
+
+            expect(res.cookie).toHaveBeenCalledWith(
+                'access-token',
+                'jwt-access-token',
+                expect.objectContaining({ httpOnly: true, secure: true, sameSite: 'lax', path: '/' }),
+            );
+            expect(res.cookie).toHaveBeenCalledWith(
+                'refresh-token',
+                'session-token',
+                expect.objectContaining({ httpOnly: true, secure: true, sameSite: 'lax', path: '/' }),
+            );
+        });
     });
 
     describe('signUp', () => {
@@ -52,74 +66,70 @@ describe('AppService', () => {
             password: 'Str0ngPass!',
             username: 'janedoe',
         };
+        const user = { id: '1', email: dto.email, name: dto.name };
 
-        it('forwards Better Auth response and cookies', async () => {
-            const incomingHeaders = { authorization: 'Bearer token' };
-            const nodeHeaders = new Headers({ 'x-test': '1' });
-            const responseHeaders = new Headers({ 'set-cookie': 'session=abc' });
-            const response = { token: null, user: { id: '1', email: dto.email } };
+        it('returns user with session and access tokens', async () => {
+            authApi.signUpEmail.mockResolvedValue({ token: 'session-token', user });
 
-            mockFromNodeHeaders.mockReturnValue(nodeHeaders);
-            authApi.signUpEmail.mockResolvedValue({ headers: responseHeaders, response });
-
-            const res = createMockResponse();
-
-            await expect(service.signUp(dto, incomingHeaders, res as unknown as Response)).resolves.toEqual(response);
-            expect(mockFromNodeHeaders).toHaveBeenCalledWith(incomingHeaders);
-            expect(authApi.signUpEmail).toHaveBeenCalledWith({ body: dto, headers: nodeHeaders, returnHeaders: true });
-            expect(res.append).toHaveBeenCalledWith('Set-Cookie', 'session=abc');
+            await expect(service.signUp(dto)).resolves.toEqual({
+                ...user,
+                sessionToken: 'session-token',
+                accessToken: 'jwt-access-token',
+            });
+            expect(authApi.signUpEmail).toHaveBeenCalledWith({ body: dto });
+            expect(authApi.getToken).toHaveBeenCalledWith({
+                headers: expect.objectContaining({ get: expect.any(Function) }),
+            });
         });
 
-        it('maps Better Auth errors to HttpException', async () => {
-            authApi.signUpEmail.mockRejectedValue({ message: 'User already exists', status: 'USER_ALREADY_EXISTS', statusCode: HttpStatus.CONFLICT });
-            const res = createMockResponse();
-            await expect(service.signUp(dto, {}, res as unknown as Response)).rejects.toMatchObject({
-                response: { message: 'User already exists', code: 'USER_ALREADY_EXISTS' },
-                status: HttpStatus.CONFLICT,
-            });
+        it('throws when sign-up does not return a session token', async () => {
+            authApi.signUpEmail.mockResolvedValue({ token: null, user });
+
+            await expect(service.signUp(dto)).rejects.toBeInstanceOf(UnauthorizedException);
         });
     });
 
     describe('signIn', () => {
         const dto = { email: 'jane@example.com', password: 'Str0ngPass!' };
+        const user = { id: '1', email: dto.email, name: 'Jane Doe' };
 
-        it('forwards Better Auth response', async () => {
-            const response = { redirect: false, token: 'token', user: { id: '1', email: dto.email } };
-            authApi.signInEmail.mockResolvedValue({ headers: new Headers(), response });
-            const res = createMockResponse();
-            await expect(service.signIn(dto, {}, res as unknown as Response)).resolves.toEqual(response);
-            expect(authApi.signInEmail).toHaveBeenCalledWith({ body: dto, headers: expect.any(Headers), returnHeaders: true });
+        it('returns user with session and access tokens', async () => {
+            authApi.signInEmail.mockResolvedValue({ token: 'session-token', user });
+
+            await expect(service.signIn(dto)).resolves.toEqual({
+                ...user,
+                sessionToken: 'session-token',
+                accessToken: 'jwt-access-token',
+            });
+            expect(authApi.signInEmail).toHaveBeenCalledWith({ body: dto });
         });
 
-        it('maps unauthorized errors to HttpException', async () => {
-            authApi.signInEmail.mockRejectedValue({
-                message: 'Invalid email or password',
-                status: 'INVALID_EMAIL_OR_PASSWORD',
-                statusCode: HttpStatus.UNAUTHORIZED,
-            });
-            const res = createMockResponse();
-            await expect(service.signIn(dto, {}, res as unknown as Response)).rejects.toBeInstanceOf(HttpException);
+        it('throws when sign-in does not return a session token', async () => {
+            authApi.signInEmail.mockResolvedValue({ token: null, user });
+
+            await expect(service.signIn(dto)).rejects.toBeInstanceOf(UnauthorizedException);
         });
     });
 
     describe('verifyEmail', () => {
         const dto = { email: 'jane@example.com', otp: '123456' };
+        const user = { id: '1', email: dto.email, name: 'Jane Doe' };
 
-        it('forwards Better Auth response', async () => {
-            const response = { status: true, token: 'token', user: { id: '1', email: dto.email } };
-            authApi.verifyEmailOTP.mockResolvedValue({ headers: new Headers(), response });
-            const res = createMockResponse();
-            await expect(service.verifyEmail(dto, {}, res as unknown as Response)).resolves.toEqual(response);
-            expect(authApi.verifyEmailOTP).toHaveBeenCalledWith({ body: dto, headers: expect.any(Headers), returnHeaders: true });
+        it('returns user with session and access tokens', async () => {
+            authApi.verifyEmailOTP.mockResolvedValue({ token: 'session-token', user });
+
+            await expect(service.verifyEmail(dto)).resolves.toEqual({
+                ...user,
+                sessionToken: 'session-token',
+                accessToken: 'jwt-access-token',
+            });
+            expect(authApi.verifyEmailOTP).toHaveBeenCalledWith({ body: dto });
         });
 
-        it('maps invalid otp errors to HttpException', async () => {
-            authApi.verifyEmailOTP.mockRejectedValue({ message: 'Invalid OTP', status: 'INVALID_OTP', statusCode: HttpStatus.BAD_REQUEST });
-            const res = createMockResponse();
-            await expect(service.verifyEmail(dto, {}, res as unknown as Response)).rejects.toMatchObject({
-                response: { message: 'Invalid OTP', code: 'INVALID_OTP' },
-                status: HttpStatus.BAD_REQUEST,
-            });
+        it('throws when verification does not return a session token', async () => {
+            authApi.verifyEmailOTP.mockResolvedValue({ token: null, user });
+
+            await expect(service.verifyEmail(dto)).rejects.toBeInstanceOf(UnauthorizedException);
         });
     });
 });

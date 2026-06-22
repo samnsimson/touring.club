@@ -1,56 +1,24 @@
-import { HttpException, HttpStatus } from '@nestjs/common';
-import type { Response } from 'express';
+import { UnauthorizedException } from '@nestjs/common';
 import { AuthUtils } from '../src/app/auth.utils';
 
-const createMockResponse = (): jest.Mocked<Pick<Response, 'append' | 'setHeader'>> => ({
-    append: jest.fn(),
-    setHeader: jest.fn(),
-});
+describe('AuthUtils', () => {
+    describe('getHeaders', () => {
+        it('returns headers with a bearer token', () => {
+            const headers = AuthUtils.getHeaders('session-token');
 
-describe('auth.utils', () => {
-    describe('applyAuthHeaders', () => {
-        it('appends Set-Cookie headers', () => {
-            const res = createMockResponse();
-            const authHeaders = new Headers({ 'set-cookie': 'session=abc; Path=/' });
-            AuthUtils.applyAuthHeaders(authHeaders, res as unknown as Response);
-            expect(res.append).toHaveBeenCalledWith('Set-Cookie', 'session=abc; Path=/');
-            expect(res.setHeader).not.toHaveBeenCalled();
+            expect(headers.get('Authorization')).toBe('Bearer session-token');
         });
 
-        it('sets non-cookie headers', () => {
-            const res = createMockResponse();
-            const authHeaders = new Headers({ 'x-auth-token': 'token-value' });
-            AuthUtils.applyAuthHeaders(authHeaders, res as unknown as Response);
-            expect(res.setHeader).toHaveBeenCalledWith('x-auth-token', 'token-value');
-            expect(res.append).not.toHaveBeenCalled();
-        });
-    });
+        it('merges default headers', () => {
+            const defaultHeaders = new Headers({ 'x-custom': 'value' });
+            const headers = AuthUtils.getHeaders('session-token', defaultHeaders);
 
-    describe('mapAuthError', () => {
-        it('throws HttpException for Better Auth API errors', () => {
-            try {
-                AuthUtils.mapAuthError({ message: 'Invalid email or password', status: 'INVALID_EMAIL_OR_PASSWORD', statusCode: HttpStatus.UNAUTHORIZED });
-                throw new Error('expected mapAuthError to throw');
-            } catch (error) {
-                expect(error).toBeInstanceOf(HttpException);
-                expect((error as HttpException).getResponse()).toEqual({ message: 'Invalid email or password', code: 'INVALID_EMAIL_OR_PASSWORD' });
-                expect((error as HttpException).getStatus()).toBe(HttpStatus.UNAUTHORIZED);
-            }
+            expect(headers.get('Authorization')).toBe('Bearer session-token');
+            expect(headers.get('x-custom')).toBe('value');
         });
 
-        it('rethrows plain objects that are not auth API errors', () => {
-            const error = { message: 'Bad request', status: 'BAD_REQUEST' };
-            expect(() => AuthUtils.mapAuthError(error)).toThrow();
-            try {
-                AuthUtils.mapAuthError(error);
-            } catch (thrown) {
-                expect(thrown).toBe(error);
-            }
-        });
-
-        it('rethrows unknown errors', () => {
-            const error = new Error('unexpected');
-            expect(() => AuthUtils.mapAuthError(error)).toThrow(error);
+        it('throws when token is missing', () => {
+            expect(() => AuthUtils.getHeaders(null)).toThrow(UnauthorizedException);
         });
     });
 });

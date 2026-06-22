@@ -10,8 +10,8 @@ export class AuthUserDto {
     @ApiProperty({ example: 'Jane Doe' })
     name!: string;
 
-    @ApiProperty({ example: true })
-    emailVerified!: boolean;
+    @ApiProperty({ example: true, required: false })
+    emailVerified?: boolean;
 
     @ApiPropertyOptional({ example: 'janedoe', nullable: true })
     username?: string | null;
@@ -25,9 +25,9 @@ export class AuthUserDto {
     @ApiPropertyOptional({ nullable: true })
     image?: string | null;
 
-    @ApiProperty()
-    createdAt!: Date;
+    @ApiProperty({ required: false })
+    createdAt?: Date;
 
-    @ApiProperty()
-    updatedAt!: Date;
+    @ApiProperty({ required: false })
+    updatedAt?: Date;
 }

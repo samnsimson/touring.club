@@ -2,25 +2,22 @@ jest.mock('@tc/auth', () => ({
     auth: { api: {} },
 }));
 
-jest.mock('better-auth/node', () => ({
-    fromNodeHeaders: jest.fn(() => new Headers()),
-}));
-
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import type * as express from 'express';
+import type { Response } from 'express';
 import { AppController } from '../src/app/app.controller';
 import { AppService } from '../src/app/app.service';
 
 describe('AppController', () => {
     let controller: AppController;
-    let appService: jest.Mocked<Pick<AppService, 'signUp' | 'signIn' | 'verifyEmail'>>;
+    let appService: jest.Mocked<Pick<AppService, 'signUp' | 'signIn' | 'verifyEmail' | 'setAuthCookies'>>;
 
     beforeAll(async () => {
         appService = {
             signUp: jest.fn(),
             signIn: jest.fn(),
             verifyEmail: jest.fn(),
+            setAuthCookies: jest.fn(),
         };
 
         const app: TestingModule = await Test.createTestingModule({
@@ -33,24 +30,32 @@ describe('AppController', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
+        appService.setAuthCookies.mockResolvedValue(undefined);
     });
 
+    const serviceResponse = {
+        id: '1',
+        email: 'jane@example.com',
+        name: 'Jane Doe',
+        sessionToken: 'session-token',
+        accessToken: 'jwt-access-token',
+    };
+
     describe('signUp', () => {
-        it('delegates to AppService with request headers and response', async () => {
+        it('delegates to AppService and sets auth cookies', async () => {
             const dto = {
                 name: 'Jane Doe',
                 email: 'jane@example.com',
                 password: 'Str0ngPass!',
                 username: 'janedoe',
             };
-            const req = { headers: { 'user-agent': 'jest' } } as unknown as express.Request;
-            const res = {} as unknown as express.Response;
-            const response = { token: null, user: { id: '1', email: dto.email } };
+            const res = {} as Response;
 
-            appService.signUp.mockResolvedValue(response as never);
+            appService.signUp.mockResolvedValue(serviceResponse);
 
-            await expect(controller.signUp(dto, req, res)).resolves.toEqual(response);
-            expect(appService.signUp).toHaveBeenCalledWith(dto, req.headers, res);
+            await expect(controller.signUp(dto, res)).resolves.toEqual(serviceResponse);
+            expect(appService.signUp).toHaveBeenCalledWith(dto);
+            expect(appService.setAuthCookies).toHaveBeenCalledWith(res, serviceResponse.accessToken, serviceResponse.sessionToken);
         });
 
         it('propagates service errors', async () => {
@@ -64,21 +69,21 @@ describe('AppController', () => {
 
             appService.signUp.mockRejectedValue(error);
 
-            await expect(controller.signUp(dto, { headers: {} } as unknown as express.Request, {} as unknown as express.Response)).rejects.toThrow(error);
+            await expect(controller.signUp(dto, {} as Response)).rejects.toThrow(error);
+            expect(appService.setAuthCookies).not.toHaveBeenCalled();
         });
     });
 
     describe('signIn', () => {
-        it('delegates to AppService with request headers and response', async () => {
+        it('delegates to AppService and sets auth cookies', async () => {
             const dto = { email: 'jane@example.com', password: 'Str0ngPass!' };
-            const req = { headers: { cookie: 'session=abc' } } as unknown as express.Request;
-            const res = {} as unknown as express.Response;
-            const response = { redirect: false, token: 'token', user: { id: '1', email: dto.email } };
+            const res = {} as Response;
 
-            appService.signIn.mockResolvedValue(response as never);
+            appService.signIn.mockResolvedValue(serviceResponse);
 
-            await expect(controller.signIn(dto, req, res)).resolves.toEqual(response);
-            expect(appService.signIn).toHaveBeenCalledWith(dto, req.headers, res);
+            await expect(controller.signIn(dto, res)).resolves.toEqual(serviceResponse);
+            expect(appService.signIn).toHaveBeenCalledWith(dto);
+            expect(appService.setAuthCookies).toHaveBeenCalledWith(res, serviceResponse.accessToken, serviceResponse.sessionToken);
         });
 
         it('propagates service errors', async () => {
@@ -86,27 +91,21 @@ describe('AppController', () => {
 
             appService.signIn.mockRejectedValue(error);
 
-            await expect(
-                controller.signIn(
-                    { email: 'jane@example.com', password: 'wrong' },
-                    { headers: {} } as unknown as express.Request,
-                    {} as unknown as express.Response,
-                ),
-            ).rejects.toThrow(error);
+            await expect(controller.signIn({ email: 'jane@example.com', password: 'wrong' }, {} as Response)).rejects.toThrow(error);
+            expect(appService.setAuthCookies).not.toHaveBeenCalled();
         });
     });
 
     describe('verifyEmail', () => {
-        it('delegates to AppService with request headers and response', async () => {
+        it('delegates to AppService and sets auth cookies', async () => {
             const dto = { email: 'jane@example.com', otp: '123456' };
-            const req = { headers: { 'x-forwarded-for': '127.0.0.1' } } as unknown as express.Request;
-            const res = {} as unknown as express.Response;
-            const response = { status: true, token: 'token', user: { id: '1', email: dto.email } };
+            const res = {} as Response;
 
-            appService.verifyEmail.mockResolvedValue(response as never);
+            appService.verifyEmail.mockResolvedValue(serviceResponse);
 
-            await expect(controller.verifyEmail(dto, req, res)).resolves.toEqual(response);
-            expect(appService.verifyEmail).toHaveBeenCalledWith(dto, req.headers, res);
+            await expect(controller.verifyEmail(dto, res)).resolves.toEqual(serviceResponse);
+            expect(appService.verifyEmail).toHaveBeenCalledWith(dto);
+            expect(appService.setAuthCookies).toHaveBeenCalledWith(res, serviceResponse.accessToken, serviceResponse.sessionToken);
         });
 
         it('propagates service errors', async () => {
@@ -114,13 +113,8 @@ describe('AppController', () => {
 
             appService.verifyEmail.mockRejectedValue(error);
 
-            await expect(
-                controller.verifyEmail(
-                    { email: 'jane@example.com', otp: '000000' },
-                    { headers: {} } as unknown as express.Request,
-                    {} as unknown as express.Response,
-                ),
-            ).rejects.toThrow(error);
+            await expect(controller.verifyEmail({ email: 'jane@example.com', otp: '000000' }, {} as Response)).rejects.toThrow(error);
+            expect(appService.setAuthCookies).not.toHaveBeenCalled();
         });
     });
 });
