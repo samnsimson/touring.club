@@ -1,5 +1,5 @@
 {
-    "name": "@tc/auth",
+    "name": "@tc/common",
     "version": "0.0.1",
     "private": true,
     "type": "module",
@@ -15,17 +15,5 @@
             "default": "./dist/index.js"
         }
     },
-    "dependencies": {
-        "@nestjs/common": "^11.0.0",
-        "@tc/config": "workspace:*",
-        "@tc/utils": "workspace:*",
-        "better-auth": "^1.6.20",
-        "express": "^5.2.1",
-        "jose": "^6.2.3",
-        "typeorm": "^0.3.20",
-        "vitest": "^4.1.9"
-    },
-    "devDependencies": {
-        "@types/express": "^5.0.6"
-    }
+    "dependencies": {}
 }
