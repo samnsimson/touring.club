@@ -6,12 +6,23 @@
         "module": "nodenext",
         "moduleResolution": "nodenext",
         "experimentalDecorators": true,
-        "emitDecoratorMetadata": true
+        "emitDecoratorMetadata": true,
+        "composite": false,
+        "declaration": false,
+        "declarationMap": false,
+        "emitDeclarationOnly": false,
+        "noEmit": true
     },
-    "include": ["jest.config.ts", "jest.config.cts", "specs/**/*.test.ts", "specs/**/*.spec.ts", "specs/**/*.d.ts"],
+    "include": ["jest.config.ts", "jest.config.cts", "specs/**/*.spec.ts", "specs/**/*.test.ts", "specs/**/*.d.ts", "src/**/*.ts"],
     "references": [
         {
-            "path": "./tsconfig.app.json"
+            "path": "../../library/config/tsconfig.lib.json"
+        },
+        {
+            "path": "../../library/core/tsconfig.lib.json"
+        },
+        {
+            "path": "../../library/auth/tsconfig.lib.json"
         }
     ]
 }
