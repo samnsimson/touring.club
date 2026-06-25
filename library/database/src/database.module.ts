@@ -3,7 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@tc/config';
 import { DatabaseModuleOptions } from './database.contract';
 import { DataSource, DataSourceOptions } from 'typeorm';
-import { DatabaseUtils } from './database.utils';
+import { DatabaseUtils } from '@tc/utils';
 
 @Module({})
 export class DatabaseModule {
@@ -16,12 +16,11 @@ export class DatabaseModule {
                     imports: [ConfigModule],
                     inject: [ConfigService],
                     useFactory: (config: ConfigService) => {
-                        return DatabaseUtils.createDataSourceOptions({
-                            autoLoadEntities: true,
-                            url: config.get('DATABASE_URL'),
-                            synchronize: config.get('NODE_ENV') === 'development',
-                            ...(options.options ?? {}),
-                        });
+                        const schema = 'auth';
+                        const url = config.get('DATABASE_URL');
+                        const env = config.get('NODE_ENV');
+                        const dataSourceOptions = DatabaseUtils.createDataSourceOptions({ url, env, schema });
+                        return { ...dataSourceOptions, autoLoadEntities: true };
                     },
                     dataSourceFactory: async (options?: DataSourceOptions) => {
                         if (!options) throw new Error('DataSourceOptions are required');

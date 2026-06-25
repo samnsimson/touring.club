@@ -82,7 +82,9 @@ export function applyJoins(
             continue;
         }
 
-        qb.leftJoin(joinTable, joinAlias, `${joinAlias}.${joinAttr.on.to} = ${alias}.${joinAttr.on.from}`);
+        const fromColumn = resolvePhysicalColumn(context, model, joinAttr.on.from);
+        const toColumn = resolvePhysicalColumn(context, joinModel, joinAttr.on.to);
+        qb.leftJoin(joinTable, joinAlias, `${joinAlias}.${toColumn} = ${alias}.${fromColumn}`);
     }
 
     if (joinSelects.length) {

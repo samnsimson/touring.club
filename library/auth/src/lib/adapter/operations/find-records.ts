@@ -1,9 +1,35 @@
 import type { FindManyArgs, FindOneArgs } from '../core/adapter-handles';
+import type { JoinConfig } from 'better-auth/adapters';
 import type { AdapterRuntime } from '../core/adapter.context';
 import { tableFor } from '../core/adapter.context';
 import { buildJoinSelects, processJoinedResults } from '../query/join-utils';
-import { applyJoins, buildSelectColumns, parseCountResult, PRIMARY_ALIAS, resolvePhysicalColumn } from '../query/query-builder.utils';
+import { applyJoins, buildSelectColumns, mapRowToFields, parseCountResult, PRIMARY_ALIAS, resolvePhysicalColumn } from '../query/query-builder.utils';
 import { applyWhereClause } from '../query/where-clause';
+
+function normalizeFindResult<T>(runtime: AdapterRuntime, model: string, row: Record<string, unknown>, join?: JoinConfig): T {
+    if (!runtime.mapRowOutput) {
+        return row as T;
+    }
+
+    const mapped = mapRowToFields(runtime.context, model, row) as Record<string, unknown>;
+
+    if (!join) {
+        return mapped as T;
+    }
+
+    for (const [joinModel] of Object.entries(join)) {
+        const joinModelName = runtime.context.getModelName(joinModel);
+        const joinData = row[joinModel] ?? row[joinModelName];
+
+        if (joinData && typeof joinData === 'object' && !Array.isArray(joinData)) {
+            mapped[joinModel] = mapRowToFields(runtime.context, joinModel, joinData as Record<string, unknown>);
+        } else if (Array.isArray(joinData)) {
+            mapped[joinModel] = joinData.map((item) => mapRowToFields(runtime.context, joinModel, item as Record<string, unknown>));
+        }
+    }
+
+    return mapped as T;
+}
 
 export async function findOneRecord<T>(runtime: AdapterRuntime, { model, where, select, join }: FindOneArgs): Promise<T | null> {
     const { selects: joinSelects, meta } = buildJoinSelects(join, runtime.context.schema, runtime.context.getDefaultModelName, runtime.context.getFieldName);
@@ -23,10 +49,11 @@ export async function findOneRecord<T>(runtime: AdapterRuntime, { model, where, 
     }
 
     if (join) {
-        return (processJoinedResults(rows, join, meta, runtime.context.getModelName, runtime.context.getFieldName)[0] as T | undefined) ?? null;
+        const row = processJoinedResults(rows, join, meta, runtime.context.getModelName, runtime.context.getFieldName)[0];
+        return row ? normalizeFindResult<T>(runtime, model, row, join) : null;
     }
 
-    return (rows[0] as T | undefined) ?? null;
+    return normalizeFindResult<T>(runtime, model, rows[0]);
 }
 
 export async function findManyRecords<T>(runtime: AdapterRuntime, args: FindManyArgs): Promise<T[]> {
@@ -79,10 +106,12 @@ export async function findManyRecords<T>(runtime: AdapterRuntime, args: FindMany
     const rows = await qb.getRawMany();
 
     if (join) {
-        return processJoinedResults(rows, join, meta, runtime.context.getModelName, runtime.context.getFieldName) as T[];
+        return processJoinedResults(rows, join, meta, runtime.context.getModelName, runtime.context.getFieldName).map((row) =>
+            normalizeFindResult<T>(runtime, model, row, join),
+        );
     }
 
-    return rows as T[];
+    return rows.map((row) => normalizeFindResult<T>(runtime, model, row));
 }
 
 export async function countRecords(runtime: AdapterRuntime, { model, where }: { model: string; where?: FindManyArgs['where'] }): Promise<number> {

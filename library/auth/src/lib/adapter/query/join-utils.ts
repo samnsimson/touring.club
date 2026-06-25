@@ -6,6 +6,7 @@ type ModelNameResolver = (model: string) => string;
 export type JoinSelectMeta = {
     joinModel: string;
     joinModelRef: string;
+    field: string;
     fieldName: string;
 };
 
@@ -35,7 +36,7 @@ export function buildJoinSelects(
         for (const field of Object.keys(fieldEntries)) {
             const column = getFieldName({ model: joinModel, field });
             selects.push(`join_${joinModelRef}.${column} AS _joined_${joinModelRef}_${column}`);
-            meta.push({ joinModel, joinModelRef, fieldName: column });
+            meta.push({ joinModel, joinModelRef, field, fieldName: column });
         }
     }
 
@@ -67,9 +68,9 @@ export function processJoinedResults(
             const keyStr = String(key);
             let assigned = false;
 
-            for (const { joinModel, fieldName, joinModelRef } of meta) {
+            for (const { joinModel, field, fieldName, joinModelRef } of meta) {
                 if (keyStr === `_joined_${joinModelRef}_${fieldName}`) {
-                    joinedModelFields[getModelName(joinModel)][getFieldName({ model: joinModel, field: fieldName })] = value;
+                    joinedModelFields[getModelName(joinModel)][field] = value;
                     assigned = true;
                     break;
                 }

@@ -16,6 +16,8 @@ export type AdapterRuntime = {
     context: AdapterContext;
     inTransaction: boolean;
     tableSchema?: string;
+    /** When true, find results map physical DB column names back to logical Better Auth field names. */
+    mapRowOutput: boolean;
 };
 
 export function qualifyTable(table: string, dbType: string, tableSchema?: string): string {
