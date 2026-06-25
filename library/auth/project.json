@@ -27,7 +27,7 @@
             "executor": "nx:run-commands",
             "dependsOn": ["utils:build"],
             "options": {
-                "command": "bun --env-file=.env x auth@latest generate --config library/auth/src/lib/auth.config.ts --yes",
+                "command": "bunx auth@latest generate --config library/auth/src/lib/auth.config.ts --yes",
                 "cwd": "{workspaceRoot}"
             }
         }
