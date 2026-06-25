@@ -6,20 +6,25 @@ export type DatabaseUtilsOptions = {
     url: string;
     env: 'development' | 'production' | 'staging' | 'test';
     schema?: string;
+    loadEntities?: boolean;
 };
 
 export class DatabaseUtils {
-    static createDataSourceOptions({ url, env, schema }: DatabaseUtilsOptions): DataSourceOptions {
+    static createDataSourceOptions({ url, env, schema, loadEntities = true }: DatabaseUtilsOptions): DataSourceOptions {
         return {
             url,
             type: 'postgres',
-            ...(schema ? { schema } : {}),
-            namingStrategy: new SnakeNamingStrategy(),
-            entities: [join(process.cwd(), 'library/database/src/entities/**/*.{ts,js}')],
-            migrations: [join(process.cwd(), 'library/database/src/migrations/*.{ts,js}')],
-            migrationsRun: env === 'development',
-            logging: env !== 'production',
             synchronize: false,
+            logging: env !== 'production',
+            namingStrategy: new SnakeNamingStrategy(),
+            ...(schema ? { schema } : {}),
+            ...(loadEntities
+                ? {
+                      entities: [join(process.cwd(), 'library/database/src/entities/**/*.{ts,js}')],
+                      migrations: [join(process.cwd(), 'library/database/src/migrations/*.{ts,js}')],
+                      migrationsRun: env === 'development',
+                  }
+                : {}),
         };
     }
 

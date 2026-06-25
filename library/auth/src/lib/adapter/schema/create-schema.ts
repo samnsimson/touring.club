@@ -5,6 +5,7 @@ import { initGetModelName } from 'better-auth/adapters';
 import type { DBAdapterSchemaCreation } from 'better-auth/adapters';
 import type { BetterAuthDBSchema, DBFieldAttribute } from 'better-auth/db';
 import type { AdapterConfig } from '../adapter.config';
+import { formatGeneratedSource } from './format-generated-source';
 import { generateEntitySource } from './generate-entity';
 import { resolveSchemaPaths, toEntityClassName } from './schema-paths';
 
@@ -39,10 +40,11 @@ export async function createTypeormSchema({ dbType, config, tables, file }: Crea
             };
             const entityFileName = `${toEntityClassName(modelKey)}.ts`;
             const entityPath = join(entitiesDir, entityFileName);
-            const content = generateEntitySource(modelKey, table, dbType, {
+            const rawContent = generateEntitySource(modelKey, table, dbType, {
                 schema: config.schema ?? 'auth',
                 namingStrategy: config.namingStrategy,
             });
+            const content = await formatGeneratedSource(rawContent, entityPath);
             const existed = existsSync(entityPath);
             const unchanged = existed && readFileSync(entityPath, 'utf8') === content;
 
