@@ -1,7 +1,7 @@
 import { betterAuth } from 'better-auth';
-import { SnakeNamingStrategy, usernameValidator } from '@tc/utils';
+import { usernameValidator } from '@tc/utils';
+import { typeormAdapter } from '@hedystia/better-auth-typeorm';
 import { AUTH_BASE_PATH, AUTH_BASE_URL } from './auth.constants';
-import { typeormAdapter } from './adapter/auth.adapter';
 import { dataSource, env } from './auth.datasource';
 import { admin, bearer, emailOTP, openAPI, username, jwt } from 'better-auth/plugins';
 
@@ -11,11 +11,10 @@ export const auth = betterAuth({
     basePath: AUTH_BASE_PATH,
     secret: env.BETTER_AUTH_SECRET,
     database: typeormAdapter(dataSource, {
-        schema: 'auth',
-        usePlural: true,
-        transaction: true,
-        namingStrategy: new SnakeNamingStrategy(),
+        outputDir: 'library/database/src',
         entitiesDir: 'library/database/src/entities/auth',
+        migrationsDir: 'library/database/src/migrations',
+        usePlural: true,
     }),
     onAPIError: { throw: true, onError: (error) => console.error(error) },
     emailVerification: { autoSignInAfterVerification: true },

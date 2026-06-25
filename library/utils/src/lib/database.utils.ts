@@ -10,7 +10,7 @@ export type DatabaseUtilsOptions = {
 };
 
 export class DatabaseUtils {
-    static createDataSourceOptions({ url, env, schema, loadEntities = true }: DatabaseUtilsOptions): DataSourceOptions {
+    static createDataSourceOptions({ url, env, schema }: DatabaseUtilsOptions): DataSourceOptions {
         return {
             url,
             type: 'postgres',
@@ -18,13 +18,9 @@ export class DatabaseUtils {
             logging: env !== 'production',
             namingStrategy: new SnakeNamingStrategy(),
             ...(schema ? { schema } : {}),
-            ...(loadEntities
-                ? {
-                      entities: [join(process.cwd(), 'library/database/src/entities/**/*.{ts,js}')],
-                      migrations: [join(process.cwd(), 'library/database/src/migrations/*.{ts,js}')],
-                      migrationsRun: env === 'development',
-                  }
-                : {}),
+            entities: [join(process.cwd(), 'library/database/src/entities/**/*.{ts,js}')],
+            migrations: [join(process.cwd(), 'library/database/src/migrations/*.{ts,js}')],
+            migrationsRun: env === 'development',
         };
     }
 
