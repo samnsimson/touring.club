@@ -7,7 +7,7 @@ import { DatabaseUtils } from '@tc/utils';
 
 @Module({})
 export class DatabaseModule {
-    static forRootAsync(options: DatabaseModuleOptions = {}): DynamicModule {
+    static forRootAsync(options: DatabaseModuleOptions): DynamicModule {
         return {
             global: true,
             module: DatabaseModule,
@@ -15,6 +15,7 @@ export class DatabaseModule {
                 TypeOrmModule.forRootAsync({
                     imports: [ConfigModule],
                     inject: [ConfigService],
+                    name: options.connectionName ?? 'default',
                     useFactory: (config: ConfigService) => {
                         const schema = 'auth';
                         const url = config.get('DATABASE_URL');

@@ -6,4 +6,5 @@ export interface DatabaseModuleOptions {
     providers?: ModuleMetadata['providers'];
     exports?: ModuleMetadata['exports'];
     options?: Partial<TypeOrmModuleOptions>;
+    connectionName: string;
 }
