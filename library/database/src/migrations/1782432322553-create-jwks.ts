@@ -1,11 +1,11 @@
 import { type MigrationInterface, type QueryRunner, Table, TableColumn, TableForeignKey, TableIndex } from 'typeorm';
 
-export class CreateVerification1782430947658 implements MigrationInterface {
+export class CreateJwks1782432322553 implements MigrationInterface {
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.createTable(
             new Table({
                 schema: 'auth',
-                name: 'verification',
+                name: 'jwks',
                 columns: [
                     {
                         name: 'id',
@@ -13,41 +13,28 @@ export class CreateVerification1782430947658 implements MigrationInterface {
                         isPrimary: true,
                     },
                     {
-                        name: 'identifier',
+                        name: 'public_key',
                         type: 'text',
                     },
                     {
-                        name: 'value',
+                        name: 'private_key',
                         type: 'text',
-                    },
-                    {
-                        name: 'expires_at',
-                        type: 'timestamptz',
                     },
                     {
                         name: 'created_at',
                         type: 'timestamptz',
-                        default: 'CURRENT_TIMESTAMP',
                     },
                     {
-                        name: 'updated_at',
+                        name: 'expires_at',
                         type: 'timestamptz',
-                        default: 'CURRENT_TIMESTAMP',
+                        isNullable: true,
                     },
                 ],
-            }),
-        );
-
-        await queryRunner.createIndex(
-            'verification',
-            new TableIndex({
-                name: 'verification_identifier_idx',
-                columnNames: ['identifier'],
             }),
         );
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.dropTable(new Table({ schema: 'auth', name: 'verification' }));
+        await queryRunner.dropTable(new Table({ schema: 'auth', name: 'jwks' }));
     }
 }

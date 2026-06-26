@@ -1,11 +1,11 @@
 import { type MigrationInterface, type QueryRunner, Table, TableColumn, TableForeignKey, TableIndex } from 'typeorm';
 
-export class CreateSession1782430947658 implements MigrationInterface {
+export class CreateUser1782432322553 implements MigrationInterface {
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.createTable(
             new Table({
                 schema: 'auth',
-                name: 'session',
+                name: 'user',
                 columns: [
                     {
                         name: 'id',
@@ -13,13 +13,23 @@ export class CreateSession1782430947658 implements MigrationInterface {
                         isPrimary: true,
                     },
                     {
-                        name: 'expires_at',
-                        type: 'timestamptz',
+                        name: 'name',
+                        type: 'text',
                     },
                     {
-                        name: 'token',
+                        name: 'email',
                         type: 'text',
                         isUnique: true,
+                    },
+                    {
+                        name: 'email_verified',
+                        type: 'boolean',
+                        default: false,
+                    },
+                    {
+                        name: 'image',
+                        type: 'text',
+                        isNullable: true,
                     },
                     {
                         name: 'created_at',
@@ -29,51 +39,46 @@ export class CreateSession1782430947658 implements MigrationInterface {
                     {
                         name: 'updated_at',
                         type: 'timestamptz',
+                        default: 'CURRENT_TIMESTAMP',
                     },
                     {
-                        name: 'ip_address',
+                        name: 'role',
                         type: 'text',
                         isNullable: true,
                     },
                     {
-                        name: 'user_agent',
+                        name: 'banned',
+                        type: 'boolean',
+                        isNullable: true,
+                        default: false,
+                    },
+                    {
+                        name: 'ban_reason',
                         type: 'text',
                         isNullable: true,
                     },
                     {
-                        name: 'user_id',
-                        type: 'text',
+                        name: 'ban_expires',
+                        type: 'timestamptz',
+                        isNullable: true,
                     },
                     {
-                        name: 'impersonated_by',
+                        name: 'username',
+                        type: 'text',
+                        isNullable: true,
+                        isUnique: true,
+                    },
+                    {
+                        name: 'display_username',
                         type: 'text',
                         isNullable: true,
                     },
                 ],
             }),
         );
-
-        await queryRunner.createIndex(
-            'session',
-            new TableIndex({
-                name: 'session_user_id_idx',
-                columnNames: ['user_id'],
-            }),
-        );
-
-        await queryRunner.createForeignKey(
-            'session',
-            new TableForeignKey({
-                columnNames: ['user_id'],
-                referencedTableName: 'user',
-                referencedSchema: 'auth',
-                referencedColumnNames: ['id'],
-                onDelete: 'CASCADE',
-            }),
-        );
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.dropTable(new Table({ schema: 'auth', name: 'session' }));
+        await queryRunner.dropTable(new Table({ schema: 'auth', name: 'user' }));
     }
 }

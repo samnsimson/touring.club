@@ -1,11 +1,11 @@
 import { type MigrationInterface, type QueryRunner, Table, TableColumn, TableForeignKey, TableIndex } from 'typeorm';
 
-export class CreateAccount1782430947658 implements MigrationInterface {
+export class CreateSession1782432322553 implements MigrationInterface {
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.createTable(
             new Table({
                 schema: 'auth',
-                name: 'account',
+                name: 'session',
                 columns: [
                     {
                         name: 'id',
@@ -13,51 +13,13 @@ export class CreateAccount1782430947658 implements MigrationInterface {
                         isPrimary: true,
                     },
                     {
-                        name: 'account_id',
-                        type: 'text',
-                    },
-                    {
-                        name: 'provider_id',
-                        type: 'text',
-                    },
-                    {
-                        name: 'user_id',
-                        type: 'text',
-                    },
-                    {
-                        name: 'access_token',
-                        type: 'text',
-                        isNullable: true,
-                    },
-                    {
-                        name: 'refresh_token',
-                        type: 'text',
-                        isNullable: true,
-                    },
-                    {
-                        name: 'id_token',
-                        type: 'text',
-                        isNullable: true,
-                    },
-                    {
-                        name: 'access_token_expires_at',
+                        name: 'expires_at',
                         type: 'timestamptz',
-                        isNullable: true,
                     },
                     {
-                        name: 'refresh_token_expires_at',
-                        type: 'timestamptz',
-                        isNullable: true,
-                    },
-                    {
-                        name: 'scope',
+                        name: 'token',
                         type: 'text',
-                        isNullable: true,
-                    },
-                    {
-                        name: 'password',
-                        type: 'text',
-                        isNullable: true,
+                        isUnique: true,
                     },
                     {
                         name: 'created_at',
@@ -68,20 +30,39 @@ export class CreateAccount1782430947658 implements MigrationInterface {
                         name: 'updated_at',
                         type: 'timestamptz',
                     },
+                    {
+                        name: 'ip_address',
+                        type: 'text',
+                        isNullable: true,
+                    },
+                    {
+                        name: 'user_agent',
+                        type: 'text',
+                        isNullable: true,
+                    },
+                    {
+                        name: 'user_id',
+                        type: 'text',
+                    },
+                    {
+                        name: 'impersonated_by',
+                        type: 'text',
+                        isNullable: true,
+                    },
                 ],
             }),
         );
 
         await queryRunner.createIndex(
-            'account',
+            'session',
             new TableIndex({
-                name: 'account_user_id_idx',
+                name: 'session_user_id_idx',
                 columnNames: ['user_id'],
             }),
         );
 
         await queryRunner.createForeignKey(
-            'account',
+            'session',
             new TableForeignKey({
                 columnNames: ['user_id'],
                 referencedTableName: 'user',
@@ -93,6 +74,6 @@ export class CreateAccount1782430947658 implements MigrationInterface {
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.dropTable(new Table({ schema: 'auth', name: 'account' }));
+        await queryRunner.dropTable(new Table({ schema: 'auth', name: 'session' }));
     }
 }
