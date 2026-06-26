@@ -1,22 +1,23 @@
-import { Column, Entity, PrimaryColumn } from 'typeorm';
+import { Column, Entity, Index, PrimaryColumn } from 'typeorm';
 
-@Entity('verifications', { schema: 'auth' })
+@Entity({ schema: 'auth', name: 'verification' })
 export class Verification {
     @PrimaryColumn('text')
     id!: string;
 
-    @Column('text', { nullable: false })
+    @Index('verification_identifier_idx')
+    @Column('text', { name: 'identifier' })
     identifier!: string;
 
-    @Column('text', { nullable: false })
+    @Column('text', { name: 'value' })
     value!: string;
 
-    @Column('timestamp', { name: 'expires_at', nullable: false })
+    @Column('timestamptz', { name: 'expires_at' })
     expiresAt!: Date;
 
-    @Column('timestamp', { name: 'created_at', nullable: false })
+    @Column('timestamptz', { name: 'created_at', default: () => 'CURRENT_TIMESTAMP' })
     createdAt!: Date;
 
-    @Column('timestamp', { name: 'updated_at', nullable: false })
+    @Column('timestamptz', { name: 'updated_at', default: () => 'CURRENT_TIMESTAMP' })
     updatedAt!: Date;
 }

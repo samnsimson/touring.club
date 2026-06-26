@@ -93,5 +93,8 @@
         "*.{json,md,yml,yaml,css,scss,html}": [
             "prettier --write"
         ]
+    },
+    "patchedDependencies": {
+        "@hedystia/better-auth-typeorm@1.0.1": "patches/@hedystia%2Fbetter-auth-typeorm@1.0.1.patch"
     }
 }

@@ -1,0 +1,226 @@
+diff --git a/dist/index.mjs b/dist/index.mjs
+index 1899a53e47833fd7ec30d0da2b6b9991f7a96187..5e7f736f337916be74d9f58991d056c4525b3299 100644
+--- a/dist/index.mjs
++++ b/dist/index.mjs
+@@ -82,6 +82,18 @@ function getDateColumnType(dataSource) {
+ 		default: return "timestamp";
+ 	}
+ }
++function getDataSourceSchema(dataSource) {
++	const schema = dataSource.options.schema;
++	return typeof schema === "string" ? schema : void 0;
++}
++function resolveColumnName(dataSource, propertyName, customName) {
++	const namingStrategy = dataSource.options.namingStrategy;
++	if (namingStrategy?.columnName) {
++		const explicitOverride = customName && customName !== propertyName ? customName : void 0;
++		return namingStrategy.columnName(propertyName, explicitOverride, []);
++	}
++	return customName || propertyName;
++}
+ function mapFieldTypeToTypeORM(fieldType, field, dataSource) {
+ 	switch (Array.isArray(fieldType) ? fieldType[0] || "string" : fieldType) {
+ 		case "string": return { type: "text" };
+@@ -144,12 +156,14 @@ function generateEntity(dataSource, modelName, modelSchema) {
+ 	const imports = [`import { ${Array.from(typeormImports).sort().join(", ")} } from 'typeorm';`];
+ 	for (const referencedModel of Array.from(referencedModels).sort()) imports.push(`import { ${toPascalCase(referencedModel)} } from './${toPascalCase(referencedModel)}';`);
+ 	imports.push("");
+-	let entityCode = `@Entity('${tableName}')\nexport class ${className} {\n`;
++	const schema = getDataSourceSchema(dataSource);
++	const entityDecorator = schema ? `@Entity({ schema: '${schema}', name: '${tableName}' })` : `@Entity('${tableName}')`;
++	let entityCode = `${entityDecorator}\nexport class ${className} {\n`;
+ 	entityCode += "  @PrimaryColumn('text')\n";
+ 	entityCode += "  id!: string;\n\n";
+ 	for (const [fieldName, field] of Object.entries(modelSchema.fields)) {
+ 		const fieldAttr = field;
+-		const dbField = fieldAttr.fieldName || fieldName;
++		const dbField = resolveColumnName(dataSource, fieldName, fieldAttr.fieldName);
+ 		const typeInfo = mapFieldTypeToTypeORM(fieldAttr.type, fieldAttr, dataSource);
+ 		const columnOptions = [];
+ 		columnOptions.push(`name: '${dbField}'`);
+@@ -168,7 +182,8 @@ function generateEntity(dataSource, modelName, modelSchema) {
+ 			const relationClass = toPascalCase(fieldAttr.references.model);
+ 			const relationPropertyName = toRelationPropertyName(fieldName);
+ 			entityCode += `  @ManyToOne(() => ${relationClass}, { onDelete: '${(fieldAttr.references.onDelete || "cascade").toUpperCase()}', nullable: ${fieldAttr.required ? "false" : "true"} })\n`;
+-			entityCode += `  @JoinColumn({ name: '${dbField}', referencedColumnName: '${fieldAttr.references.field}' })\n`;
++			const referencedColumn = resolveColumnName(dataSource, fieldAttr.references.field, void 0);
++			entityCode += `  @JoinColumn({ name: '${dbField}', referencedColumnName: '${referencedColumn}' })\n`;
+ 			entityCode += `  ${relationPropertyName}${fieldAttr.required ? "!" : "?"}: ${relationClass};\n\n`;
+ 		}
+ 	}
+@@ -178,12 +193,14 @@ function generateEntity(dataSource, modelName, modelSchema) {
+ function generateMigration(dataSource, modelName, modelSchema, timestamp, action, changes) {
+ 	const className = `${action.charAt(0).toUpperCase() + action.slice(1)}${toPascalCase(modelName)}${timestamp}`;
+ 	const tableName = modelSchema.modelName;
++	const schema = getDataSourceSchema(dataSource);
+ 	let migrationCode = "import { type MigrationInterface, type QueryRunner, Table, TableColumn, TableForeignKey, TableIndex } from 'typeorm';\n\n";
+ 	migrationCode += `export class ${className} implements MigrationInterface {\n`;
+ 	migrationCode += "  public async up(queryRunner: QueryRunner): Promise<void> {\n";
+ 	if (action === "create") {
+ 		migrationCode += "    await queryRunner.createTable(\n";
+ 		migrationCode += "      new Table({\n";
++		if (schema) migrationCode += `        schema: '${schema}',\n`;
+ 		migrationCode += `        name: '${tableName}',\n`;
+ 		migrationCode += "        columns: [\n";
+ 		const columns = [];
+@@ -195,7 +212,7 @@ function generateMigration(dataSource, modelName, modelSchema, timestamp, action
+           }`);
+ 		for (const [fieldName, field] of Object.entries(modelSchema.fields)) {
+ 			const fieldAttr = field;
+-			const dbField = fieldAttr.fieldName || fieldName;
++			const dbField = resolveColumnName(dataSource, fieldName, fieldAttr.fieldName);
+ 			const typeInfo = mapFieldTypeToTypeORM(fieldAttr.type, fieldAttr, dataSource);
+ 			if (fieldName === "id" || dbField === "id") continue;
+ 			let columnDef = "          {\n";
+@@ -220,7 +237,8 @@ function generateMigration(dataSource, modelName, modelSchema, timestamp, action
+       new TableForeignKey({
+         columnNames: ['${dbField}'],
+         referencedTableName: '${fieldAttr.references.model}',
+-        referencedColumnNames: ['${fieldAttr.references.field}'],
++        referencedSchema: ${schema ? `'${schema}'` : "undefined"},
++        referencedColumnNames: ['${resolveColumnName(dataSource, fieldAttr.references.field, void 0)}'],
+         onDelete: '${(fieldAttr.references.onDelete || "cascade").toUpperCase()}',
+       }),
+     );`);
+@@ -232,32 +250,28 @@ function generateMigration(dataSource, modelName, modelSchema, timestamp, action
+ 		if (postCreateStatements.length > 0) migrationCode += `${postCreateStatements.join("\n\n")}\n`;
+ 	} else if (action === "alter" && changes) {
+ 		if (changes.addColumns && changes.addColumns.length > 0) for (const { name, field } of changes.addColumns) {
++			const dbField = resolveColumnName(dataSource, name, field.fieldName);
+ 			const typeInfo = mapFieldTypeToTypeORM(field.type, field, dataSource);
+ 			migrationCode += `    await queryRunner.addColumn('${tableName}', new TableColumn({\n`;
+-			migrationCode += `      name: '${field.fieldName || name}',\n`;
++			migrationCode += `      name: '${dbField}',\n`;
+ 			migrationCode += `      type: '${typeInfo.type}',\n`;
+ 			migrationCode += `      isNullable: ${!field.required},\n`;
+-			if (field.unique || (field.fieldName || name) === "email" || (field.fieldName || name) === "token") migrationCode += "      isUnique: true,\n";
++			if (field.unique || dbField === "email" || dbField === "token") migrationCode += "      isUnique: true,\n";
+ 			const defaultValue = formatDefaultValueForMigration(field);
+ 			if (defaultValue) migrationCode += `      default: ${defaultValue},\n`;
+ 			migrationCode += "    }));\n\n";
+-			if (field.index) {
+-				const dbField = field.fieldName || name;
+-				migrationCode += `    await queryRunner.createIndex('${tableName}', new TableIndex({ name: '${tableName}_${dbField}_idx', columnNames: ['${dbField}'] }));\n\n`;
+-			}
+-			if (field.references) {
+-				const dbField = field.fieldName || name;
+-				migrationCode += `    await queryRunner.createForeignKey('${tableName}', new TableForeignKey({ columnNames: ['${dbField}'], referencedTableName: '${field.references.model}', referencedColumnNames: ['${field.references.field}'], onDelete: '${(field.references.onDelete || "cascade").toUpperCase()}' }));\n\n`;
+-			}
++			if (field.index) migrationCode += `    await queryRunner.createIndex('${tableName}', new TableIndex({ name: '${tableName}_${dbField}_idx', columnNames: ['${dbField}'] }));\n\n`;
++			if (field.references) migrationCode += `    await queryRunner.createForeignKey('${tableName}', new TableForeignKey({ columnNames: ['${dbField}'], referencedTableName: '${field.references.model}', referencedSchema: ${schema ? `'${schema}'` : "undefined"}, referencedColumnNames: ['${resolveColumnName(dataSource, field.references.field, void 0)}'], onDelete: '${(field.references.onDelete || "cascade").toUpperCase()}' }));\n\n`;
+ 		}
+ 		if (changes.dropColumns && changes.dropColumns.length > 0) for (const columnName of changes.dropColumns) migrationCode += `    await queryRunner.dropColumn('${tableName}', '${columnName}');\n\n`;
+ 		if (changes.modifyColumns && changes.modifyColumns.length > 0) for (const { name, field } of changes.modifyColumns) {
++			const dbField = resolveColumnName(dataSource, name, field.fieldName);
+ 			const typeInfo = mapFieldTypeToTypeORM(field.type, field, dataSource);
+ 			migrationCode += `    await queryRunner.changeColumn('${tableName}', '${name}', new TableColumn({\n`;
+-			migrationCode += `      name: '${field.fieldName || name}',\n`;
++			migrationCode += `      name: '${dbField}',\n`;
+ 			migrationCode += `      type: '${typeInfo.type}',\n`;
+ 			migrationCode += `      isNullable: ${!field.required},\n`;
+-			if (field.unique || (field.fieldName || name) === "email" || (field.fieldName || name) === "token") migrationCode += "      isUnique: true,\n";
++			if (field.unique || dbField === "email" || dbField === "token") migrationCode += "      isUnique: true,\n";
+ 			const defaultValue = formatDefaultValueForMigration(field);
+ 			if (defaultValue) migrationCode += `      default: ${defaultValue},\n`;
+ 			migrationCode += "    }));\n\n";
+@@ -265,9 +279,11 @@ function generateMigration(dataSource, modelName, modelSchema, timestamp, action
+ 	}
+ 	migrationCode += "  }\n\n";
+ 	migrationCode += "  public async down(queryRunner: QueryRunner): Promise<void> {\n";
+-	if (action === "create") migrationCode += `    await queryRunner.dropTable('${tableName}');\n`;
+-	else if (action === "alter" && changes) {
+-		if (changes.addColumns && changes.addColumns.length > 0) for (const { name, field } of changes.addColumns) migrationCode += `    await queryRunner.dropColumn('${tableName}', '${field.fieldName || name}');\n`;
++	if (action === "create") {
++		if (schema) migrationCode += `    await queryRunner.dropTable(new Table({ schema: '${schema}', name: '${tableName}' }));\n`;
++		else migrationCode += `    await queryRunner.dropTable('${tableName}');\n`;
++	} else if (action === "alter" && changes) {
++		if (changes.addColumns && changes.addColumns.length > 0) for (const { name, field } of changes.addColumns) migrationCode += `    await queryRunner.dropColumn('${tableName}', '${resolveColumnName(dataSource, name, field.fieldName)}');\n`;
+ 		if (changes.dropColumns && changes.dropColumns.length > 0) for (const columnName of changes.dropColumns) migrationCode += `    await queryRunner.addColumn('${tableName}', new TableColumn({ name: '${columnName}', type: 'text', isNullable: true }));\n`;
+ 	}
+ 	migrationCode += "  }\n";
+@@ -380,10 +396,10 @@ const typeormAdapter = (dataSource, options) => createAdapterFactory({
+ 			for (let i = 0; i < cleaned.length; i++) {
+ 				const w = cleaned[i];
+ 				const prefix = i === 0 ? "" : ` ${w.connector ?? "AND"} `;
+-				let mappedFieldName = getFieldName({
++				let mappedFieldName = resolveColumnName(dataSource, w.field, getFieldName({
+ 					model,
+ 					field: w.field
+-				});
++				}));
+ 				if (fieldMapCache[model]?.[w.field]) mappedFieldName = fieldMapCache[model][w.field];
+ 				const col = escapeId(dataSource, mappedFieldName);
+ 				const isInsensitive = w.mode === "insensitive";
+@@ -484,10 +500,10 @@ const typeormAdapter = (dataSource, options) => createAdapterFactory({
+ 					}
+ 				}
+ 				if (!found) {
+-					const dbFieldName = getFieldName({
++					const dbFieldName = resolveColumnName(dataSource, key, getFieldName({
+ 						model,
+ 						field: key
+-					});
++					}));
+ 					if (existingColumns?.has(dbFieldName)) createFieldMap[key] = dbFieldName;
+ 					else if (!existingColumns) createFieldMap[key] = dbFieldName || key;
+ 				}
+@@ -559,10 +575,10 @@ const typeormAdapter = (dataSource, options) => createAdapterFactory({
+ 			const { sql, params } = buildWhereSql(model, "findMany", where);
+ 			let query = `SELECT * FROM ${escapeId(dataSource, tableName)}${sql}`;
+ 			if (sortBy?.field) {
+-				let mappedSortField = getFieldName({
++				let mappedSortField = resolveColumnName(dataSource, sortBy.field, getFieldName({
+ 					model,
+ 					field: sortBy.field
+-				});
++				}));
+ 				if (fieldMapCache[model]?.[sortBy.field]) mappedSortField = fieldMapCache[model][sortBy.field];
+ 				query += ` ORDER BY ${escapeId(dataSource, mappedSortField)} ${sortBy.direction === "desc" ? "DESC" : "ASC"}`;
+ 			}
+@@ -593,7 +609,8 @@ const typeormAdapter = (dataSource, options) => createAdapterFactory({
+ 				const setClauses = [];
+ 				const setValues = [];
+ 				for (const [key, value] of Object.entries(transformed)) if (value !== void 0) {
+-					setClauses.push(`${escapeId(dataSource, key)} = ${createParameterToken(dataSource, setValues.length)}`);
++					const columnName = resolveColumnName(dataSource, key, getFieldName({ model, field: key }));
++					setClauses.push(`${escapeId(dataSource, columnName)} = ${createParameterToken(dataSource, setValues.length)}`);
+ 					setValues.push(normalizeQueryValue(value, dataSource));
+ 				}
+ 				if (setClauses.length > 0) await queryRunner.query(`UPDATE ${escapeId(dataSource, tableName)} SET ${setClauses.join(", ")} WHERE ${escapeId(dataSource, "id")} = ${createParameterToken(dataSource, setValues.length)}`, [...setValues, existing[0].id]);
+@@ -637,7 +654,8 @@ const typeormAdapter = (dataSource, options) => createAdapterFactory({
+ 			const setClauses = [];
+ 			const setValues = [];
+ 			for (const [key, value] of Object.entries(transformed)) if (value !== void 0) {
+-				setClauses.push(`${escapeId(dataSource, key)} = ${createParameterToken(dataSource, setValues.length)}`);
++				const columnName = resolveColumnName(dataSource, key, getFieldName({ model, field: key }));
++				setClauses.push(`${escapeId(dataSource, columnName)} = ${createParameterToken(dataSource, setValues.length)}`);
+ 				setValues.push(normalizeQueryValue(value, dataSource));
+ 			}
+ 			if (setClauses.length === 0) return 0;
+@@ -766,6 +784,8 @@ const typeormAdapter = (dataSource, options) => createAdapterFactory({
+ 					if (!fs.existsSync(entitiesDir)) fs.mkdirSync(entitiesDir, { recursive: true });
+ 					const queryRunner = schemaDataSource.createQueryRunner();
+ 					await queryRunner.connect();
++					const schema = getDataSourceSchema(schemaDataSource);
++					if (schema && (schemaDataSource.options.type === "postgres" || schemaDataSource.options.type === "cockroachdb")) await queryRunner.query(`CREATE SCHEMA IF NOT EXISTS ${escapeId(schemaDataSource, schema)}`);
+ 					let changelogContent = `# TypeORM Schema Changes - ${(/* @__PURE__ */ new Date()).toISOString()}\n\n`;
+ 					let hasChanges = false;
+ 					const expectedTables = Object.keys(tables);
+@@ -792,7 +812,7 @@ const typeormAdapter = (dataSource, options) => createAdapterFactory({
+ 							const addColumns = [];
+ 							const dropColumns = [];
+ 							for (const [fieldName, field] of Object.entries(expectedFields)) {
+-								const dbField = field.fieldName || fieldName;
++								const dbField = resolveColumnName(dataSource, fieldName, field.fieldName);
+ 								if (!existingColumns.includes(dbField)) addColumns.push({
+ 									name: fieldName,
+ 									field
+@@ -800,7 +820,7 @@ const typeormAdapter = (dataSource, options) => createAdapterFactory({
+ 							}
+ 							for (const existingCol of existingColumns) {
+ 								if (existingCol === "id") continue;
+-								if (!Object.entries(expectedFields).some(([fieldName, field]) => (field.fieldName || fieldName) === existingCol)) dropColumns.push(existingCol);
++								if (!Object.entries(expectedFields).some(([fieldName, field]) => resolveColumnName(dataSource, fieldName, field.fieldName) === existingCol)) dropColumns.push(existingCol);
+ 							}
+ 							if (addColumns.length > 0 || dropColumns.length > 0) {
+ 								const migrationFileName = `${timestamp}-alter-${modelName}.ts`;

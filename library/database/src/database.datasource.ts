@@ -6,4 +6,5 @@ const env = validateEnv(process.env);
 export const dataSource = DatabaseUtils.createDataSource({
     url: env.DATABASE_URL,
     env: env.NODE_ENV,
+    schema: 'auth',
 });
