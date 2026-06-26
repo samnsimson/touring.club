@@ -1,0 +1,10 @@
+{
+    "extends": "./tsconfig.lib.json",
+    "compilerOptions": {
+        "emitDeclarationOnly": false,
+        "noEmit": true
+    },
+    "ts-node": {
+        "esm": true
+    }
+}
