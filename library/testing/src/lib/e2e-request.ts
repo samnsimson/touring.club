@@ -16,9 +16,9 @@ export class E2EApi {
 
     constructor(private readonly options: E2EApiOptions) {
         this.headers = { ...options.headers };
-        this.snapshotRedactor = new SnapshotRedactor({ keys: [] });
-        this.fixtureLoader = new RequestFixtureLoader({ fixturesDir: '.tmp/e2e-fixtures' });
-        this.emailCapture = new EmailCapture({ captureDir: '.tmp/e2e-emails' });
+        this.snapshotRedactor = new SnapshotRedactor();
+        this.fixtureLoader = new RequestFixtureLoader({ fixturesDir: options.fixturesDir });
+        this.emailCapture = new EmailCapture({ captureDir: options.emailCaptureDir });
     }
 
     setHeader(name: string, value: string): this {

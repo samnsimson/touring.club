@@ -1,0 +1,38 @@
+---
+description: E2e test suite formatting for apps/__tests__/e2e
+globs: apps/**/__tests__/e2e/**/*.e2e.spec.ts
+alwaysApply: false
+---
+
+# E2e test suite format
+
+Follow `apps/auth-service/__tests__/e2e/auth-password.e2e.spec.ts` when writing or editing e2e suites.
+
+## Layout
+
+- One blank line after imports, then `describe`.
+- `const api = createAuthE2EApi();` at suite scope, blank line after.
+- `beforeEach` uses a normal multi-line block when needed; blank line after the hook.
+- Blank line **between** `it` blocks only.
+
+## Inside each `it`
+
+- **No blank lines** between statements.
+- **One statement per line** — no wrapped object literals or chained calls across lines.
+- Inline request bodies on a single line, or assign to a `const` on one line first.
+- Use `if (!requireDatabase('…')) return;` for DB-gated tests.
+- Put helpers in `support/`; do not use external fixture files for request bodies.
+
+## Example
+
+```typescript
+it('POST /api/v1/auth/change-password updates the password for an authenticated user', async () => {
+    if (!requireDatabase('change-password')) return;
+    const user = await createVerifiedUser(api);
+    const signInRes = await signInUser(api, user);
+    const client = authedApi({ accessToken: signInRes.body.accessToken, sessionToken: signInRes.body.sessionToken });
+    const body = { currentPassword: user.password, newPassword: 'NewStr0ngPass!', revokeOtherSessions: true };
+    const response = await client.post('/api/v1/auth/change-password', body);
+    expect(response.status).toBe(200);
+});
+```

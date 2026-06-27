@@ -88,7 +88,7 @@ With a PAT you get **5,000 API requests/hour** and the long sleeps stop. JCasC a
 | Lint    | `nx affected -t lint` (falls back to `run-many` on first build)                      |
 | Test    | `nx affected -t test`                                                                |
 | Build   | `nx affected -t build`                                                               |
-| E2E     | Runs `auth-service-e2e` when `auth-service` is affected; applies DB migrations first |
+| E2E     | Runs `auth-service:e2e` when `auth-service` is affected; applies DB migrations first |
 | Deploy  | Placeholder CD stage on `main` — extend with your registry/deployment tooling        |
 
 The pipeline runs on the Jenkins controller (`agent any`) with Bun pre-installed in the Jenkins Docker image. No Docker-in-Docker is required for CI stages.

@@ -65,6 +65,7 @@ touring.club/
 │   ├── core/                # App bootstrap, Swagger, health routes
 │   ├── database/            # TypeORM module, entities, migrations
 │   ├── utils/               # Cross-cutting utilities and decorators
+│   ├── testing/             # E2E helpers (E2EApi, EmailCapture, fixtures)
 │   └── common/              # Shared types/constants (use sparingly)
 ├── .agents/skills/          # Workspace Nx skills (read before scaffolding/CI)
 ├── patches/                 # bun patch overrides (e.g. better-auth-typeorm)
@@ -81,6 +82,10 @@ touring.club/
 | New microservice            | `apps/<service-name>/`                 | `nx-generate` skill → `@nx/nest:application` |
 | New shared library          | `library/<lib-name>/`                  | `nx-generate` skill → `@nx/js:library`       |
 | DTOs, controllers, services | `apps/<app>/src/app/`                  | Hand-written or Nest schematics              |
+| App unit tests              | `apps/<app>/__tests__/`                | Hand-written Jest specs                      |
+| App e2e tests               | `apps/<app>/__tests__/e2e/`            | `@tc/testing` + Jest e2e target              |
+| App Jest config             | `apps/<app>/jest.config.cts`           | `createAppUnitJestConfig` from `jest/`       |
+| App e2e Jest config         | `apps/<app>/jest.e2e.config.cts`       | `createAppE2eJestConfig` from `jest/`        |
 | DB entities                 | `library/database/src/entities/`       | Better Auth generate or TypeORM migrations   |
 | DB migrations               | `library/database/src/migrations/`     | `bun nx run database:migration:generate`     |
 | Env variables               | `library/config/src/lib/env.schema.ts` | Hand-written                                 |
@@ -140,6 +145,15 @@ Libraries export through `src/index.ts`. Add new public APIs there; keep interna
 
 - Reserved for shared types/constants across services. Currently minimal — prefer a focused library over dumping into `common`.
 
+### `@tc/testing`
+
+- `E2EApi` — supertest wrapper with fixture loading, email capture, and response redaction
+- `EmailCapture` — poll captured emails written by `EMAIL_PROVIDER=capture`
+- `RequestFixtureLoader` — optional helper to load JSON request bodies from disk when useful
+- `SnapshotRedactor` — redact dynamic fields before snapshot assertions
+- **Use for app e2e suites** under `apps/<app>/__tests__/e2e/`
+- **Formatting:** see `.cursor/rules/e2e-test-format.mdc`
+
 ## Dependency Direction
 
 ```
@@ -153,16 +167,16 @@ Libraries must not import from apps. Avoid circular deps between libraries. `@tc
 
 ## Current Projects
 
-| Project            | Type | Purpose                           |
-| ------------------ | ---- | --------------------------------- |
-| `auth-service`     | app  | Auth REST API (`/api/v1/auth/*`)  |
-| `auth-service-e2e` | e2e  | End-to-end tests for auth-service |
-| `auth`             | lib  | Better Auth integration           |
-| `core`             | lib  | Bootstrap & Swagger               |
-| `config`           | lib  | Environment & config              |
-| `database`         | lib  | TypeORM & migrations              |
-| `utils`            | lib  | Shared utilities                  |
-| `common`           | lib  | Shared types (minimal)            |
+| Project        | Type | Purpose                          |
+| -------------- | ---- | -------------------------------- |
+| `auth-service` | app  | Auth REST API (`/api/v1/auth/*`) |
+| `auth`         | lib  | Better Auth integration          |
+| `core`         | lib  | Bootstrap & Swagger              |
+| `config`       | lib  | Environment & config             |
+| `database`     | lib  | TypeORM & migrations             |
+| `testing`      | lib  | Shared e2e testing utilities     |
+| `utils`        | lib  | Shared utilities                 |
+| `common`       | lib  | Shared types (minimal)           |
 
 ## Application Patterns
 
@@ -188,6 +202,22 @@ async function bootstrap() {
 bootstrap();
 ```
 
+### App Jest config
+
+Shared factories live in `jest/`. New apps only need thin wrappers — no per-project SWC/Jest boilerplate. SWC config falls back to `jest/.spec.swcrc` when the app has no local `.spec.swcrc`.
+
+```javascript
+// apps/my-service/jest.config.cts
+const { createAppUnitJestConfig } = require('../../jest/create-app-unit-config.cjs');
+module.exports = createAppUnitJestConfig('my-service', __dirname);
+
+// apps/my-service/jest.e2e.config.cts
+const { createAppE2eJestConfig } = require('../../jest/create-app-e2e-config.cjs');
+module.exports = createAppE2eJestConfig('my-service', __dirname);
+```
+
+Wire the e2e target in `project.json` to `jest.e2e.config.cts` and follow `__tests__/e2e/support/` conventions (see `.cursor/rules/e2e-test-format.mdc`).
+
 ### Controllers
 
 - Use `@ApiTags()` on the controller class
@@ -209,7 +239,7 @@ bootstrap();
 4. **Minimize scope** — smallest correct diff; don't refactor unrelated code
 5. **Match existing patterns** — read surrounding files before writing; reuse existing abstractions
 6. **Comments** — only for non-obvious logic; code should be self-explanatory
-7. **Tests** — add only when they cover meaningful behavior; Jest for apps, Vitest for `auth` lib adapter tests
+7. **Tests** — add only when they cover meaningful behavior; Jest for apps, Vitest for `auth` lib adapter tests. **App tests live in `apps/<app>/__tests__/`** (unit specs at the root, e2e suites in `__tests__/e2e/`). Configure Jest `roots` to `__tests__` and ignore the e2e subdirectory from the unit `test` target. **E2e suite style:** follow `.cursor/rules/e2e-test-format.mdc` (reference: `apps/auth-service/__tests__/e2e/auth-password.e2e.spec.ts`) — one statement per line inside `it`, no blank lines within a test, inline request bodies.
 8. **No secrets in code** — env vars via `@tc/config`; never commit `.env`
 9. **Module boundaries** — ESLint `@nx/enforce-module-boundaries` is enabled; respect project tags
 
@@ -235,7 +265,8 @@ bun nx serve auth-service                     # Run auth service
 
 # Build & test
 bun nx run-many -t build                      # Build all
-bun nx run-many -t test                       # Test all
+bun nx run-many -t test                       # Unit tests
+bun nx run auth-service:e2e                   # Auth service e2e (requires Postgres)
 bun nx affected -t lint test build            # Only changed projects
 
 # Database

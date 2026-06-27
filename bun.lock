@@ -88,6 +88,7 @@
         "@tc/auth": "workspace:*",
         "@tc/config": "workspace:*",
         "@tc/core": "workspace:*",
+        "@tc/testing": "workspace:*",
         "@tc/utils": "workspace:*",
         "better-auth": "^1.6.20",
         "class-transformer": "^0.5.1",
@@ -99,6 +100,7 @@
       "devDependencies": {
         "@nestjs/testing": "^11.0.0",
         "@types/express": "^5.0.6",
+        "@types/supertest": "^7.2.0",
       },
     },
     "library/auth": {
@@ -170,7 +172,6 @@
       "devDependencies": {
         "@types/express": "^5.0.6",
         "@types/jest": "^30.0.0",
-        "@types/lodash": "^4.17.24",
         "@types/supertest": "^7.2.0",
       },
     },

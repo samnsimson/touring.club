@@ -59,7 +59,24 @@
                 },
                 "production": {
                     "buildTarget": "auth-service:build:production"
+                },
+                "e2e": {
+                    "buildTarget": "auth-service:build:development"
                 }
+            }
+        },
+        "e2e": {
+            "executor": "@nx/jest:jest",
+            "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+            "dependsOn": [
+                {
+                    "target": "serve",
+                    "params": "forward"
+                }
+            ],
+            "options": {
+                "jestConfig": "apps/auth-service/jest.e2e.config.cts",
+                "passWithNoTests": false
             }
         },
         "test": {

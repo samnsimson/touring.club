@@ -6,6 +6,8 @@ export type E2ERequestTarget = string | Server | Application;
 export interface E2EApiOptions {
     server: E2ERequestTarget;
     headers?: Record<string, string>;
+    fixturesDir?: string;
+    emailCaptureDir?: string;
 }
 
 export interface RequestFixtureLoaderOptions {
