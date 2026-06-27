@@ -1,0 +1,34 @@
+jenkins:
+    systemMessage: Touring Club CI/CD
+    numExecutors: 2
+    mode: NORMAL
+    securityRealm:
+        local:
+            allowsSignup: false
+            users:
+                - id: admin
+                  password: ${JENKINS_ADMIN_PASSWORD}
+    authorizationStrategy:
+        loggedInUsersCanDoAnything:
+            allowAnonymousRead: false
+
+credentials:
+    system:
+        domainCredentials:
+            - credentials:
+                  - string:
+                        scope: GLOBAL
+                        id: touring-club-better-auth-secret
+                        secret: ${BETTER_AUTH_SECRET}
+                        description: Better Auth signing secret for CI builds
+                  - string:
+                        scope: GLOBAL
+                        id: touring-club-database-url
+                        secret: ${JENKINS_DATABASE_URL}
+                        description: PostgreSQL connection string for CI builds
+
+unclassified:
+    location:
+        url: ${JENKINS_URL}
+    timestamper:
+        allPipelines: true
