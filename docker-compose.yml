@@ -38,7 +38,8 @@ services:
                 -Djava.awt.headless=true
             JENKINS_ADMIN_PASSWORD: ${JENKINS_ADMIN_PASSWORD:-admin}
             JENKINS_URL: ${JENKINS_URL:-http://localhost:8080/}
-            GIT_REPOSITORY_URL: ${GIT_REPOSITORY_URL:-}
+            GITHUB_USERNAME: ${GITHUB_USERNAME:-samnsimson}
+            GITHUB_TOKEN: ${GITHUB_TOKEN:-}
             BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-local-dev-better-auth-secret-32chars}
             JENKINS_DATABASE_URL: postgresql://postgres:postgres@postgres:5432/touring_club
         volumes:

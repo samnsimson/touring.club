@@ -3,7 +3,16 @@ FROM jenkins/jenkins:lts-jdk21
 USER root
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends git curl ca-certificates unzip \
+    && apt-get install -y --no-install-recommends \
+        git \
+        curl \
+        ca-certificates \
+        unzip \
+        build-essential \
+        python3 \
+    && curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
+    && apt-get install -y --no-install-recommends nodejs \
+    && npm install -g node-gyp \
     && rm -rf /var/lib/apt/lists/*
 
 ENV BUN_INSTALL=/opt/bun

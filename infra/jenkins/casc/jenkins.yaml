@@ -16,6 +16,12 @@ credentials:
     system:
         domainCredentials:
             - credentials:
+                  - usernamePassword:
+                        scope: GLOBAL
+                        id: github-pat
+                        username: ${GITHUB_USERNAME}
+                        password: ${GITHUB_TOKEN}
+                        description: GitHub PAT for git clone and API (branch discovery)
                   - string:
                         scope: GLOBAL
                         id: touring-club-better-auth-secret
@@ -32,3 +38,5 @@ unclassified:
         url: ${JENKINS_URL}
     timestamper:
         allPipelines: true
+    gitHubConfiguration:
+        apiRateLimitChecker: ThrottleOnOver
