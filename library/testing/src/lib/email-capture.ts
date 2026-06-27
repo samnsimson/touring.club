@@ -26,7 +26,6 @@ export class EmailCapture {
 
     clear(): void {
         fs.mkdirSync(this.captureDir, { recursive: true });
-
         for (const entry of fs.readdirSync(this.captureDir)) {
             if (entry.endsWith('.json')) {
                 fs.unlinkSync(path.join(this.captureDir, entry));
@@ -36,7 +35,6 @@ export class EmailCapture {
 
     readAll(): CapturedEmail[] {
         if (!fs.existsSync(this.captureDir)) return [];
-
         return fs
             .readdirSync(this.captureDir)
             .filter((entry) => entry.endsWith('.json'))
@@ -55,13 +53,11 @@ export class EmailCapture {
     async waitFor(options: WaitForEmailOptions): Promise<CapturedEmail> {
         const timeoutMs = options.timeoutMs ?? this.pollTimeoutMs;
         const startedAt = Date.now();
-
         while (Date.now() - startedAt < timeoutMs) {
             const email = this.find(options);
             if (email) return email;
             await new Promise((resolve) => setTimeout(resolve, this.pollIntervalMs));
         }
-
         throw new Error(`Timed out waiting for captured email (${JSON.stringify(options)})`);
     }
 

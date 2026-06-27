@@ -4,7 +4,6 @@ import type { RequestFixtureLoaderOptions } from './testing.contracts';
 
 export class RequestFixtureLoader {
     static readonly defaultFixturesDir = 'fixtures/requests';
-
     private readonly fixturesDir: string;
 
     constructor(options: RequestFixtureLoaderOptions = {}) {
@@ -13,11 +12,7 @@ export class RequestFixtureLoader {
 
     load<T>(name: string): T {
         const fixturePath = path.resolve(process.cwd(), this.fixturesDir, `${name}.request.json`);
-
-        if (!fs.existsSync(fixturePath)) {
-            throw new Error(`Request fixture "${name}" not found at ${fixturePath}`);
-        }
-
+        if (!fs.existsSync(fixturePath)) throw new Error(`Request fixture "${name}" not found at ${fixturePath}`);
         return JSON.parse(fs.readFileSync(fixturePath, 'utf8')) as T;
     }
 }
