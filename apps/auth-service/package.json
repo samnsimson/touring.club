@@ -13,6 +13,7 @@
         "@tc/auth": "workspace:*",
         "@tc/core": "workspace:*",
         "@tc/config": "workspace:*",
+        "@tc/utils": "workspace:*",
         "better-auth": "^1.6.20",
         "class-transformer": "^0.5.1",
         "class-validator": "^0.15.1"

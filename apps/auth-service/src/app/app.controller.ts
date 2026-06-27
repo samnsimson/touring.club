@@ -1,9 +1,10 @@
-import { Body, Controller, HttpCode, HttpStatus, Post, Res } from '@nestjs/common';
-import { ApiBadRequestResponse, ApiConflictResponse, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
-import { AuthErrorResponseDto, SignInDto, SignInResponseDto, SignUpDto, SignUpResponseDto, VerifyEmailDto, VerifyEmailResponseDto } from './dto';
+import { Body, Controller, HttpStatus, Post, Res } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
+import { SignInDto, SignInResponseDto, SignUpDto, SignUpResponseDto, VerifyEmailDto, VerifyEmailResponseDto } from './dto';
 import { AllowAnonymous } from '@thallesp/nestjs-better-auth';
 import { AppService } from './app.service';
 import type { Response } from 'express';
+import { ApiResource, ApiResourceExceptions } from '@tc/utils';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -12,11 +13,8 @@ export class AppController {
 
     @Post('sign-up')
     @AllowAnonymous()
-    @HttpCode(HttpStatus.CREATED)
-    @ApiOperation({ operationId: 'signUp', summary: 'Register a new user with email and password' })
-    @ApiCreatedResponse({ type: SignUpResponseDto, description: 'User created; verification OTP sent when required' })
-    @ApiBadRequestResponse({ type: AuthErrorResponseDto })
-    @ApiConflictResponse({ type: AuthErrorResponseDto, description: 'Email or username already in use' })
+    @ApiResource({ type: SignUpResponseDto, operationId: 'signUp', status: HttpStatus.CREATED })
+    @ApiResourceExceptions(HttpStatus.BAD_REQUEST, HttpStatus.CONFLICT)
     async signUp(@Body() dto: SignUpDto, @Res({ passthrough: true }) res: Response) {
         const response = await this.appService.signUp(dto);
         const isTokensInResponse = 'sessionToken' in response && 'accessToken' in response;
@@ -26,11 +24,8 @@ export class AppController {
 
     @Post('sign-in')
     @AllowAnonymous()
-    @HttpCode(HttpStatus.OK)
-    @ApiOperation({ operationId: 'signIn', summary: 'Sign in with email and password' })
-    @ApiOkResponse({ type: SignInResponseDto })
-    @ApiBadRequestResponse({ type: AuthErrorResponseDto })
-    @ApiUnauthorizedResponse({ type: AuthErrorResponseDto })
+    @ApiResource({ type: SignInResponseDto, operationId: 'signIn', status: HttpStatus.OK })
+    @ApiResourceExceptions(HttpStatus.BAD_REQUEST, HttpStatus.UNAUTHORIZED)
     async signIn(@Body() dto: SignInDto, @Res({ passthrough: true }) res: Response) {
         const response = await this.appService.signIn(dto);
         await this.appService.setAuthCookies(res, response.accessToken, response.sessionToken);
@@ -39,10 +34,8 @@ export class AppController {
 
     @Post('verify-email')
     @AllowAnonymous()
-    @HttpCode(HttpStatus.OK)
-    @ApiOperation({ operationId: 'verifyEmail', summary: 'Verify email address using a one-time password' })
-    @ApiOkResponse({ type: VerifyEmailResponseDto })
-    @ApiBadRequestResponse({ type: AuthErrorResponseDto, description: 'Invalid or expired OTP' })
+    @ApiResource({ type: VerifyEmailResponseDto, operationId: 'verifyEmail', status: HttpStatus.OK })
+    @ApiResourceExceptions(HttpStatus.BAD_REQUEST)
     async verifyEmail(@Body() dto: VerifyEmailDto, @Res({ passthrough: true }) res: Response) {
         const response = await this.appService.verifyEmail(dto);
         await this.appService.setAuthCookies(res, response.accessToken, response.sessionToken);
