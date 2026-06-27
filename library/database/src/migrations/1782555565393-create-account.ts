@@ -1,11 +1,11 @@
 import { type MigrationInterface, type QueryRunner, Table, TableForeignKey, TableIndex } from 'typeorm';
 
-export class CreateSession1782555064316 implements MigrationInterface {
+export class CreateAccount1782555565393 implements MigrationInterface {
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.createTable(
             new Table({
                 schema: 'auth',
-                name: 'session',
+                name: 'account',
                 columns: [
                     {
                         name: 'id',
@@ -13,13 +13,51 @@ export class CreateSession1782555064316 implements MigrationInterface {
                         isPrimary: true,
                     },
                     {
-                        name: 'expires_at',
-                        type: 'timestamptz',
+                        name: 'account_id',
+                        type: 'text',
                     },
                     {
-                        name: 'token',
+                        name: 'provider_id',
                         type: 'text',
-                        isUnique: true,
+                    },
+                    {
+                        name: 'user_id',
+                        type: 'text',
+                    },
+                    {
+                        name: 'access_token',
+                        type: 'text',
+                        isNullable: true,
+                    },
+                    {
+                        name: 'refresh_token',
+                        type: 'text',
+                        isNullable: true,
+                    },
+                    {
+                        name: 'id_token',
+                        type: 'text',
+                        isNullable: true,
+                    },
+                    {
+                        name: 'access_token_expires_at',
+                        type: 'timestamptz',
+                        isNullable: true,
+                    },
+                    {
+                        name: 'refresh_token_expires_at',
+                        type: 'timestamptz',
+                        isNullable: true,
+                    },
+                    {
+                        name: 'scope',
+                        type: 'text',
+                        isNullable: true,
+                    },
+                    {
+                        name: 'password',
+                        type: 'text',
+                        isNullable: true,
                     },
                     {
                         name: 'created_at',
@@ -30,39 +68,22 @@ export class CreateSession1782555064316 implements MigrationInterface {
                         name: 'updated_at',
                         type: 'timestamptz',
                     },
-                    {
-                        name: 'ip_address',
-                        type: 'text',
-                        isNullable: true,
-                    },
-                    {
-                        name: 'user_agent',
-                        type: 'text',
-                        isNullable: true,
-                    },
-                    {
-                        name: 'user_id',
-                        type: 'text',
-                    },
-                    {
-                        name: 'impersonated_by',
-                        type: 'text',
-                        isNullable: true,
-                    },
                 ],
             }),
         );
 
+        const accountTable = new Table({ schema: 'auth', name: 'account' });
+
         await queryRunner.createIndex(
-            'session',
+            accountTable,
             new TableIndex({
-                name: 'session_user_id_idx',
+                name: 'account_user_id_idx',
                 columnNames: ['user_id'],
             }),
         );
 
         await queryRunner.createForeignKey(
-            'session',
+            accountTable,
             new TableForeignKey({
                 columnNames: ['user_id'],
                 referencedTableName: 'user',
@@ -74,6 +95,6 @@ export class CreateSession1782555064316 implements MigrationInterface {
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.dropTable(new Table({ schema: 'auth', name: 'session' }));
+        await queryRunner.dropTable(new Table({ schema: 'auth', name: 'account' }));
     }
 }

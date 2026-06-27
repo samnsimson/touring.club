@@ -17,11 +17,10 @@ export class DatabaseUtils {
             synchronize: false,
             logging: env !== 'production',
             namingStrategy: new SnakeNamingStrategy(),
+            migrations: [join(process.cwd(), 'library/database/src/migrations/*.{ts,js}')],
             ...(schema ? { schema } : {}),
             ...(loadEntities && {
                 entities: [join(process.cwd(), 'library/database/src/entities/**/*.{ts,js}')],
-                migrations: [join(process.cwd(), 'library/database/src/migrations/*.{ts,js}')],
-                migrationsRun: env === 'development',
             }),
         };
     }

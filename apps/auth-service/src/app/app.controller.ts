@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpStatus, Patch, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Patch, Post, Req, Res } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import {
     ChangePasswordDto,
@@ -22,7 +22,6 @@ import { AllowAnonymous } from '@thallesp/nestjs-better-auth';
 import { AppService } from './app.service';
 import type { Request, Response } from 'express';
 import { ApiResource, ApiResourceExceptions } from '@tc/utils';
-import { AuthGuard } from '@tc/auth';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -30,7 +29,6 @@ export class AppController {
     constructor(private readonly appService: AppService) {}
 
     @Get('me')
-    @UseGuards(AuthGuard)
     @ApiResource({ type: GetMeResponseDto, operationId: 'getMe', status: HttpStatus.OK })
     @ApiResourceExceptions(HttpStatus.UNAUTHORIZED)
     async getMe(@Req() req: Request) {
@@ -38,7 +36,6 @@ export class AppController {
     }
 
     @Patch('me')
-    @UseGuards(AuthGuard)
     @ApiResource({ type: UpdateProfileResponseDto, operationId: 'updateProfile', status: HttpStatus.OK })
     @ApiResourceExceptions(HttpStatus.BAD_REQUEST, HttpStatus.UNAUTHORIZED)
     async updateProfile(@Req() req: Request, @Body() dto: UpdateProfileDto) {
@@ -46,7 +43,6 @@ export class AppController {
     }
 
     @Post('change-password')
-    @UseGuards(AuthGuard)
     @ApiResource({ type: ChangePasswordResponseDto, operationId: 'changePassword', status: HttpStatus.OK })
     @ApiResourceExceptions(HttpStatus.BAD_REQUEST, HttpStatus.UNAUTHORIZED)
     async changePassword(@Req() req: Request, @Body() dto: ChangePasswordDto) {
@@ -66,8 +62,9 @@ export class AppController {
     @ApiResourceExceptions(HttpStatus.BAD_REQUEST, HttpStatus.CONFLICT)
     async signUp(@Body() dto: SignUpDto, @Res({ passthrough: true }) res: Response) {
         const response = await this.appService.signUp(dto);
-        const isTokensInResponse = 'sessionToken' in response && 'accessToken' in response;
-        if (isTokensInResponse) await this.appService.setAuthCookies(res, response.accessToken, response.sessionToken);
+        if (response.sessionToken && response.accessToken) {
+            await this.appService.setAuthCookies(res, response.accessToken, response.sessionToken);
+        }
         return response;
     }
 

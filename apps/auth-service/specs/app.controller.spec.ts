@@ -6,11 +6,30 @@ import { AppService } from '../src/app/app.service';
 
 jest.mock('@tc/auth', () => ({
     auth: { api: {} },
+    AuthGuard: class AuthGuard {},
+}));
+
+jest.mock('@thallesp/nestjs-better-auth', () => ({
+    AllowAnonymous: () => () => undefined,
 }));
 
 describe('AppController', () => {
     let controller: AppController;
-    let appService: jest.Mocked<Pick<AppService, 'signUp' | 'signIn' | 'verifyEmail' | 'setAuthCookies' | 'getMe' | 'signOut'>>;
+    let appService: jest.Mocked<
+        Pick<
+            AppService,
+            | 'signUp'
+            | 'signIn'
+            | 'verifyEmail'
+            | 'setAuthCookies'
+            | 'getMe'
+            | 'signOut'
+            | 'forgotPassword'
+            | 'resetPassword'
+            | 'changePassword'
+            | 'updateProfile'
+        >
+    >;
 
     beforeAll(async () => {
         appService = {
@@ -20,6 +39,10 @@ describe('AppController', () => {
             setAuthCookies: jest.fn(),
             getMe: jest.fn(),
             signOut: jest.fn(),
+            forgotPassword: jest.fn(),
+            resetPassword: jest.fn(),
+            changePassword: jest.fn(),
+            updateProfile: jest.fn(),
         };
 
         const app: TestingModule = await Test.createTestingModule({

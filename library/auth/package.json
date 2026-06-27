@@ -16,14 +16,15 @@
         }
     },
     "dependencies": {
+        "@hedystia/better-auth-typeorm": "^1.0.1",
         "@nestjs/common": "^11.0.0",
         "@tc/config": "workspace:*",
         "@tc/utils": "workspace:*",
+        "@thallesp/nestjs-better-auth": "^2.6.1",
         "better-auth": "^1.6.20",
         "express": "^5.2.1",
         "jose": "^6.2.3",
-        "vitest": "^4.1.9",
-        "@hedystia/better-auth-typeorm": "^1.0.1"
+        "vitest": "^4.1.9"
     },
     "devDependencies": {
         "@types/express": "^5.0.6"

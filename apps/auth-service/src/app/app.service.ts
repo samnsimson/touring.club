@@ -31,6 +31,9 @@ export class AppService {
     }
 
     async getMe(request: Request) {
+        if (!AuthHeaders.getSessionToken(request) && !AuthHeaders.getAccessToken(request)) {
+            throw new UnauthorizedException('Not authenticated');
+        }
         const session = await this.authService.api.getSession({ headers: AuthHeaders.fromRequest(request) });
         if (!session?.user) throw new UnauthorizedException('Not authenticated');
         return session.user;
@@ -69,7 +72,7 @@ export class AppService {
 
     async forgotPassword(dto: ForgotPasswordDto) {
         try {
-            await this.authService.api.requestPasswordReset({ body: dto });
+            await this.authService.api.requestPasswordReset({ body: { ...dto } });
         } catch (error) {
             this.logger.warn(`Forgot password request failed: ${String(error)}`);
         }
@@ -77,23 +80,26 @@ export class AppService {
     }
 
     async resetPassword(dto: ResetPasswordDto) {
-        await this.authService.api.resetPassword({ body: dto });
+        await this.authService.api.resetPassword({ body: { ...dto } });
         return { success: true };
     }
 
     async changePassword(request: Request, dto: ChangePasswordDto) {
+        if (!AuthHeaders.getSessionToken(request)) throw new UnauthorizedException('Not authenticated');
         await this.authService.api.changePassword({
-            body: dto,
+            body: { ...dto },
             headers: AuthHeaders.fromRequest(request),
         });
         return { success: true };
     }
 
     async updateProfile(request: Request, dto: UpdateProfileDto) {
-        const response = await this.authService.api.updateUser({
-            body: dto,
+        if (!AuthHeaders.getSessionToken(request)) throw new UnauthorizedException('Not authenticated');
+        await this.authService.api.updateUser({
+            body: { ...dto },
             headers: AuthHeaders.fromRequest(request),
         });
-        return { user: response.user };
+        const user = await this.getMe(request);
+        return { user };
     }
 }

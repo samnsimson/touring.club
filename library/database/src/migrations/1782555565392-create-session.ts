@@ -1,6 +1,6 @@
 import { type MigrationInterface, type QueryRunner, Table, TableForeignKey, TableIndex } from 'typeorm';
 
-export class CreateSession1782555565391 implements MigrationInterface {
+export class CreateSession1782555565392 implements MigrationInterface {
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.createTable(
             new Table({
@@ -53,8 +53,10 @@ export class CreateSession1782555565391 implements MigrationInterface {
             }),
         );
 
+        const sessionTable = new Table({ schema: 'auth', name: 'session' });
+
         await queryRunner.createIndex(
-            'session',
+            sessionTable,
             new TableIndex({
                 name: 'session_user_id_idx',
                 columnNames: ['user_id'],
@@ -62,7 +64,7 @@ export class CreateSession1782555565391 implements MigrationInterface {
         );
 
         await queryRunner.createForeignKey(
-            'session',
+            sessionTable,
             new TableForeignKey({
                 columnNames: ['user_id'],
                 referencedTableName: 'user',

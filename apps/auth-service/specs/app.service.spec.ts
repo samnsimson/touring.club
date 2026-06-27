@@ -1,6 +1,7 @@
 import { UnauthorizedException } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
-import { auth, AuthHeaders } from '@tc/auth';
+import { AuthService } from '@thallesp/nestjs-better-auth';
+import { AuthHeaders } from '@tc/auth';
 import type { Response } from 'express';
 import { AppService } from '../src/app/app.service';
 
@@ -11,22 +12,23 @@ type AuthApiMock = {
     getToken: jest.Mock;
     getSession: jest.Mock;
     signOut: jest.Mock;
+    requestPasswordReset: jest.Mock;
+    resetPassword: jest.Mock;
+    changePassword: jest.Mock;
+    updateUser: jest.Mock;
 };
 
+jest.mock('@thallesp/nestjs-better-auth', () => ({
+    AuthService: class AuthService {},
+    AllowAnonymous: () => () => undefined,
+}));
+
 jest.mock('@tc/auth', () => ({
-    auth: {
-        api: {
-            signUpEmail: jest.fn(),
-            signInEmail: jest.fn(),
-            verifyEmailOTP: jest.fn(),
-            getToken: jest.fn(),
-            getSession: jest.fn(),
-            signOut: jest.fn(),
-        },
-    },
+    auth: {},
     AuthHeaders: {
         fromRequest: jest.fn(() => new Headers()),
         getSessionToken: jest.fn(),
+        getAccessToken: jest.fn(),
     },
     AUTH_ACCESS_TOKEN_COOKIE: 'access-token',
     AUTH_REFRESH_TOKEN_COOKIE: 'refresh-token',
@@ -39,16 +41,31 @@ const createMockResponse = (): jest.Mocked<Pick<Response, 'cookie' | 'clearCooki
 
 describe('AppService', () => {
     let service: AppService;
-    const authApi = auth.api as unknown as AuthApiMock;
+    const authApi: AuthApiMock = {
+        signUpEmail: jest.fn(),
+        signInEmail: jest.fn(),
+        verifyEmailOTP: jest.fn(),
+        getToken: jest.fn(),
+        getSession: jest.fn(),
+        signOut: jest.fn(),
+        requestPasswordReset: jest.fn(),
+        resetPassword: jest.fn(),
+        changePassword: jest.fn(),
+        updateUser: jest.fn(),
+    };
 
     beforeAll(async () => {
-        const app = await Test.createTestingModule({ providers: [AppService] }).compile();
+        const app = await Test.createTestingModule({
+            providers: [AppService, { provide: AuthService, useValue: { api: authApi } }],
+        }).compile();
         service = app.get<AppService>(AppService);
     });
 
     beforeEach(() => {
         jest.clearAllMocks();
         authApi.getToken.mockResolvedValue({ token: 'jwt-access-token' });
+        (AuthHeaders.getSessionToken as jest.Mock).mockReturnValue(undefined);
+        (AuthHeaders.getAccessToken as jest.Mock).mockReturnValue(undefined);
     });
 
     describe('setAuthCookies', () => {
@@ -82,13 +99,20 @@ describe('AppService', () => {
     describe('getMe', () => {
         it('returns the authenticated user', async () => {
             const user = { id: '1', email: 'jane@example.com', name: 'Jane Doe' };
+            (AuthHeaders.getSessionToken as jest.Mock).mockReturnValue('session-token');
             authApi.getSession.mockResolvedValue({ user });
             await expect(service.getMe({ headers: {}, cookies: {} } as never)).resolves.toEqual(user);
         });
 
         it('throws when no session exists', async () => {
+            (AuthHeaders.getSessionToken as jest.Mock).mockReturnValue('session-token');
             authApi.getSession.mockResolvedValue(null);
             await expect(service.getMe({ headers: {}, cookies: {} } as never)).rejects.toBeInstanceOf(UnauthorizedException);
+        });
+
+        it('throws when no auth token is present', async () => {
+            await expect(service.getMe({ headers: {}, cookies: {} } as never)).rejects.toBeInstanceOf(UnauthorizedException);
+            expect(authApi.getSession).not.toHaveBeenCalled();
         });
     });
 
@@ -157,6 +181,40 @@ describe('AppService', () => {
         it('throws when verification does not return a session token', async () => {
             authApi.verifyEmailOTP.mockResolvedValue({ token: null, user });
             await expect(service.verifyEmail(dto)).rejects.toBeInstanceOf(UnauthorizedException);
+        });
+    });
+
+    describe('forgotPassword', () => {
+        it('always returns success', async () => {
+            authApi.requestPasswordReset.mockRejectedValue(new Error('user not found'));
+            await expect(service.forgotPassword({ email: 'missing@example.com' })).resolves.toEqual({ success: true });
+        });
+    });
+
+    describe('resetPassword', () => {
+        it('delegates to Better Auth', async () => {
+            authApi.resetPassword.mockResolvedValue(undefined);
+            await expect(service.resetPassword({ token: 'token', newPassword: 'NewPass123!' })).resolves.toEqual({ success: true });
+        });
+    });
+
+    describe('changePassword', () => {
+        it('delegates to Better Auth with session headers', async () => {
+            authApi.changePassword.mockResolvedValue(undefined);
+            (AuthHeaders.getSessionToken as jest.Mock).mockReturnValue('session-token');
+            const req = { headers: {}, cookies: {} } as never;
+            await expect(service.changePassword(req, { currentPassword: 'old', newPassword: 'new12345' })).resolves.toEqual({ success: true });
+            expect(authApi.changePassword).toHaveBeenCalled();
+        });
+    });
+
+    describe('updateProfile', () => {
+        it('returns the updated user', async () => {
+            const user = { id: '1', email: 'jane@example.com', name: 'Updated' };
+            authApi.updateUser.mockResolvedValue({ status: true });
+            authApi.getSession.mockResolvedValue({ user });
+            (AuthHeaders.getSessionToken as jest.Mock).mockReturnValue('session-token');
+            await expect(service.updateProfile({ headers: {}, cookies: {} } as never, { name: 'Updated' })).resolves.toEqual({ user });
         });
     });
 });

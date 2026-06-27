@@ -1,6 +1,6 @@
 import { type MigrationInterface, type QueryRunner, Table, TableIndex } from 'typeorm';
 
-export class CreateVerification1782555565391 implements MigrationInterface {
+export class CreateVerification1782555565394 implements MigrationInterface {
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.createTable(
             new Table({
@@ -39,7 +39,7 @@ export class CreateVerification1782555565391 implements MigrationInterface {
         );
 
         await queryRunner.createIndex(
-            'verification',
+            new Table({ schema: 'auth', name: 'verification' }),
             new TableIndex({
                 name: 'verification_identifier_idx',
                 columnNames: ['identifier'],
