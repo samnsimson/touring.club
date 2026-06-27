@@ -1,6 +1,8 @@
-import { Body, Controller, Get, HttpStatus, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Patch, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import {
+    ChangePasswordDto,
+    ChangePasswordResponseDto,
     ForgotPasswordDto,
     ForgotPasswordResponseDto,
     GetMeResponseDto,
@@ -11,6 +13,8 @@ import {
     SignOutResponseDto,
     SignUpDto,
     SignUpResponseDto,
+    UpdateProfileDto,
+    UpdateProfileResponseDto,
     VerifyEmailDto,
     VerifyEmailResponseDto,
 } from './dto';
@@ -31,6 +35,22 @@ export class AppController {
     @ApiResourceExceptions(HttpStatus.UNAUTHORIZED)
     async getMe(@Req() req: Request) {
         return this.appService.getMe(req);
+    }
+
+    @Patch('me')
+    @UseGuards(AuthGuard)
+    @ApiResource({ type: UpdateProfileResponseDto, operationId: 'updateProfile', status: HttpStatus.OK })
+    @ApiResourceExceptions(HttpStatus.BAD_REQUEST, HttpStatus.UNAUTHORIZED)
+    async updateProfile(@Req() req: Request, @Body() dto: UpdateProfileDto) {
+        return this.appService.updateProfile(req, dto);
+    }
+
+    @Post('change-password')
+    @UseGuards(AuthGuard)
+    @ApiResource({ type: ChangePasswordResponseDto, operationId: 'changePassword', status: HttpStatus.OK })
+    @ApiResourceExceptions(HttpStatus.BAD_REQUEST, HttpStatus.UNAUTHORIZED)
+    async changePassword(@Req() req: Request, @Body() dto: ChangePasswordDto) {
+        return this.appService.changePassword(req, dto);
     }
 
     @Post('sign-out')

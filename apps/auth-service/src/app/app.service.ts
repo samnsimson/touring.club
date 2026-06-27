@@ -1,6 +1,6 @@
 import { auth, AuthHeaders, AUTH_ACCESS_TOKEN_COOKIE, AUTH_REFRESH_TOKEN_COOKIE } from '@tc/auth';
 import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
-import { SignInDto, SignUpDto, VerifyEmailDto, ForgotPasswordDto, ResetPasswordDto } from './dto';
+import { SignInDto, SignUpDto, VerifyEmailDto, ForgotPasswordDto, ResetPasswordDto, ChangePasswordDto, UpdateProfileDto } from './dto';
 import { AuthUtils } from './auth.utils';
 import { CookieOptions, Request, Response } from 'express';
 import { AuthService } from '@thallesp/nestjs-better-auth';
@@ -79,5 +79,21 @@ export class AppService {
     async resetPassword(dto: ResetPasswordDto) {
         await this.authService.api.resetPassword({ body: dto });
         return { success: true };
+    }
+
+    async changePassword(request: Request, dto: ChangePasswordDto) {
+        await this.authService.api.changePassword({
+            body: dto,
+            headers: AuthHeaders.fromRequest(request),
+        });
+        return { success: true };
+    }
+
+    async updateProfile(request: Request, dto: UpdateProfileDto) {
+        const response = await this.authService.api.updateUser({
+            body: dto,
+            headers: AuthHeaders.fromRequest(request),
+        });
+        return { user: response.user };
     }
 }
