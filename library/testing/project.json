@@ -1,0 +1,28 @@
+{
+    "name": "testing",
+    "$schema": "../../node_modules/nx/schemas/project-schema.json",
+    "sourceRoot": "library/testing/src",
+    "projectType": "library",
+    "tags": ["testing", "shared"],
+    "targets": {
+        "build": {
+            "executor": "@nx/esbuild:esbuild",
+            "outputs": ["{options.outputPath}"],
+            "options": {
+                "outputPath": "library/testing/dist",
+                "main": "library/testing/src/index.ts",
+                "tsConfig": "library/testing/tsconfig.lib.json",
+                "format": ["esm"],
+                "declarationRootDir": "library/testing/src"
+            }
+        },
+        "test": {
+            "executor": "@nx/jest:jest",
+            "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+            "options": {
+                "jestConfig": "library/testing/jest.config.cts",
+                "passWithNoTests": true
+            }
+        }
+    }
+}

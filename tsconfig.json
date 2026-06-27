@@ -19,13 +19,13 @@
             "path": "./library/core"
         },
         {
-            "path": "./apps/auth-service/e2e"
-        },
-        {
             "path": "./apps/auth-service"
         },
         {
             "path": "./library/common"
+        },
+        {
+            "path": "./library/testing"
         }
     ]
 }

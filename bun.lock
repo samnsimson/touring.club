@@ -158,6 +158,13 @@
         "typeorm": "^1.0.0",
       },
     },
+    "library/testing": {
+      "name": "@tc/testing",
+      "version": "0.0.1",
+      "devDependencies": {
+        "@types/jest": "^30.0.0",
+      },
+    },
     "library/utils": {
       "name": "@tc/utils",
       "version": "0.0.1",
@@ -825,6 +832,8 @@
     "@tc/core": ["@tc/core@workspace:library/core"],
 
     "@tc/database": ["@tc/database@workspace:library/database"],
+
+    "@tc/testing": ["@tc/testing@workspace:library/testing"],
 
     "@tc/utils": ["@tc/utils@workspace:library/utils"],
 

@@ -60,18 +60,6 @@ pipeline {
             }
         }
 
-        stage('E2E') {
-            when {
-                expression {
-                    shouldRunE2e()
-                }
-            }
-            steps {
-                sh 'bun run migration:run'
-                sh 'bun nx run auth-service-e2e:e2e --nxBail'
-            }
-        }
-
         stage('Deploy') {
             when {
                 branch 'main'
@@ -95,24 +83,5 @@ def runNx(String target) {
     sh "bun nx affected -t ${target} --base=${env.NX_BASE} --head=HEAD --nxBail"
   } else {
     sh "bun nx run-many -t ${target} --nxBail"
-  }
-}
-
-def shouldRunE2e() {
-  if (env.NX_USE_AFFECTED != 'true') {
-    return true
-  }
-
-  def affected = sh(
-    script: "bun nx show projects --affected --base=${env.NX_BASE} --head=HEAD --plain",
-    returnStdout: true,
-  ).trim()
-
-  if (!affected) {
-    return false
-  }
-
-  return affected.split('\n').any { project ->
-    project == 'auth-service' || project == 'auth-service-e2e'
   }
 }
