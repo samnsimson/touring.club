@@ -1,13 +1,12 @@
-import { E2EApi } from '@tc/testing';
+import type { E2EApi } from '@tc/testing';
+import { getAuthE2EApi } from './create-e2e-app';
 
 export const AUTH_E2E_EMAIL_CAPTURE_DIR = process.env.EMAIL_CAPTURE_DIR ?? 'apps/auth-service/.tmp/e2e-email-capture';
 const AUTH_ACCESS_TOKEN_COOKIE = 'access-token';
 const AUTH_REFRESH_TOKEN_COOKIE = 'refresh-token';
 
 export function createAuthE2EApi(): E2EApi {
-    const host = process.env.HOST ?? 'localhost';
-    const port = process.env.AUTH_SERVICE_PORT ?? process.env.PORT ?? '3000';
-    return new E2EApi({ server: `http://${host}:${port}`, emailCaptureDir: AUTH_E2E_EMAIL_CAPTURE_DIR });
+    return getAuthE2EApi();
 }
 
 export function withAuthHeaders(api: E2EApi, accessToken: string, sessionToken: string): E2EApi {

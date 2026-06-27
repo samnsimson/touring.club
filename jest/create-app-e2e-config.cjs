@@ -1,4 +1,5 @@
 const { readSwcJestConfig } = require('./read-swc-config.cjs');
+const { createWorkspaceModuleNameMapper } = require('./create-workspace-module-name-mapper.cjs');
 
 /**
  * @param {string} displayName
@@ -8,6 +9,7 @@ const { readSwcJestConfig } = require('./read-swc-config.cjs');
 function createAppE2eJestConfig(displayName, projectRoot, options = {}) {
     const e2eRoot = options.e2eRoot ?? '__tests__/e2e';
     const supportDir = options.supportDir ?? `${e2eRoot}/support`;
+    const swcJestConfig = readSwcJestConfig(projectRoot);
 
     return {
         displayName: `${displayName}-e2e`,
@@ -16,11 +18,15 @@ function createAppE2eJestConfig(displayName, projectRoot, options = {}) {
         globalSetup: `<rootDir>/${supportDir}/global-setup.ts`,
         globalTeardown: `<rootDir>/${supportDir}/global-teardown.ts`,
         setupFiles: [`<rootDir>/${supportDir}/test-setup.ts`],
+        setupFilesAfterEnv: [`<rootDir>/${supportDir}/e2e-setup.ts`],
         testEnvironment: 'node',
+        moduleNameMapper: createWorkspaceModuleNameMapper(projectRoot),
         transform: {
-            '^.+\\.[tj]s$': ['@swc/jest', readSwcJestConfig(projectRoot)],
+            '^.+\\.[tj]s$': ['@swc/jest', swcJestConfig],
+            '^.+\\.mjs$': ['@swc/jest', { ...swcJestConfig, module: { type: 'commonjs' } }],
         },
-        moduleFileExtensions: ['ts', 'js', 'html'],
+        transformIgnorePatterns: ['<rootDir>/__jest_never_ignore__'],
+        moduleFileExtensions: ['ts', 'js', 'mjs', 'html'],
         coverageDirectory: 'test-output/jest/coverage',
         testTimeout: options.testTimeout ?? 30_000,
         maxWorkers: options.maxWorkers ?? 1,

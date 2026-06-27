@@ -1,7 +1,12 @@
+import type { E2EApi } from '@tc/testing';
 import { createAuthE2EApi } from './support/auth-client';
 
 describe('Auth Service validation', () => {
-    const api = createAuthE2EApi();
+    let api: E2EApi;
+
+    beforeAll(() => {
+        api = createAuthE2EApi();
+    });
 
     it('POST /api/v1/auth/sign-up validates request body', async () => {
         const body = { name: 'E2E User', password: 'Str0ngPass!', rememberMe: true };

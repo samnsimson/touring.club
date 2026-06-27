@@ -3,7 +3,7 @@ import { Test } from '@nestjs/testing';
 import { AuthService } from '@thallesp/nestjs-better-auth';
 import { AuthHeaders } from '@tc/auth';
 import type { Response } from 'express';
-import { AppService } from '../src/app/app.service';
+import { AppService } from '../../src/app/app.service';
 
 type AuthApiMock = {
     signUpEmail: jest.Mock;

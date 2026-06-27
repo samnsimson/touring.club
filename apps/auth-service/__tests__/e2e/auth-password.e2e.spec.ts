@@ -1,8 +1,13 @@
+import type { E2EApi } from '@tc/testing';
 import { createAuthE2EApi } from './support/auth-client';
 import { authedApi, createVerifiedUser, requireDatabase, signInUser } from './support/auth-scenarios';
 
 describe('Auth password', () => {
-    const api = createAuthE2EApi();
+    let api: E2EApi;
+
+    beforeAll(() => {
+        api = createAuthE2EApi();
+    });
 
     beforeEach(() => {
         api.emailCapture.clear();

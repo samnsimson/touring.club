@@ -6,8 +6,7 @@ function createAppUnitJestConfig(displayName, projectRoot) {
         displayName,
         preset: '../../jest.preset.js',
         testEnvironment: 'node',
-        roots: ['<rootDir>/__tests__'],
-        testPathIgnorePatterns: ['/node_modules/', '<rootDir>/__tests__/e2e/'],
+        roots: ['<rootDir>/__tests__/unit'],
         transform: {
             '^.+\\.[tj]s$': ['@swc/jest', readSwcJestConfig(projectRoot)],
         },

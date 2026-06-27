@@ -62,8 +62,8 @@ export class AppController {
     @ApiResourceExceptions(HttpStatus.BAD_REQUEST, HttpStatus.CONFLICT)
     async signUp(@Body() dto: SignUpDto, @Res({ passthrough: true }) res: Response) {
         const response = await this.appService.signUp(dto);
-        const isTokensInResponse = 'sessionToken' in response && 'accessToken' in response;
-        if (isTokensInResponse) await this.appService.setAuthCookies(res, response.accessToken, response.sessionToken);
+        const { accessToken, sessionToken } = response;
+        if (accessToken && sessionToken) await this.appService.setAuthCookies(res, accessToken, sessionToken);
         return response;
     }
 
@@ -73,7 +73,8 @@ export class AppController {
     @ApiResourceExceptions(HttpStatus.BAD_REQUEST, HttpStatus.UNAUTHORIZED)
     async signIn(@Body() dto: SignInDto, @Res({ passthrough: true }) res: Response) {
         const response = await this.appService.signIn(dto);
-        await this.appService.setAuthCookies(res, response.accessToken, response.sessionToken);
+        const { accessToken, sessionToken } = response;
+        if (accessToken && sessionToken) await this.appService.setAuthCookies(res, accessToken, sessionToken);
         return response;
     }
 

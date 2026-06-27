@@ -17,10 +17,10 @@
         "jest.config.ts",
         "jest.config.cts",
         "jest.e2e.config.cts",
-        "__tests__/**/*.spec.ts",
-        "__tests__/**/*.test.ts",
-        "__tests__/**/*.e2e.spec.ts",
-        "__tests__/**/*.d.ts",
+        "__tests__/unit/**/*.spec.ts",
+        "__tests__/unit/**/*.test.ts",
+        "__tests__/e2e/**/*.e2e.spec.ts",
+        "__tests__/e2e/**/*.d.ts",
         "src/**/*.ts"
     ],
     "references": [

@@ -11,17 +11,21 @@ export type DatabaseUtilsOptions = {
 
 export class DatabaseUtils {
     static createDataSourceOptions({ url, env, schema, loadEntities = true }: DatabaseUtilsOptions): DataSourceOptions {
+        const entityPaths = loadEntities
+            ? {
+                  entities: [join(process.cwd(), 'library/database/src/entities/**/*.{ts,js}')],
+                  migrations: [join(process.cwd(), 'library/database/src/migrations/*.{ts,js}')],
+              }
+            : {};
+
         return {
             url,
             type: 'postgres',
             synchronize: false,
             logging: env !== 'production',
             namingStrategy: new SnakeNamingStrategy(),
-            migrations: [join(process.cwd(), 'library/database/src/migrations/*.{ts,js}')],
             ...(schema ? { schema } : {}),
-            ...(loadEntities && {
-                entities: [join(process.cwd(), 'library/database/src/entities/**/*.{ts,js}')],
-            }),
+            ...entityPaths,
         };
     }
 

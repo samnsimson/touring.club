@@ -1,34 +1,21 @@
-import { NestFactory } from '@nestjs/core';
-import { NestExpressApplication } from '@nestjs/platform-express';
-import { RootModule } from './root.module';
-import { BootstrapApplicationOptions } from './contract';
-import { Swagger } from '../swagger';
+import { Logger } from '@nestjs/common';
 import { validateEnv } from '@tc/config';
-import { Logger, ValidationPipe, VersioningType } from '@nestjs/common';
-import { composeHealthRoutes } from './health.routes';
-import * as cookieParser from 'cookie-parser';
+import { BootstrapApplicationOptions } from './contract';
+import { createTestApplication } from './create-test-application';
+
+export { createTestApplication } from './create-test-application';
+export type { ApplicationBootstrapOptions, BootstrapApplicationOptions } from './contract';
 
 export const bootstrapApplication = async ({ rootModule, port, globalPrefix = 'api', configure, swagger }: BootstrapApplicationOptions) => {
     const env = validateEnv(process.env);
     const logger = new Logger(bootstrapApplication.name);
-    const app = await NestFactory.create<NestExpressApplication>(RootModule.init(rootModule));
-
-    app.setGlobalPrefix(globalPrefix);
-    app.enableVersioning({ type: VersioningType.URI, defaultVersion: '1', prefix: 'v' });
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }));
-    app.use(cookieParser());
-
-    composeHealthRoutes(app, globalPrefix);
-
-    Swagger.init(app, {
-        env: swagger?.env ?? env.NODE_ENV,
-        title: swagger?.title ?? 'API',
-        description: swagger?.description ?? 'API description',
-        version: swagger?.version ?? '1.0',
-        path: swagger?.path ?? '/docs',
+    const app = await createTestApplication({
+        rootModule,
+        globalPrefix,
+        configure,
+        swagger,
+        includeSwagger: true,
     });
-
-    if (configure) await configure(app);
 
     await app.listen(port, () => {
         const ENV = env.NODE_ENV.toUpperCase();

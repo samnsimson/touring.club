@@ -142,6 +142,7 @@
         "@nestjs/core": "^11.0.0",
         "@nestjs/platform-express": "^11.0.0",
         "@nestjs/swagger": "^11.4.4",
+        "@nestjs/testing": "^11.1.27",
         "@nestjs/typeorm": "^11.0.2",
         "@tc/config": "workspace:*",
         "@tc/database": "workspace:*",

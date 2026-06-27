@@ -1,6 +1,6 @@
 import { auth, AuthHeaders, AUTH_ACCESS_TOKEN_COOKIE, AUTH_REFRESH_TOKEN_COOKIE } from '@tc/auth';
 import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
-import { SignInDto, SignUpDto, VerifyEmailDto, ForgotPasswordDto, ResetPasswordDto, ChangePasswordDto, UpdateProfileDto } from './dto';
+import { SignInDto, SignUpDto, SignUpResponseDto, VerifyEmailDto, ForgotPasswordDto, ResetPasswordDto, ChangePasswordDto, UpdateProfileDto } from './dto';
 import { AuthUtils } from './auth.utils';
 import { CookieOptions, Request, Response } from 'express';
 import { AuthService } from '@thallesp/nestjs-better-auth';
@@ -46,7 +46,7 @@ export class AppService {
         return { success: true };
     }
 
-    async signUp(dto: SignUpDto) {
+    async signUp(dto: SignUpDto): Promise<SignUpResponseDto> {
         const response = await this.authService.api.signUpEmail({ body: { ...dto } });
         this.logger.log(`Sign up response: ${JSON.stringify(response)}`);
         if (!response.token) return { ...response.user };

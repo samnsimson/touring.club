@@ -13,7 +13,8 @@ Shared e2e testing utilities for Touring Club apps.
 
 ```
 apps/<app>/__tests__/
-├── *.spec.ts              # unit tests (Jest `test` target)
+├── unit/
+│   └── *.spec.ts          # unit tests (Jest `test` target)
 └── e2e/
     ├── *.e2e.spec.ts      # e2e suites — see .cursor/rules/e2e-test-format.mdc
     └── support/           # global setup, auth client helpers
@@ -21,7 +22,7 @@ apps/<app>/__tests__/
 
 ## Running auth-service e2e
 
-Requires Postgres (`docker compose up`) and env vars:
+E2e tests boot the Nest app in-process via `Test.createTestingModule` (see `@tc/core` `createTestApplication`). Requires Postgres (`docker compose up`) and env vars:
 
 ```bash
 EMAIL_PROVIDER=capture \

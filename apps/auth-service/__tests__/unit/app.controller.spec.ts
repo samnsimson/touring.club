@@ -1,8 +1,8 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import type { Response } from 'express';
-import { AppController } from '../src/app/app.controller';
-import { AppService } from '../src/app/app.service';
+import { AppController } from '../../src/app/app.controller';
+import { AppService } from '../../src/app/app.service';
 
 jest.mock('@tc/auth', () => ({
     auth: { api: {} },
@@ -140,7 +140,15 @@ describe('AppController', () => {
     describe('getMe', () => {
         it('delegates to AppService', async () => {
             const req = {} as import('express').Request;
-            const user = { id: '1', email: 'jane@example.com', name: 'Jane Doe' };
+            const user = {
+                id: '1',
+                email: 'jane@example.com',
+                name: 'Jane Doe',
+                emailVerified: true,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+                banned: false,
+            };
             appService.getMe.mockResolvedValue(user);
             await expect(controller.getMe(req)).resolves.toEqual(user);
             expect(appService.getMe).toHaveBeenCalledWith(req);

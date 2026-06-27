@@ -1,7 +1,12 @@
+import type { E2EApi } from '@tc/testing';
 import { createAuthE2EApi } from './support/auth-client';
 
 describe('Auth Service health', () => {
-    const api = createAuthE2EApi();
+    let api: E2EApi;
+
+    beforeAll(() => {
+        api = createAuthE2EApi();
+    });
 
     it('service is reachable', async () => {
         const health = await api.get('/api/health');

@@ -82,7 +82,7 @@ touring.club/
 | New microservice            | `apps/<service-name>/`                 | `nx-generate` skill → `@nx/nest:application` |
 | New shared library          | `library/<lib-name>/`                  | `nx-generate` skill → `@nx/js:library`       |
 | DTOs, controllers, services | `apps/<app>/src/app/`                  | Hand-written or Nest schematics              |
-| App unit tests              | `apps/<app>/__tests__/`                | Hand-written Jest specs                      |
+| App unit tests              | `apps/<app>/__tests__/unit/`           | Hand-written Jest specs                      |
 | App e2e tests               | `apps/<app>/__tests__/e2e/`            | `@tc/testing` + Jest e2e target              |
 | App Jest config             | `apps/<app>/jest.config.cts`           | `createAppUnitJestConfig` from `jest/`       |
 | App e2e Jest config         | `apps/<app>/jest.e2e.config.cts`       | `createAppE2eJestConfig` from `jest/`        |
@@ -239,7 +239,7 @@ Wire the e2e target in `project.json` to `jest.e2e.config.cts` and follow `__tes
 4. **Minimize scope** — smallest correct diff; don't refactor unrelated code
 5. **Match existing patterns** — read surrounding files before writing; reuse existing abstractions
 6. **Comments** — only for non-obvious logic; code should be self-explanatory
-7. **Tests** — add only when they cover meaningful behavior; Jest for apps, Vitest for `auth` lib adapter tests. **App tests live in `apps/<app>/__tests__/`** (unit specs at the root, e2e suites in `__tests__/e2e/`). Configure Jest `roots` to `__tests__` and ignore the e2e subdirectory from the unit `test` target. **E2e suite style:** follow `.cursor/rules/e2e-test-format.mdc` (reference: `apps/auth-service/__tests__/e2e/auth-password.e2e.spec.ts`) — one statement per line inside `it`, no blank lines within a test, inline request bodies.
+7. **Tests** — add only when they cover meaningful behavior; Jest for apps, Vitest for `auth` lib adapter tests. **App tests live under `apps/<app>/__tests__/`** — unit specs in `__tests__/unit/`, e2e suites in `__tests__/e2e/`. Use `createAppUnitJestConfig` / `createAppE2eJestConfig` from `jest/`. **E2e suite style:** follow `.cursor/rules/e2e-test-format.mdc` (reference: `apps/auth-service/__tests__/e2e/auth-password.e2e.spec.ts`) — one statement per line inside `it`, no blank lines within a test, inline request bodies.
 8. **No secrets in code** — env vars via `@tc/config`; never commit `.env`
 9. **Module boundaries** — ESLint `@nx/enforce-module-boundaries` is enabled; respect project tags
 

@@ -1,7 +1,7 @@
 import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
-import { waitForPortOpen } from '@nx/node/utils';
+import pg from 'pg';
 
 const AUTH_E2E_EMAIL_CAPTURE_DIR = process.env.EMAIL_CAPTURE_DIR ?? 'apps/auth-service/.tmp/e2e-email-capture';
 
@@ -10,6 +10,16 @@ function clearCapturedEmails(captureDir: string): void {
     fs.mkdirSync(resolvedDir, { recursive: true });
     for (const entry of fs.readdirSync(resolvedDir)) {
         if (entry.endsWith('.json')) fs.unlinkSync(path.join(resolvedDir, entry));
+    }
+}
+
+async function resetAuthJwks(databaseUrl: string): Promise<void> {
+    const client = new pg.Client({ connectionString: databaseUrl });
+    await client.connect();
+    try {
+        await client.query('DELETE FROM auth.jwkss');
+    } finally {
+        await client.end();
     }
 }
 
@@ -27,13 +37,11 @@ module.exports = async function () {
             env: process.env,
         });
         if (result.status !== 0) throw new Error('Database migrations failed during e2e global setup');
+
+        await resetAuthJwks(process.env.DATABASE_URL);
     }
 
     clearCapturedEmails(AUTH_E2E_EMAIL_CAPTURE_DIR);
-
-    const host = process.env.HOST ?? 'localhost';
-    const port = Number(process.env.AUTH_SERVICE_PORT ?? process.env.PORT ?? 3000);
-    await waitForPortOpen(port, { host });
 
     globalThis.__TEARDOWN_MESSAGE__ = '\nTearing down auth-service e2e...\n';
 };

@@ -10,4 +10,4 @@ export const dataSource = DatabaseUtils.createDataSource({
     loadEntities: false,
 });
 
-await dataSource.initialize();
+export const authDataSourceReady = dataSource.initialize();

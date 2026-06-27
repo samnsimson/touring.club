@@ -1,5 +1,5 @@
 import { UnauthorizedException } from '@nestjs/common';
-import { AuthUtils } from '../src/app/auth.utils';
+import { AuthUtils } from '../../src/app/auth.utils';
 
 describe('AuthUtils', () => {
     describe('getHeaders', () => {
