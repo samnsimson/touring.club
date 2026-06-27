@@ -7,7 +7,7 @@ import { DatabaseUtils } from '@tc/utils';
 
 @Module({})
 export class DatabaseModule {
-    static forRootAsync(options: DatabaseModuleOptions): DynamicModule {
+    static forRootAsync(options: DatabaseModuleOptions = {}): DynamicModule {
         return {
             global: true,
             module: DatabaseModule,
@@ -17,10 +17,9 @@ export class DatabaseModule {
                     inject: [ConfigService],
                     name: options.connectionName ?? 'default',
                     useFactory: (config: ConfigService) => {
-                        const schema = 'auth';
                         const url = config.get('DATABASE_URL');
                         const env = config.get('NODE_ENV');
-                        const dataSourceOptions = DatabaseUtils.createDataSourceOptions({ url, env, schema });
+                        const dataSourceOptions = DatabaseUtils.createDataSourceOptions({ url, env });
                         return { ...dataSourceOptions, autoLoadEntities: true };
                     },
                     dataSourceFactory: async (options?: DataSourceOptions) => {
