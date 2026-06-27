@@ -20,25 +20,17 @@ pipeline {
     }
 
     stages {
-        stage('Install') {
+        stage('Prepare') {
             steps {
                 sh 'bun install --frozen-lockfile'
-            }
-        }
-
-        stage('Resolve Nx base') {
-            steps {
                 script {
                     def targetBranch = env.CHANGE_TARGET ?: 'main'
                     env.NX_BASE = "origin/${targetBranch}"
-
                     sh "git fetch origin ${targetBranch} --depth=1 || true"
-
                     def baseExists = sh(
                         script: "git rev-parse --verify ${env.NX_BASE}^{commit}",
                         returnStatus: true,
                     ) == 0
-
                     env.NX_USE_AFFECTED = baseExists ? 'true' : 'false'
                 }
             }
