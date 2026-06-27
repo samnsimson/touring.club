@@ -1,17 +1,31 @@
-import { DynamicModule, Module } from '@nestjs/common';
-import { AuthModuleOptions } from './auth.contracts';
+import { DynamicModule, MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
 import { AuthModule as BetterAuthModule, AuthService } from '@thallesp/nestjs-better-auth';
-import { auth } from './auth.config';
+import { BetterAuthMiddleware } from './middleware/better-auth.middleware';
+import { AuthModuleOptions } from './auth.contracts';
+import { createAuth } from './auth.config';
+import { dataSource } from './auth.datasource';
 import { AuthGuard } from './guard/auth.guard';
 
 @Module({})
-export class AuthModule {
+export class AuthModule implements NestModule {
+    configure(consumer: MiddlewareConsumer) {
+        consumer.apply(BetterAuthMiddleware).forRoutes({ path: '*path', method: RequestMethod.ALL });
+    }
+
     static forRoot(options: AuthModuleOptions = {}): DynamicModule {
         return {
             module: AuthModule,
-            imports: [BetterAuthModule.forRoot({ auth }), ...(options.imports ?? [])],
             exports: [AuthService, AuthGuard, ...(options.exports ?? [])],
-            providers: [AuthService, AuthGuard, ...(options.providers ?? [])],
+            providers: [AuthService, AuthGuard, BetterAuthMiddleware, ...(options.providers ?? [])],
+            imports: [
+                BetterAuthModule.forRootAsync({
+                    useFactory: async () => {
+                        if (!dataSource.isInitialized) await dataSource.initialize();
+                        return { auth: createAuth() };
+                    },
+                }),
+                ...(options.imports ?? []),
+            ],
         };
     }
 }

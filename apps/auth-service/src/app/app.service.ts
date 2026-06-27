@@ -1,4 +1,5 @@
-import { auth, AuthHeaders, AUTH_ACCESS_TOKEN_COOKIE, AUTH_REFRESH_TOKEN_COOKIE } from '@tc/auth';
+import type { Auth } from '@tc/auth';
+import { AuthHeaders, AUTH_ACCESS_TOKEN_COOKIE, AUTH_REFRESH_TOKEN_COOKIE } from '@tc/auth';
 import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { SignInDto, SignUpDto, SignUpResponseDto, VerifyEmailDto, ForgotPasswordDto, ResetPasswordDto, ChangePasswordDto, UpdateProfileDto } from './dto';
 import { AuthUtils } from './auth.utils';
@@ -12,7 +13,7 @@ export class AppService {
     private readonly cookieOptions: CookieOptions = { httpOnly: true, secure: true, sameSite: 'lax', path: '/' };
     private readonly logger = new Logger(AppService.name);
 
-    constructor(private readonly authService: AuthService<typeof auth>) {}
+    constructor(private readonly authService: AuthService<Auth>) {}
 
     async setAuthCookies(response: Response, accessToken: string, sessionToken: string) {
         response.cookie(AUTH_ACCESS_TOKEN_COOKIE, accessToken, { ...this.cookieOptions, maxAge: this.accessTokenMaxAge });

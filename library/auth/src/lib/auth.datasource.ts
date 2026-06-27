@@ -9,5 +9,3 @@ export const dataSource = DatabaseUtils.createDataSource({
     url: env.DATABASE_URL,
     loadEntities: false,
 });
-
-export const authDataSourceReady = dataSource.initialize();

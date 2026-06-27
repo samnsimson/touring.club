@@ -8,12 +8,6 @@
     "types": "./dist/index.d.ts",
     "exports": {
         "./package.json": "./package.json",
-        "./prepare": {
-            "@touring.club/source": "./src/prepare.ts",
-            "types": "./dist/prepare.d.ts",
-            "import": "./dist/prepare.js",
-            "default": "./dist/prepare.js"
-        },
         ".": {
             "@touring.club/source": "./src/index.ts",
             "types": "./dist/index.d.ts",
