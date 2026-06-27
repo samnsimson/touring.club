@@ -1,5 +1,4 @@
-import { type E2EApi } from '@tc/testing';
-import { createAuthE2EApi, uniqueId, withAuthHeaders } from './auth-client';
+import { type E2EApi, type MockEmailService } from '@tc/testing';
 
 export type VerifiedUser = {
     email: string;
@@ -8,6 +7,17 @@ export type VerifiedUser = {
     accessToken: string;
     sessionToken: string;
 };
+
+const AUTH_ACCESS_TOKEN_COOKIE = 'access-token';
+const AUTH_REFRESH_TOKEN_COOKIE = 'refresh-token';
+
+const uniqueId = (): string => `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
+function withAuthHeaders(api: E2EApi, accessToken: string, sessionToken: string): E2EApi {
+    return api
+        .setHeader('Authorization', `Bearer ${sessionToken}`)
+        .setHeader('Cookie', `${AUTH_REFRESH_TOKEN_COOKIE}=${sessionToken}; ${AUTH_ACCESS_TOKEN_COOKIE}=${accessToken}`);
+}
 
 export function requireDatabase(testName: string): boolean {
     if (process.env.DATABASE_URL) return true;
@@ -28,9 +38,9 @@ export async function signUpUser(api: E2EApi, credentials: Pick<VerifiedUser, 'e
     return response;
 }
 
-export async function verifyUserEmail(api: E2EApi, email: string) {
-    const verificationEmail = await api.emailCapture.waitFor({ to: email, subjectIncludes: 'verification code' });
-    const otp = api.emailCapture.extractOtp(verificationEmail.text);
+export async function verifyUserEmail(api: E2EApi, mailbox: MockEmailService, email: string) {
+    const verificationEmail = await mailbox.waitFor({ to: email, subjectIncludes: 'verification code' });
+    const otp = mailbox.extractOtp(verificationEmail.text);
     expect(otp).toBeDefined();
 
     const response = await api.post('/api/v1/auth/verify-email', { email, otp });
@@ -40,10 +50,10 @@ export async function verifyUserEmail(api: E2EApi, email: string) {
     return response;
 }
 
-export async function createVerifiedUser(api: E2EApi = createAuthE2EApi()): Promise<VerifiedUser> {
+export async function createVerifiedUser(api: E2EApi, mailbox: MockEmailService): Promise<VerifiedUser> {
     const credentials = createUserCredentials();
     await signUpUser(api, credentials);
-    const verifyRes = await verifyUserEmail(api, credentials.email);
+    const verifyRes = await verifyUserEmail(api, mailbox, credentials.email);
     return { ...credentials, accessToken: verifyRes.body.accessToken, sessionToken: verifyRes.body.sessionToken };
 }
 
@@ -55,6 +65,6 @@ export async function signInUser(api: E2EApi, { email, password }: Pick<Verified
     return response;
 }
 
-export function authedApi(user: Pick<VerifiedUser, 'accessToken' | 'sessionToken'>): E2EApi {
-    return withAuthHeaders(createAuthE2EApi(), user.accessToken, user.sessionToken);
+export function authedApi(api: E2EApi, user: Pick<VerifiedUser, 'accessToken' | 'sessionToken'>): E2EApi {
+    return withAuthHeaders(api, user.accessToken, user.sessionToken);
 }

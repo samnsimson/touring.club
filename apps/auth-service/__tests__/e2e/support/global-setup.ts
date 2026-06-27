@@ -1,17 +1,5 @@
 import { spawnSync } from 'node:child_process';
-import fs from 'node:fs';
-import path from 'node:path';
 import pg from 'pg';
-
-const AUTH_E2E_EMAIL_CAPTURE_DIR = process.env.EMAIL_CAPTURE_DIR ?? 'apps/auth-service/.tmp/e2e-email-capture';
-
-function clearCapturedEmails(captureDir: string): void {
-    const resolvedDir = path.resolve(process.cwd(), captureDir);
-    fs.mkdirSync(resolvedDir, { recursive: true });
-    for (const entry of fs.readdirSync(resolvedDir)) {
-        if (entry.endsWith('.json')) fs.unlinkSync(path.join(resolvedDir, entry));
-    }
-}
 
 async function resetAuthJwks(databaseUrl: string): Promise<void> {
     const client = new pg.Client({ connectionString: databaseUrl });
@@ -40,8 +28,6 @@ module.exports = async function () {
 
         await resetAuthJwks(process.env.DATABASE_URL);
     }
-
-    clearCapturedEmails(AUTH_E2E_EMAIL_CAPTURE_DIR);
 
     globalThis.__TEARDOWN_MESSAGE__ = '\nTearing down auth-service e2e...\n';
 };

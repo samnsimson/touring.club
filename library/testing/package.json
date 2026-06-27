@@ -16,6 +16,12 @@
         }
     },
     "dependencies": {
+        "@nestjs/common": "^11.0.0",
+        "@nestjs/core": "^11.0.0",
+        "@nestjs/platform-express": "^11.0.0",
+        "@nestjs/testing": "^11.0.0",
+        "@tc/core": "workspace:*",
+        "cookie-parser": "^1.4.7",
         "supertest": "^7.2.2"
     },
     "devDependencies": {

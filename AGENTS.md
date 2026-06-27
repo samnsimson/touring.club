@@ -65,7 +65,7 @@ touring.club/
 │   ├── core/                # App bootstrap, Swagger, health routes
 │   ├── database/            # TypeORM module, entities, migrations
 │   ├── utils/               # Cross-cutting utilities and decorators
-│   ├── testing/             # E2E helpers (E2EApi, EmailCapture, fixtures)
+│   ├── testing/             # E2E helpers (E2EApi, MockEmailService, fixtures)
 │   └── common/              # Shared types/constants (use sparingly)
 ├── .agents/skills/          # Workspace Nx skills (read before scaffolding/CI)
 ├── patches/                 # bun patch overrides (e.g. better-auth-typeorm)
@@ -147,8 +147,9 @@ Libraries export through `src/index.ts`. Add new public APIs there; keep interna
 
 ### `@tc/testing`
 
-- `E2EApi` — supertest wrapper with fixture loading, email capture, and response redaction
-- `EmailCapture` — poll captured emails written by `EMAIL_PROVIDER=capture`
+- `E2EApplication` — bootstraps a Nest app in-process via `Test.createTestingModule` for e2e suites
+- `E2EApi` — supertest wrapper with fixture loading and response redaction
+- `MockEmailService` — in-memory Jest mock for OTP/reset-token e2e flows
 - `RequestFixtureLoader` — optional helper to load JSON request bodies from disk when useful
 - `SnapshotRedactor` — redact dynamic fields before snapshot assertions
 - **Use for app e2e suites** under `apps/<app>/__tests__/e2e/`
@@ -236,12 +237,13 @@ Wire the e2e target in `project.json` to `jest.e2e.config.cts` and follow `__tes
 1. **TypeScript strict mode** — no `any` unless unavoidable; use definite assignment (`!`) on DTO fields
 2. **ESM** — libraries use `"type": "module"`; respect existing import style
 3. **NestJS conventions** — modules, controllers, services, DTOs; inject dependencies via constructor
-4. **Minimize scope** — smallest correct diff; don't refactor unrelated code
-5. **Match existing patterns** — read surrounding files before writing; reuse existing abstractions
-6. **Comments** — only for non-obvious logic; code should be self-explanatory
-7. **Tests** — add only when they cover meaningful behavior; Jest for apps, Vitest for `auth` lib adapter tests. **App tests live under `apps/<app>/__tests__/`** — unit specs in `__tests__/unit/`, e2e suites in `__tests__/e2e/`. Use `createAppUnitJestConfig` / `createAppE2eJestConfig` from `jest/`. **E2e suite style:** follow `.cursor/rules/e2e-test-format.mdc` (reference: `apps/auth-service/__tests__/e2e/auth-password.e2e.spec.ts`) — one statement per line inside `it`, no blank lines within a test, inline request bodies.
-8. **No secrets in code** — env vars via `@tc/config`; never commit `.env`
-9. **Module boundaries** — ESLint `@nx/enforce-module-boundaries` is enabled; respect project tags
+4. **Prefer classes over standalone functions** — use classes for reusable utilities, helpers, and service-style APIs (e.g. `E2EApplication`, `E2EApi`); reserve functions for thin factories, hooks, and one-off entrypoints
+5. **Minimize scope** — smallest correct diff; don't refactor unrelated code
+6. **Match existing patterns** — read surrounding files before writing; reuse existing abstractions
+7. **Comments** — only for non-obvious logic; code should be self-explanatory
+8. **Tests** — add only when they cover meaningful behavior; Jest for apps, Vitest for `auth` lib adapter tests. **App tests live under `apps/<app>/__tests__/`** — unit specs in `__tests__/unit/`, e2e suites in `__tests__/e2e/`. Use `createAppUnitJestConfig` / `createAppE2eJestConfig` from `jest/`. **E2e suite style:** follow `.cursor/rules/e2e-test-format.mdc` (reference: `apps/auth-service/__tests__/e2e/auth-password.e2e.spec.ts`) — one statement per line inside `it`, no blank lines within a test, inline request bodies.
+9. **No secrets in code** — env vars via `@tc/config`; never commit `.env`
+10. **Module boundaries** — ESLint `@nx/enforce-module-boundaries` is enabled; respect project tags
 
 ## Formatting Preferences
 

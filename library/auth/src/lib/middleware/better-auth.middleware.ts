@@ -12,11 +12,7 @@ export class BetterAuthMiddleware implements NestMiddleware {
 
     use(req: Request, res: Response, next: NextFunction): void {
         const path = req.originalUrl ?? req.url ?? '';
-        if (!path.startsWith(AUTH_BASE_PATH)) {
-            next();
-            return;
-        }
-
+        if (!path.startsWith(AUTH_BASE_PATH)) return next();
         if (!this.handler) this.handler = toNodeHandler(this.authService.instance);
         void this.handler(req, res);
     }

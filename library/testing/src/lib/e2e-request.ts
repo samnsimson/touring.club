@@ -2,7 +2,6 @@ import request from 'supertest';
 import type supertest from 'supertest';
 import type { E2EApiOptions } from './testing.contracts';
 import { RequestFixtureLoader } from './request-fixture-loader';
-import { EmailCapture } from './email-capture';
 import { SnapshotRedactor } from './snapshot-redactor';
 
 type HttpMethod = 'get' | 'post' | 'put' | 'patch' | 'delete';
@@ -12,13 +11,11 @@ export class E2EApi {
     private readonly headers: Record<string, string>;
     public readonly fixtureLoader: RequestFixtureLoader;
     public readonly snapshotRedactor: SnapshotRedactor;
-    public readonly emailCapture: EmailCapture;
 
     constructor(private readonly options: E2EApiOptions) {
         this.headers = { ...options.headers };
         this.snapshotRedactor = new SnapshotRedactor();
         this.fixtureLoader = new RequestFixtureLoader({ fixturesDir: options.fixturesDir });
-        this.emailCapture = new EmailCapture({ captureDir: options.emailCaptureDir });
     }
 
     setHeader(name: string, value: string): this {

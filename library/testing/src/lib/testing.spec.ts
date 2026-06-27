@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import http from 'node:http';
 import os from 'node:os';
 import path from 'node:path';
-import { E2EApi, EmailCapture, RequestFixtureLoader, SnapshotRedactor } from './testing';
+import { E2EApi, MockEmailService, RequestFixtureLoader, SnapshotRedactor } from './testing';
 
 describe('RequestFixtureLoader', () => {
     it('loads a request fixture from disk', () => {
@@ -36,39 +36,36 @@ describe('SnapshotRedactor', () => {
     });
 });
 
-describe('EmailCapture', () => {
+describe('MockEmailService', () => {
     it('extracts otp and reset tokens from email text', () => {
-        const capture = new EmailCapture();
-        expect(capture.extractOtp('Your verification code is 123456.')).toBe('123456');
-        expect(capture.extractResetToken('Or enter this token: reset-token-abc')).toBe('reset-token-abc');
+        const mailbox = new MockEmailService();
+        expect(mailbox.extractOtp('Your verification code is 123456.')).toBe('123456');
+        expect(mailbox.extractResetToken('Or enter this token: reset-token-abc')).toBe('reset-token-abc');
     });
 
-    it('reads, finds, and waits for captured emails', async () => {
-        const captureDir = fs.mkdtempSync(path.join(os.tmpdir(), 'tc-email-capture-'));
-        const capture = new EmailCapture({ captureDir, pollIntervalMs: 25, pollTimeoutMs: 1_000 });
-        capture.clear();
+    it('stores sent emails and waits for matching messages', async () => {
+        const mailbox = new MockEmailService({ pollIntervalMs: 25, pollTimeoutMs: 1_000 });
 
         setTimeout(() => {
-            fs.writeFileSync(
-                path.join(captureDir, `${Date.now()}-email.json`),
-                JSON.stringify({
-                    to: 'user@example.com',
-                    subject: 'Your Touring Club verification code',
-                    text: 'Your verification code is 654321.',
-                    capturedAt: new Date().toISOString(),
-                }),
-                'utf8',
-            );
+            mailbox.send({
+                to: 'user@example.com',
+                subject: 'Your Touring Club verification code',
+                text: 'Your verification code is 654321.',
+            });
         }, 50);
 
-        expect(capture.readAll()).toEqual([]);
-        const email = await capture.waitFor({ to: 'user@example.com', subjectIncludes: 'verification code' });
+        expect(mailbox.readAll()).toEqual([]);
+        const email = await mailbox.waitFor({ to: 'user@example.com', subjectIncludes: 'verification code' });
         expect(email.text).toContain('654321');
-        expect(capture.find({ to: 'user@example.com' })).toEqual(email);
+        expect(mailbox.find({ to: 'user@example.com' })).toEqual(email);
     });
 
-    it('resolves relative capture directories against the cwd', () => {
-        expect(EmailCapture.resolveCaptureDir('.tmp/custom-capture')).toBe(path.resolve(process.cwd(), '.tmp/custom-capture'));
+    it('clears stored emails and mock call history', () => {
+        const mailbox = new MockEmailService();
+        mailbox.send({ to: 'user@example.com', subject: 'Test', text: 'Hello' });
+        mailbox.clear();
+        expect(mailbox.readAll()).toEqual([]);
+        expect(mailbox.send).not.toHaveBeenCalled();
     });
 });
 
@@ -111,7 +108,6 @@ describe('E2EApi', () => {
         const api = new E2EApi({ server: baseUrl });
         expect(api.fixtureLoader).toBeInstanceOf(RequestFixtureLoader);
         expect(api.snapshotRedactor).toBeInstanceOf(SnapshotRedactor);
-        expect(api.emailCapture).toBeInstanceOf(EmailCapture);
     });
 
     it('sends GET requests through supertest', async () => {

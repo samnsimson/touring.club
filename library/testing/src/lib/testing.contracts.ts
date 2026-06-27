@@ -1,5 +1,21 @@
+import type { Type } from '@nestjs/common';
+import type { NestExpressApplication } from '@nestjs/platform-express';
 import type { Server } from 'node:http';
 import type { Application } from 'express';
+
+export interface MockEmailInput {
+    to: string;
+    subject: string;
+    text: string;
+    html?: string;
+}
+
+export interface E2EApplicationOptions {
+    rootModule: Type<unknown>;
+    globalPrefix?: string;
+    fixturesDir?: string;
+    configure?: (app: NestExpressApplication) => void | Promise<void>;
+}
 
 export type E2ERequestTarget = string | Server | Application;
 
@@ -7,17 +23,10 @@ export interface E2EApiOptions {
     server: E2ERequestTarget;
     headers?: Record<string, string>;
     fixturesDir?: string;
-    emailCaptureDir?: string;
 }
 
 export interface RequestFixtureLoaderOptions {
     fixturesDir?: string;
-}
-
-export interface EmailCaptureOptions {
-    captureDir?: string;
-    pollIntervalMs?: number;
-    pollTimeoutMs?: number;
 }
 
 export interface CapturedEmail {

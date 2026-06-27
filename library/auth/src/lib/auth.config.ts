@@ -5,10 +5,14 @@ import { AUTH_BASE_PATH, AUTH_BASE_URL } from './auth.constants';
 import { dataSource, env } from './auth.datasource';
 import { EmailService } from './email';
 import { admin, bearer, emailOTP, openAPI, username, jwt } from 'better-auth/plugins';
+import type { EmailSender } from './auth.contracts';
 
-const emailService = new EmailService(env);
+export interface CreateAuthOptions {
+    emailService?: EmailSender;
+}
 
-export function createAuth() {
+export function createAuth(options: CreateAuthOptions = {}) {
+    const emailService = options.emailService ?? new EmailService(env);
     return betterAuth({
         name: 'Touring Club',
         baseURL: AUTH_BASE_URL,

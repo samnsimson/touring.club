@@ -1,11 +1,22 @@
-import type { E2EApi } from '@tc/testing';
-import { createAuthE2EApi } from './support/auth-client';
+import { E2EApplication, MockEmailService, type E2EApi } from '@tc/testing';
+import { createAuthE2EAppModule } from './support/e2e-app.module';
+
+const mockEmailService = new MockEmailService();
+const e2eApplication = new E2EApplication({
+    rootModule: createAuthE2EAppModule(mockEmailService),
+    globalPrefix: 'api',
+});
 
 describe('Auth Service health', () => {
     let api: E2EApi;
 
-    beforeAll(() => {
-        api = createAuthE2EApi();
+    beforeAll(async () => {
+        await e2eApplication.bootstrap();
+        api = e2eApplication.getApi();
+    }, 60_000);
+
+    afterAll(async () => {
+        await e2eApplication.close();
     });
 
     it('service is reachable', async () => {

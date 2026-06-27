@@ -1,16 +1,27 @@
-import type { E2EApi } from '@tc/testing';
-import { createAuthE2EApi } from './support/auth-client';
+import { E2EApplication, MockEmailService, type E2EApi } from '@tc/testing';
 import { createUserCredentials, requireDatabase, signUpUser, verifyUserEmail } from './support/auth-scenarios';
+import { createAuthE2EAppModule } from './support/e2e-app.module';
+
+const mockEmailService = new MockEmailService();
+const e2eApplication = new E2EApplication({
+    rootModule: createAuthE2EAppModule(mockEmailService),
+    globalPrefix: 'api',
+});
 
 describe('Auth registration', () => {
     let api: E2EApi;
 
-    beforeAll(() => {
-        api = createAuthE2EApi();
+    beforeAll(async () => {
+        await e2eApplication.bootstrap();
+        api = e2eApplication.getApi();
+    }, 60_000);
+
+    afterAll(async () => {
+        await e2eApplication.close();
     });
 
     beforeEach(() => {
-        api.emailCapture.clear();
+        mockEmailService.clear();
     });
 
     it('POST /api/v1/auth/sign-up creates a pending user', async () => {
@@ -23,6 +34,6 @@ describe('Auth registration', () => {
         if (!requireDatabase('verify-email')) return;
         const credentials = createUserCredentials();
         await signUpUser(api, credentials);
-        await verifyUserEmail(api, credentials.email);
+        await verifyUserEmail(api, mockEmailService, credentials.email);
     });
 });

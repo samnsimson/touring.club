@@ -17,8 +17,6 @@ function createAppE2eJestConfig(displayName, projectRoot, options = {}) {
         roots: [`<rootDir>/${e2eRoot}`],
         globalSetup: `<rootDir>/${supportDir}/global-setup.ts`,
         globalTeardown: `<rootDir>/${supportDir}/global-teardown.ts`,
-        setupFiles: [`<rootDir>/${supportDir}/test-setup.ts`],
-        setupFilesAfterEnv: [`<rootDir>/${supportDir}/e2e-setup.ts`],
         testEnvironment: 'node',
         moduleNameMapper: createWorkspaceModuleNameMapper(projectRoot),
         transform: {
