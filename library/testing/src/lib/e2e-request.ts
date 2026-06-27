@@ -16,8 +16,8 @@ export class E2EApi {
 
     constructor(private readonly options: E2EApiOptions) {
         this.headers = { ...options.headers };
+        this.snapshotRedactor = new SnapshotRedactor({ keys: [] });
         this.fixtureLoader = new RequestFixtureLoader({ fixturesDir: '.tmp/e2e-fixtures' });
-        this.snapshotRedactor = new SnapshotRedactor({ keys: ['password', 'token', 'otp', 'email', 'username', 'displayUsername'] });
         this.emailCapture = new EmailCapture({ captureDir: '.tmp/e2e-emails' });
     }
 
@@ -26,24 +26,34 @@ export class E2EApi {
         return this;
     }
 
-    get(url: string): Promise<E2EResponse> {
-        return this.send('get', url);
+    async get(url: string, headers?: Record<string, string>): Promise<E2EResponse> {
+        const response = await this.send('get', url, undefined, headers);
+        this.snapshotRedactor.redact(response.body);
+        return response;
     }
 
-    post(url: string, body?: unknown): Promise<E2EResponse> {
-        return this.send('post', url, body);
+    async post(url: string, body?: unknown, headers?: Record<string, string>): Promise<E2EResponse> {
+        const response = await this.send('post', url, body, headers);
+        this.snapshotRedactor.redact(response.body);
+        return response;
     }
 
-    put(url: string, body?: unknown): Promise<E2EResponse> {
-        return this.send('put', url, body);
+    async put(url: string, body?: unknown, headers?: Record<string, string>): Promise<E2EResponse> {
+        const response = await this.send('put', url, body, headers);
+        this.snapshotRedactor.redact(response.body);
+        return response;
     }
 
-    patch(url: string, body?: unknown): Promise<E2EResponse> {
-        return this.send('patch', url, body);
+    async patch(url: string, body?: unknown, headers?: Record<string, string>): Promise<E2EResponse> {
+        const response = await this.send('patch', url, body, headers);
+        this.snapshotRedactor.redact(response.body);
+        return response;
     }
 
-    delete(url: string, body?: unknown): Promise<E2EResponse> {
-        return this.send('delete', url, body);
+    async delete(url: string, body?: unknown, headers?: Record<string, string>): Promise<E2EResponse> {
+        const response = await this.send('delete', url, body, headers);
+        this.snapshotRedactor.redact(response.body);
+        return response;
     }
 
     private send(method: HttpMethod, url: string, body?: unknown, headers?: Record<string, string>): Promise<E2EResponse> {

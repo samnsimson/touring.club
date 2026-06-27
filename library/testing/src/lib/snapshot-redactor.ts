@@ -2,7 +2,6 @@ import type { SnapshotRedactorOptions } from './testing.contracts';
 
 export class SnapshotRedactor {
     static readonly defaultKeys = ['accessToken', 'sessionToken', 'token', 'id', 'createdAt', 'updatedAt', 'otp', 'email', 'username', 'displayUsername'];
-
     private readonly keys: Set<string>;
 
     constructor(options: SnapshotRedactorOptions = {}) {
