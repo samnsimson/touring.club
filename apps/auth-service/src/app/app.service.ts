@@ -1,8 +1,8 @@
-import { auth } from '@tc/auth';
+import { auth, AuthHeaders, AUTH_ACCESS_TOKEN_COOKIE, AUTH_REFRESH_TOKEN_COOKIE } from '@tc/auth';
 import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { SignInDto, SignUpDto, VerifyEmailDto } from './dto';
 import { AuthUtils } from './auth.utils';
-import { CookieOptions, Response } from 'express';
+import { CookieOptions, Request, Response } from 'express';
 import { AuthService } from '@thallesp/nestjs-better-auth';
 
 @Injectable()
@@ -15,14 +15,32 @@ export class AppService {
     constructor(private readonly authService: AuthService<typeof auth>) {}
 
     async setAuthCookies(response: Response, accessToken: string, sessionToken: string) {
-        response.cookie('access-token', accessToken, { ...this.cookieOptions, maxAge: this.accessTokenMaxAge });
-        response.cookie('refresh-token', sessionToken, { ...this.cookieOptions, maxAge: this.sessionTokenMaxAge });
+        response.cookie(AUTH_ACCESS_TOKEN_COOKIE, accessToken, { ...this.cookieOptions, maxAge: this.accessTokenMaxAge });
+        response.cookie(AUTH_REFRESH_TOKEN_COOKIE, sessionToken, { ...this.cookieOptions, maxAge: this.sessionTokenMaxAge });
+    }
+
+    clearAuthCookies(response: Response) {
+        response.clearCookie(AUTH_ACCESS_TOKEN_COOKIE, this.cookieOptions);
+        response.clearCookie(AUTH_REFRESH_TOKEN_COOKIE, this.cookieOptions);
     }
 
     async issueToken(token: string | null) {
         const headers = AuthUtils.getHeaders(token);
         const response = await this.authService.api.getToken({ headers });
         return response.token;
+    }
+
+    async getMe(request: Request) {
+        const session = await this.authService.api.getSession({ headers: AuthHeaders.fromRequest(request) });
+        if (!session?.user) throw new UnauthorizedException('Not authenticated');
+        return session.user;
+    }
+
+    async signOut(request: Request, response: Response) {
+        if (!AuthHeaders.getSessionToken(request)) throw new UnauthorizedException('Not authenticated');
+        await this.authService.api.signOut({ headers: AuthHeaders.fromRequest(request) });
+        this.clearAuthCookies(response);
+        return { success: true };
     }
 
     async signUp(dto: SignUpDto) {

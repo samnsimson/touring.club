@@ -1,15 +1,40 @@
-import { Body, Controller, HttpStatus, Post, Res } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { SignInDto, SignInResponseDto, SignUpDto, SignUpResponseDto, VerifyEmailDto, VerifyEmailResponseDto } from './dto';
+import {
+    GetMeResponseDto,
+    SignInDto,
+    SignInResponseDto,
+    SignOutResponseDto,
+    SignUpDto,
+    SignUpResponseDto,
+    VerifyEmailDto,
+    VerifyEmailResponseDto,
+} from './dto';
 import { AllowAnonymous } from '@thallesp/nestjs-better-auth';
 import { AppService } from './app.service';
-import type { Response } from 'express';
+import type { Request, Response } from 'express';
 import { ApiResource, ApiResourceExceptions } from '@tc/utils';
+import { AuthGuard } from '@tc/auth';
 
 @ApiTags('Auth')
 @Controller('auth')
 export class AppController {
     constructor(private readonly appService: AppService) {}
+
+    @Get('me')
+    @UseGuards(AuthGuard)
+    @ApiResource({ type: GetMeResponseDto, operationId: 'getMe', status: HttpStatus.OK })
+    @ApiResourceExceptions(HttpStatus.UNAUTHORIZED)
+    async getMe(@Req() req: Request) {
+        return this.appService.getMe(req);
+    }
+
+    @Post('sign-out')
+    @ApiResource({ type: SignOutResponseDto, operationId: 'signOut', status: HttpStatus.OK })
+    @ApiResourceExceptions(HttpStatus.UNAUTHORIZED)
+    async signOut(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+        return this.appService.signOut(req, res);
+    }
 
     @Post('sign-up')
     @AllowAnonymous()

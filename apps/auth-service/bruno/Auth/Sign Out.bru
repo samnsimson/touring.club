@@ -1,0 +1,19 @@
+meta {
+  name: Sign Out
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/api/v1/auth/sign-out
+  body: none
+  auth: none
+}
+
+headers {
+  Cookie: refresh-token={{sessionToken}}
+}
+
+docs {
+  Invalidate the current session and clear auth cookies.
+}

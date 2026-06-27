@@ -10,7 +10,7 @@ jest.mock('@tc/auth', () => ({
 
 describe('AppController', () => {
     let controller: AppController;
-    let appService: jest.Mocked<Pick<AppService, 'signUp' | 'signIn' | 'verifyEmail' | 'setAuthCookies'>>;
+    let appService: jest.Mocked<Pick<AppService, 'signUp' | 'signIn' | 'verifyEmail' | 'setAuthCookies' | 'getMe' | 'signOut'>>;
 
     beforeAll(async () => {
         appService = {
@@ -18,6 +18,8 @@ describe('AppController', () => {
             signIn: jest.fn(),
             verifyEmail: jest.fn(),
             setAuthCookies: jest.fn(),
+            getMe: jest.fn(),
+            signOut: jest.fn(),
         };
 
         const app: TestingModule = await Test.createTestingModule({
@@ -109,6 +111,26 @@ describe('AppController', () => {
             appService.verifyEmail.mockRejectedValue(error);
             await expect(controller.verifyEmail({ email: 'jane@example.com', otp: '000000' }, {} as Response)).rejects.toThrow(error);
             expect(appService.setAuthCookies).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('getMe', () => {
+        it('delegates to AppService', async () => {
+            const req = {} as import('express').Request;
+            const user = { id: '1', email: 'jane@example.com', name: 'Jane Doe' };
+            appService.getMe.mockResolvedValue(user);
+            await expect(controller.getMe(req)).resolves.toEqual(user);
+            expect(appService.getMe).toHaveBeenCalledWith(req);
+        });
+    });
+
+    describe('signOut', () => {
+        it('delegates to AppService', async () => {
+            const req = {} as import('express').Request;
+            const res = {} as Response;
+            appService.signOut.mockResolvedValue({ success: true });
+            await expect(controller.signOut(req, res)).resolves.toEqual({ success: true });
+            expect(appService.signOut).toHaveBeenCalledWith(req, res);
         });
     });
 });
