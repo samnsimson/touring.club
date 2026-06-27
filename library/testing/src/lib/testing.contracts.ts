@@ -1,10 +1,21 @@
-export interface E2ETestingEngineOptions {
+import type { Server } from 'node:http';
+import type { Application } from 'express';
+
+export type E2ERequestTarget = string | Server | Application;
+
+export interface E2EApiOptions {
+    server: E2ERequestTarget;
+    headers?: Record<string, string>;
+}
+
+export interface RequestFixtureLoaderOptions {
     fixturesDir?: string;
-    snapshotsDir?: string;
-    emailCaptureDir?: string;
+}
+
+export interface EmailCaptureOptions {
+    captureDir?: string;
     pollIntervalMs?: number;
     pollTimeoutMs?: number;
-    redactKeys?: string[];
 }
 
 export interface CapturedEmail {
@@ -21,9 +32,6 @@ export interface WaitForEmailOptions {
     timeoutMs?: number;
 }
 
-export interface FixtureContext<T> {
-    fixture: T;
-    vars: Record<string, string>;
+export interface SnapshotRedactorOptions {
+    keys?: string[];
 }
-
-export type SnapshotValue = Record<string, unknown> | unknown[] | string | number | boolean | null;

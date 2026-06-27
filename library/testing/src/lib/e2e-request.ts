@@ -1,0 +1,55 @@
+import request from 'supertest';
+import type supertest from 'supertest';
+import type { E2EApiOptions } from './testing.contracts';
+import { RequestFixtureLoader } from './request-fixture-loader';
+import { EmailCapture } from './email-capture';
+import { SnapshotRedactor } from './snapshot-redactor';
+
+type HttpMethod = 'get' | 'post' | 'put' | 'patch' | 'delete';
+export type E2EResponse = supertest.Response;
+
+export class E2EApi {
+    private readonly headers: Record<string, string>;
+    public readonly fixtureLoader: RequestFixtureLoader;
+    public readonly snapshotRedactor: SnapshotRedactor;
+    public readonly emailCapture: EmailCapture;
+
+    constructor(private readonly options: E2EApiOptions) {
+        this.headers = { ...options.headers };
+        this.fixtureLoader = new RequestFixtureLoader({ fixturesDir: '.tmp/e2e-fixtures' });
+        this.snapshotRedactor = new SnapshotRedactor({ keys: ['password', 'token', 'otp', 'email', 'username', 'displayUsername'] });
+        this.emailCapture = new EmailCapture({ captureDir: '.tmp/e2e-emails' });
+    }
+
+    setHeader(name: string, value: string): this {
+        this.headers[name] = value;
+        return this;
+    }
+
+    get(url: string): Promise<E2EResponse> {
+        return this.send('get', url);
+    }
+
+    post(url: string, body?: unknown): Promise<E2EResponse> {
+        return this.send('post', url, body);
+    }
+
+    put(url: string, body?: unknown): Promise<E2EResponse> {
+        return this.send('put', url, body);
+    }
+
+    patch(url: string, body?: unknown): Promise<E2EResponse> {
+        return this.send('patch', url, body);
+    }
+
+    delete(url: string, body?: unknown): Promise<E2EResponse> {
+        return this.send('delete', url, body);
+    }
+
+    private send(method: HttpMethod, url: string, body?: unknown, headers?: Record<string, string>): Promise<E2EResponse> {
+        let req = request(this.options.server)[method](url);
+        for (const [name, value] of Object.entries(headers ?? this.headers)) req = req.set(name, value);
+        if (body !== undefined) req = req.send(body as string | object);
+        return req;
+    }
+}

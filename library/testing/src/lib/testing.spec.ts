@@ -1,49 +1,45 @@
 import fs from 'node:fs';
+import http from 'node:http';
 import os from 'node:os';
 import path from 'node:path';
-import { E2ETestingEngine } from './e2e-testing-engine';
-import { clearCapturedEmails, extractOtpFromEmail, extractResetTokenFromEmail, waitForCapturedEmail } from './email-capture';
-import { interpolateFixture, loadFixture } from './fixture-utils';
-import { createE2ETestingEngine, redactSnapshotValue } from './testing';
+import { createE2ERequest, EmailCapture, RequestFixtureLoader, SnapshotRedactor } from './testing';
 
 describe('@tc/testing', () => {
-    it('interpolates fixture templates', () => {
-        const result = interpolateFixture({ email: '{{email}}', nested: { username: '{{username}}' } }, { email: 'a@b.test', username: 'alice' });
+    it('loads request fixtures from disk', () => {
+        const fixturesDir = fs.mkdtempSync(path.join(os.tmpdir(), 'tc-request-fixtures-'));
+        fs.writeFileSync(path.join(fixturesDir, 'sign-up.request.json'), JSON.stringify({ email: 'a@b.test' }), 'utf8');
 
-        expect(result).toEqual({ email: 'a@b.test', nested: { username: 'alice' } });
+        const fixtures = new RequestFixtureLoader({ fixturesDir });
+        expect(fixtures.load<{ email: string }>('sign-up')).toEqual({ email: 'a@b.test' });
     });
 
-    it('loads fixtures from disk', () => {
-        const fixturesDir = fs.mkdtempSync(path.join(os.tmpdir(), 'tc-fixtures-'));
-        fs.writeFileSync(path.join(fixturesDir, 'sample.fixture.json'), JSON.stringify({ ok: true }), 'utf8');
+    it('redacts dynamic fields for jest snapshots', () => {
+        const redactor = new SnapshotRedactor();
 
-        expect(loadFixture<{ ok: boolean }>(fixturesDir, 'sample')).toEqual({ ok: true });
-    });
-
-    it('redacts dynamic snapshot fields', () => {
         expect(
-            redactSnapshotValue({
-                id: 'abc',
+            redactor.redact({
+                id: 'user-1',
                 accessToken: 'secret',
-                user: { email: 'a@b.test', sessionToken: 'token' },
+                profile: { email: 'a@b.test' },
             }),
         ).toEqual({
             id: '[redacted]',
             accessToken: '[redacted]',
-            user: { email: 'a@b.test', sessionToken: '[redacted]' },
+            profile: { email: '[redacted]' },
         });
     });
 
     it('extracts otp and reset tokens from captured email text', () => {
-        expect(extractOtpFromEmail('Your verification code is 123456. It expires in 10 minutes.')).toBe('123456');
-        expect(extractResetTokenFromEmail('Use this link to reset your password: http://localhost\n\nOr enter this token: abc-reset-token')).toBe(
-            'abc-reset-token',
-        );
+        const emailCapture = new EmailCapture();
+
+        expect(emailCapture.extractOtp('Your verification code is 123456.')).toBe('123456');
+        expect(emailCapture.extractResetToken('Or enter this token: reset-token-abc')).toBe('reset-token-abc');
     });
 
-    it('waits for captured emails', async () => {
+    it('waits for captured emails written by the capture provider', async () => {
         const captureDir = fs.mkdtempSync(path.join(os.tmpdir(), 'tc-email-capture-'));
-        clearCapturedEmails(captureDir);
+        const emailCapture = new EmailCapture({ captureDir, pollIntervalMs: 25, pollTimeoutMs: 1_000 });
+        emailCapture.clear();
 
         setTimeout(() => {
             fs.writeFileSync(
@@ -58,25 +54,26 @@ describe('@tc/testing', () => {
             );
         }, 50);
 
-        const email = await waitForCapturedEmail(captureDir, { to: 'user@example.com', subjectIncludes: 'verification code' }, 25, 1_000);
+        const email = await emailCapture.waitFor({ to: 'user@example.com', subjectIncludes: 'verification code' });
         expect(email.text).toContain('654321');
     });
 
-    it('creates an e2e engine with fixture helpers', async () => {
-        const fixturesDir = fs.mkdtempSync(path.join(os.tmpdir(), 'tc-engine-fixtures-'));
-        fs.writeFileSync(path.join(fixturesDir, 'user.fixture.json'), JSON.stringify({ email: '{{email}}' }), 'utf8');
-
-        const engine = createE2ETestingEngine({ fixturesDir });
-        await engine.useFixture('user', { email: 'engine@example.com' }, async ({ fixture }) => {
-            expect(fixture).toEqual({ email: 'engine@example.com' });
+    it('sends requests through supertest', async () => {
+        const server = http.createServer((_req, res) => {
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ ok: true }));
         });
-    });
-});
 
-describe('E2ETestingEngine', () => {
-    it('uses the configured capture directory', () => {
-        const engine = new E2ETestingEngine({ emailCaptureDir: '.tmp/custom-capture' });
-        engine.clearCapturedEmails();
-        expect(fs.existsSync(path.resolve(process.cwd(), '.tmp/custom-capture'))).toBe(true);
+        await new Promise<void>((resolve) => server.listen(0, resolve));
+        const address = server.address();
+        if (!address || typeof address === 'string') throw new Error('Expected server to listen on a port');
+
+        const api = createE2ERequest({ server: `http://127.0.0.1:${address.port}` });
+        const response = await api.get('/health');
+
+        expect(response.status).toBe(200);
+        expect(response.body).toEqual({ ok: true });
+
+        await new Promise<void>((resolve, reject) => server.close((error) => (error ? reject(error) : resolve())));
     });
 });
