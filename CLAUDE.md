@@ -28,7 +28,9 @@ This document gives agents the full context needed to work effectively in this r
 
 ## What This Project Is
 
-**Touring Club** is a backend platform being built as an Nx monorepo of NestJS microservices. The current focus is authentication: a dedicated `auth-service` backed by [Better Auth](https://www.better-auth.com/), TypeORM, and PostgreSQL. The architecture is designed to grow into additional services (e.g. a gateway) that share common libraries.
+**Touring Club** (`touring.club`) is a social travel and touring platform — discover, organize, and join group trips, experiences, and community-driven travel events. Read **[docs/PROJECT.md](docs/PROJECT.md)** for the full product vision, domain model, feature roadmap, user types, and target architecture.
+
+**Current codebase:** Early-stage Nx monorepo focused on **authentication** — a dedicated `auth-service` backed by [Better Auth](https://www.better-auth.com/), TypeORM, and PostgreSQL. The architecture is designed to grow into additional services and client apps. Treat `docs/PROJECT.md` as the product north star; follow existing repo patterns unless explicitly migrating.
 
 **Package manager:** Bun (`bun.lock`). Always prefix Nx commands with `bun` (e.g. `bun nx serve auth-service`).
 
