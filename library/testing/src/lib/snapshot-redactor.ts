@@ -14,16 +14,11 @@ export class SnapshotRedactor {
     }
 
     private redactValue(value: unknown): unknown {
-        if (Array.isArray(value)) {
-            return value.map((entry) => this.redactValue(entry));
-        }
-
+        if (Array.isArray(value)) return value.map((entry) => this.redactValue(entry));
         if (value && typeof value === 'object') {
-            return Object.fromEntries(
-                Object.entries(value as Record<string, unknown>).map(([key, entry]) => [key, this.keys.has(key) ? '[redacted]' : this.redactValue(entry)]),
-            );
+            const entries = Object.entries(value as Record<string, unknown>);
+            return Object.fromEntries(entries.map(([key, entry]) => [key, this.keys.has(key) ? '[redacted]' : this.redactValue(entry)]));
         }
-
         return value;
     }
 }
