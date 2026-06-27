@@ -47,9 +47,38 @@ docker-compose.yml                # Postgres + Jenkins services
 
 4. Create a **Multibranch Pipeline** job named `touring-club`:
     - **Branch Sources** → Git → set your repository URL
+    - **Credentials** → select `github-pat` (created from `GITHUB_TOKEN` in `infra/jenkins/.env`)
     - **Behaviours** → Discover branches
     - **Build Configuration** → Mode: by Jenkinsfile → Script Path: `Jenkinsfile`
+    - **Scan Multibranch Pipeline Triggers** → disable periodic scans or set to daily (reduces GitHub API usage)
     - Save and **Scan Repository Now**
+
+## GitHub API rate limits
+
+If you see logs like:
+
+```
+Jenkins-Imposed API Limiter: Current quota for Github API usage has 52 remaining...
+Sleeping for 4 min 27 sec.
+```
+
+Jenkins is throttling **unauthenticated** GitHub API calls (60/hour per IP). The checkout still works; the build just pauses before continuing.
+
+**Fix:**
+
+1. Create a GitHub PAT with `repo` scope at [github.com/settings/tokens](https://github.com/settings/tokens)
+2. Add it to `infra/jenkins/.env`:
+
+    ```
+    GITHUB_USERNAME=samnsimson
+    GITHUB_TOKEN=ghp_...
+    ```
+
+3. Restart Jenkins: `docker compose restart jenkins`
+4. In your multibranch job, set **Branch Sources → Credentials** to `github-pat`
+5. Re-run the build
+
+With a PAT you get **5,000 API requests/hour** and the long sleeps stop. JCasC also configures Jenkins to only throttle when actually over the limit (`ThrottleOnOver`), not preemptively.
 
 ## Pipeline stages
 
@@ -62,7 +91,7 @@ docker-compose.yml                # Postgres + Jenkins services
 | E2E     | Runs `auth-service-e2e` when `auth-service` is affected; applies DB migrations first |
 | Deploy  | Placeholder CD stage on `main` — extend with your registry/deployment tooling        |
 
-The pipeline agent image is built from `infra/docker/ci-agent/Dockerfile` (Bun + Git + Docker CLI). It joins the `touring-club` Docker network so builds can reach the shared Postgres service.
+The pipeline runs on the Jenkins controller (`agent any`) with Bun pre-installed in the Jenkins Docker image. No Docker-in-Docker is required for CI stages.
 
 ## Credentials
 
@@ -70,6 +99,7 @@ JCasC seeds two string credentials used by the pipeline:
 
 | Credential ID                     | Purpose                                    |
 | --------------------------------- | ------------------------------------------ |
+| `github-pat`                      | GitHub PAT for clone + API (branch scans)  |
 | `touring-club-better-auth-secret` | `BETTER_AUTH_SECRET` for app startup in CI |
 | `touring-club-database-url`       | `DATABASE_URL` for migrations and e2e      |
 

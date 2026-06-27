@@ -1,12 +1,5 @@
 pipeline {
-    agent {
-        dockerfile {
-            filename 'infra/docker/ci-agent/Dockerfile'
-            dir '.'
-            reuseNode true
-            args '-v /var/run/docker.sock:/var/run/docker.sock -u root:root --network touring-club'
-        }
-    }
+    agent any
 
     options {
         timestamps()
@@ -21,17 +14,12 @@ pipeline {
         HOST = '0.0.0.0'
         AUTH_SERVICE_PORT = '3000'
         PORT = '3000'
+        PATH = "/usr/local/bin:/opt/bun/bin:${env.PATH}"
         BETTER_AUTH_SECRET = credentials('touring-club-better-auth-secret')
         DATABASE_URL = credentials('touring-club-database-url')
     }
 
     stages {
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
-        }
-
         stage('Install') {
             steps {
                 sh 'bun install --frozen-lockfile'
