@@ -1,6 +1,7 @@
 import { Body, Controller, HttpCode, HttpStatus, Post, Res } from '@nestjs/common';
 import { ApiBadRequestResponse, ApiConflictResponse, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
 import { AuthErrorResponseDto, SignInDto, SignInResponseDto, SignUpDto, SignUpResponseDto, VerifyEmailDto, VerifyEmailResponseDto } from './dto';
+import { AllowAnonymous } from '@thallesp/nestjs-better-auth';
 import { AppService } from './app.service';
 import type { Response } from 'express';
 
@@ -10,6 +11,7 @@ export class AppController {
     constructor(private readonly appService: AppService) {}
 
     @Post('sign-up')
+    @AllowAnonymous()
     @HttpCode(HttpStatus.CREATED)
     @ApiOperation({ operationId: 'signUp', summary: 'Register a new user with email and password' })
     @ApiCreatedResponse({ type: SignUpResponseDto, description: 'User created; verification OTP sent when required' })
@@ -23,6 +25,7 @@ export class AppController {
     }
 
     @Post('sign-in')
+    @AllowAnonymous()
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ operationId: 'signIn', summary: 'Sign in with email and password' })
     @ApiOkResponse({ type: SignInResponseDto })
@@ -35,6 +38,7 @@ export class AppController {
     }
 
     @Post('verify-email')
+    @AllowAnonymous()
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ operationId: 'verifyEmail', summary: 'Verify email address using a one-time password' })
     @ApiOkResponse({ type: VerifyEmailResponseDto })

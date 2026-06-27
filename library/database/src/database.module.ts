@@ -19,7 +19,7 @@ export class DatabaseModule {
                     useFactory: (config: ConfigService) => {
                         const url = config.get('DATABASE_URL');
                         const env = config.get('NODE_ENV');
-                        const dataSourceOptions = DatabaseUtils.createDataSourceOptions({ url, env });
+                        const dataSourceOptions = DatabaseUtils.createDataSourceOptions({ url, env, loadEntities: false });
                         return { ...dataSourceOptions, autoLoadEntities: true };
                     },
                     dataSourceFactory: async (options?: DataSourceOptions) => {

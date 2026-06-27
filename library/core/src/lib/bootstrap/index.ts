@@ -1,6 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import { composeRootModule } from './compose-root-module';
+import { RootModule } from './root.module';
 import { BootstrapApplicationOptions } from './contract';
 import { Swagger } from '../swagger';
 import { validateEnv } from '@tc/config';
@@ -11,7 +11,7 @@ import * as cookieParser from 'cookie-parser';
 export const bootstrapApplication = async ({ rootModule, port, globalPrefix = 'api', configure, swagger }: BootstrapApplicationOptions) => {
     const env = validateEnv(process.env);
     const logger = new Logger(bootstrapApplication.name);
-    const app = await NestFactory.create<NestExpressApplication>(composeRootModule(rootModule));
+    const app = await NestFactory.create<NestExpressApplication>(RootModule.init(rootModule));
 
     app.setGlobalPrefix(globalPrefix);
     app.enableVersioning({ type: VersioningType.URI, defaultVersion: '1', prefix: 'v' });
