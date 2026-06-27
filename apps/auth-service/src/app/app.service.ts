@@ -1,6 +1,6 @@
 import { auth, AuthHeaders, AUTH_ACCESS_TOKEN_COOKIE, AUTH_REFRESH_TOKEN_COOKIE } from '@tc/auth';
 import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
-import { SignInDto, SignUpDto, VerifyEmailDto } from './dto';
+import { SignInDto, SignUpDto, VerifyEmailDto, ForgotPasswordDto, ResetPasswordDto } from './dto';
 import { AuthUtils } from './auth.utils';
 import { CookieOptions, Request, Response } from 'express';
 import { AuthService } from '@thallesp/nestjs-better-auth';
@@ -65,5 +65,19 @@ export class AppService {
         if (!response.token) throw new UnauthorizedException('Failed to verify email');
         const accessToken = await this.issueToken(response.token);
         return { ...response.user, sessionToken: response.token, accessToken };
+    }
+
+    async forgotPassword(dto: ForgotPasswordDto) {
+        try {
+            await this.authService.api.requestPasswordReset({ body: dto });
+        } catch (error) {
+            this.logger.warn(`Forgot password request failed: ${String(error)}`);
+        }
+        return { success: true };
+    }
+
+    async resetPassword(dto: ResetPasswordDto) {
+        await this.authService.api.resetPassword({ body: dto });
+        return { success: true };
     }
 }

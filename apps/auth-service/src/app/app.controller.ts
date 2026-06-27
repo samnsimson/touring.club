@@ -1,7 +1,11 @@
 import { Body, Controller, Get, HttpStatus, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import {
+    ForgotPasswordDto,
+    ForgotPasswordResponseDto,
     GetMeResponseDto,
+    ResetPasswordDto,
+    ResetPasswordResponseDto,
     SignInDto,
     SignInResponseDto,
     SignOutResponseDto,
@@ -65,5 +69,21 @@ export class AppController {
         const response = await this.appService.verifyEmail(dto);
         await this.appService.setAuthCookies(res, response.accessToken, response.sessionToken);
         return response;
+    }
+
+    @Post('forgot-password')
+    @AllowAnonymous()
+    @ApiResource({ type: ForgotPasswordResponseDto, operationId: 'forgotPassword', status: HttpStatus.OK })
+    @ApiResourceExceptions(HttpStatus.BAD_REQUEST)
+    async forgotPassword(@Body() dto: ForgotPasswordDto) {
+        return this.appService.forgotPassword(dto);
+    }
+
+    @Post('reset-password')
+    @AllowAnonymous()
+    @ApiResource({ type: ResetPasswordResponseDto, operationId: 'resetPassword', status: HttpStatus.OK })
+    @ApiResourceExceptions(HttpStatus.BAD_REQUEST)
+    async resetPassword(@Body() dto: ResetPasswordDto) {
+        return this.appService.resetPassword(dto);
     }
 }
