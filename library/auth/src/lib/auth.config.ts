@@ -3,7 +3,10 @@ import { usernameValidator } from '@tc/utils';
 import { typeormAdapter } from '@hedystia/better-auth-typeorm';
 import { AUTH_BASE_PATH, AUTH_BASE_URL } from './auth.constants';
 import { dataSource, env } from './auth.datasource';
+import { EmailService } from './email';
 import { admin, bearer, emailOTP, openAPI, username, jwt } from 'better-auth/plugins';
+
+const emailService = new EmailService(env);
 
 export const auth = betterAuth({
     name: 'Touring Club',
@@ -18,7 +21,18 @@ export const auth = betterAuth({
     }),
     onAPIError: { throw: true, onError: (error) => console.error(error) },
     emailVerification: { autoSignInAfterVerification: true },
-    emailAndPassword: { enabled: true, requireEmailVerification: true, revokeSessionsOnPasswordReset: true },
+    emailAndPassword: {
+        enabled: true,
+        requireEmailVerification: true,
+        revokeSessionsOnPasswordReset: true,
+        sendResetPassword: async ({ user, url, token }) => {
+            emailService.send({
+                to: user.email,
+                subject: 'Reset your Touring Club password',
+                text: `Use this link to reset your password: ${url}\n\nOr enter this token: ${token}`,
+            });
+        },
+    },
     plugins: [
         bearer(),
         openAPI({ path: '/docs' }),
@@ -47,7 +61,13 @@ export const auth = betterAuth({
             expiresIn: 10 * 60,
             sendVerificationOnSignUp: true,
             overrideDefaultEmailVerification: true,
-            sendVerificationOTP: async ({ email, otp, type }) => console.log(`Sending OTP to ${email}: ${otp} for ${type}`),
+            sendVerificationOTP: async ({ email, otp, type }) => {
+                emailService.send({
+                    to: email,
+                    subject: 'Your Touring Club verification code',
+                    text: `Your verification code is ${otp}. It expires in 10 minutes.\n\nPurpose: ${type}`,
+                });
+            },
         }),
     ],
 });
