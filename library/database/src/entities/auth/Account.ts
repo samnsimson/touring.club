@@ -1,7 +1,7 @@
 import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 import { User } from './User';
 
-@Entity({ schema: 'auth', name: 'account' })
+@Entity({ schema: 'auth', name: 'accounts' })
 export class Account {
     @PrimaryColumn('text')
     id!: string;
@@ -12,7 +12,7 @@ export class Account {
     @Column('text', { name: 'provider_id' })
     providerId!: string;
 
-    @Index('account_user_id_idx')
+    @Index('accounts_user_id_idx')
     @Column('text', { name: 'user_id' })
     userId!: string;
 

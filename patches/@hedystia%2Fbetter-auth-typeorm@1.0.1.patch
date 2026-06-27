@@ -1,8 +1,25 @@
 diff --git a/dist/index.mjs b/dist/index.mjs
-index 1899a53e47833fd7ec30d0da2b6b9991f7a96187..f9131e160168a6ab21f3a46a2e6c1403d7a3fa82 100644
+index 1899a53e47833fd7ec30d0da2b6b9991f7a96187..e02b68aeee3e35fa377461dbedbc852bb68604bc 100644
 --- a/dist/index.mjs
 +++ b/dist/index.mjs
-@@ -82,6 +82,18 @@ function getDateColumnType(dataSource) {
+@@ -44,14 +44,14 @@ async function ensureTableExists(dataSource, tableName, data) {
+ 				if (key === "id") return `${escaped} text PRIMARY KEY`;
+ 				return `${escaped} ${typeof value === "boolean" ? "boolean" : typeof value === "number" ? "integer" : value instanceof Date ? getDateColumnType(dataSource) : "text"}`;
+ 			}).join(", ");
+-			await queryRunner.query(`CREATE TABLE IF NOT EXISTS ${escapeId(dataSource, tableName)} (${columns})`);
++			await queryRunner.query(`CREATE TABLE IF NOT EXISTS ${escapeTableId(dataSource, tableName)} (${columns})`);
+ 		} else {
+ 			const table = await queryRunner.getTable(tableName);
+ 			if (table) {
+ 				const existingColumns = new Set(table.columns.map((col) => col.name));
+ 				for (const [key, value] of Object.entries(data)) if (!existingColumns.has(key)) {
+ 					const type = typeof value === "boolean" ? "boolean" : typeof value === "number" ? "integer" : value instanceof Date ? getDateColumnType(dataSource) : "text";
+-					await queryRunner.query(`ALTER TABLE ${escapeId(dataSource, tableName)} ADD COLUMN ${escapeId(dataSource, key)} ${type}`);
++					await queryRunner.query(`ALTER TABLE ${escapeTableId(dataSource, tableName)} ADD COLUMN ${escapeId(dataSource, key)} ${type}`);
+ 				}
+ 			}
+ 		}
+@@ -82,6 +82,23 @@ function getDateColumnType(dataSource) {
  		default: return "timestamp";
  	}
  }
@@ -18,10 +35,24 @@ index 1899a53e47833fd7ec30d0da2b6b9991f7a96187..f9131e160168a6ab21f3a46a2e6c1403
 +	}
 +	return customName || propertyName;
 +}
++function escapeTableId(dataSource, tableName) {
++	const schema = getDataSourceSchema(dataSource);
++	if (schema) return `${escapeId(dataSource, schema)}.${escapeId(dataSource, tableName)}`;
++	return escapeId(dataSource, tableName);
++}
  function mapFieldTypeToTypeORM(fieldType, field, dataSource) {
  	switch (Array.isArray(fieldType) ? fieldType[0] || "string" : fieldType) {
  		case "string": return { type: "text" };
-@@ -133,23 +145,29 @@ function generateEntity(dataSource, modelName, modelSchema) {
+@@ -126,30 +143,36 @@ function convertOperatorToTypeORM(operator, value) {
+ 		default: return value;
+ 	}
+ }
+-function generateEntity(dataSource, modelName, modelSchema) {
++function generateEntity(dataSource, modelName, modelSchema, getModelName) {
+ 	const className = toPascalCase(modelName);
+-	const tableName = modelSchema.modelName;
++	const tableName = getModelName(modelName);
+ 	const referencedModels = /* @__PURE__ */ new Set();
  	const typeormImports = new Set([
  		"Column",
  		"Entity",
@@ -58,7 +89,7 @@ index 1899a53e47833fd7ec30d0da2b6b9991f7a96187..f9131e160168a6ab21f3a46a2e6c1403
  		const typeInfo = mapFieldTypeToTypeORM(fieldAttr.type, fieldAttr, dataSource);
  		const columnOptions = [];
  		columnOptions.push(`name: '${dbField}'`);
-@@ -168,7 +186,8 @@ function generateEntity(dataSource, modelName, modelSchema) {
+@@ -168,22 +191,26 @@ function generateEntity(dataSource, modelName, modelSchema) {
  			const relationClass = toPascalCase(fieldAttr.references.model);
  			const relationPropertyName = toRelationPropertyName(fieldName);
  			entityCode += `  @ManyToOne(() => ${relationClass}, { onDelete: '${(fieldAttr.references.onDelete || "cascade").toUpperCase()}', nullable: ${fieldAttr.required ? "false" : "true"} })\n`;
@@ -68,12 +99,16 @@ index 1899a53e47833fd7ec30d0da2b6b9991f7a96187..f9131e160168a6ab21f3a46a2e6c1403
  			entityCode += `  ${relationPropertyName}${fieldAttr.required ? "!" : "?"}: ${relationClass};\n\n`;
  		}
  	}
-@@ -178,12 +197,15 @@ function generateEntity(dataSource, modelName, modelSchema) {
- function generateMigration(dataSource, modelName, modelSchema, timestamp, action, changes) {
+ 	entityCode += "}";
+ 	return `${imports.join("\n")}\n${entityCode}`;
+ }
+-function generateMigration(dataSource, modelName, modelSchema, timestamp, action, changes) {
++function generateMigration(dataSource, modelName, modelSchema, timestamp, action, changes, getModelName) {
  	const className = `${action.charAt(0).toUpperCase() + action.slice(1)}${toPascalCase(modelName)}${timestamp}`;
- 	const tableName = modelSchema.modelName;
+-	const tableName = modelSchema.modelName;
 -	let migrationCode = "import { type MigrationInterface, type QueryRunner, Table, TableColumn, TableForeignKey, TableIndex } from 'typeorm';\n\n";
 -	migrationCode += `export class ${className} implements MigrationInterface {\n`;
++	const tableName = getModelName(modelName);
 +	const schema = getDataSourceSchema(dataSource);
 +	const valueImports = /* @__PURE__ */ new Set();
 +	let migrationCode = `export class ${className} implements MigrationInterface {\n`;
@@ -86,7 +121,7 @@ index 1899a53e47833fd7ec30d0da2b6b9991f7a96187..f9131e160168a6ab21f3a46a2e6c1403
  		migrationCode += `        name: '${tableName}',\n`;
  		migrationCode += "        columns: [\n";
  		const columns = [];
-@@ -195,7 +217,7 @@ function generateMigration(dataSource, modelName, modelSchema, timestamp, action
+@@ -195,7 +222,7 @@ function generateMigration(dataSource, modelName, modelSchema, timestamp, action
            }`);
  		for (const [fieldName, field] of Object.entries(modelSchema.fields)) {
  			const fieldAttr = field;
@@ -95,7 +130,7 @@ index 1899a53e47833fd7ec30d0da2b6b9991f7a96187..f9131e160168a6ab21f3a46a2e6c1403
  			const typeInfo = mapFieldTypeToTypeORM(fieldAttr.type, fieldAttr, dataSource);
  			if (fieldName === "id" || dbField === "id") continue;
  			let columnDef = "          {\n";
-@@ -208,22 +230,29 @@ function generateMigration(dataSource, modelName, modelSchema, timestamp, action
+@@ -208,22 +235,29 @@ function generateMigration(dataSource, modelName, modelSchema, timestamp, action
  			if (defaultValue) columnDef += `            default: ${defaultValue},\n`;
  			columnDef += "          }";
  			columns.push(columnDef);
@@ -117,8 +152,9 @@ index 1899a53e47833fd7ec30d0da2b6b9991f7a96187..f9131e160168a6ab21f3a46a2e6c1403
        '${tableName}',
        new TableForeignKey({
          columnNames: ['${dbField}'],
-         referencedTableName: '${fieldAttr.references.model}',
+-        referencedTableName: '${fieldAttr.references.model}',
 -        referencedColumnNames: ['${fieldAttr.references.field}'],
++        referencedTableName: '${getModelName(fieldAttr.references.model)}',
 +        referencedSchema: ${schema ? `'${schema}'` : "undefined"},
 +        referencedColumnNames: ['${resolveColumnName(dataSource, fieldAttr.references.field, void 0)}'],
          onDelete: '${(fieldAttr.references.onDelete || "cascade").toUpperCase()}',
@@ -128,7 +164,7 @@ index 1899a53e47833fd7ec30d0da2b6b9991f7a96187..f9131e160168a6ab21f3a46a2e6c1403
  		}
  		migrationCode += `${columns.join(",\n")}\n`;
  		migrationCode += "        ],\n";
-@@ -232,32 +261,36 @@ function generateMigration(dataSource, modelName, modelSchema, timestamp, action
+@@ -232,32 +266,36 @@ function generateMigration(dataSource, modelName, modelSchema, timestamp, action
  		if (postCreateStatements.length > 0) migrationCode += `${postCreateStatements.join("\n\n")}\n`;
  	} else if (action === "alter" && changes) {
  		if (changes.addColumns && changes.addColumns.length > 0) for (const { name, field } of changes.addColumns) {
@@ -154,7 +190,7 @@ index 1899a53e47833fd7ec30d0da2b6b9991f7a96187..f9131e160168a6ab21f3a46a2e6c1403
 -				const dbField = field.fieldName || name;
 -				migrationCode += `    await queryRunner.createForeignKey('${tableName}', new TableForeignKey({ columnNames: ['${dbField}'], referencedTableName: '${field.references.model}', referencedColumnNames: ['${field.references.field}'], onDelete: '${(field.references.onDelete || "cascade").toUpperCase()}' }));\n\n`;
 +				valueImports.add("TableForeignKey");
-+				migrationCode += `    await queryRunner.createForeignKey('${tableName}', new TableForeignKey({ columnNames: ['${dbField}'], referencedTableName: '${field.references.model}', referencedSchema: ${schema ? `'${schema}'` : "undefined"}, referencedColumnNames: ['${resolveColumnName(dataSource, field.references.field, void 0)}'], onDelete: '${(field.references.onDelete || "cascade").toUpperCase()}' }));\n\n`;
++				migrationCode += `    await queryRunner.createForeignKey('${tableName}', new TableForeignKey({ columnNames: ['${dbField}'], referencedTableName: '${getModelName(field.references.model)}', referencedSchema: ${schema ? `'${schema}'` : "undefined"}, referencedColumnNames: ['${resolveColumnName(dataSource, field.references.field, void 0)}'], onDelete: '${(field.references.onDelete || "cascade").toUpperCase()}' }));\n\n`;
  			}
  		}
  		if (changes.dropColumns && changes.dropColumns.length > 0) for (const columnName of changes.dropColumns) migrationCode += `    await queryRunner.dropColumn('${tableName}', '${columnName}');\n\n`;
@@ -172,7 +208,7 @@ index 1899a53e47833fd7ec30d0da2b6b9991f7a96187..f9131e160168a6ab21f3a46a2e6c1403
  			const defaultValue = formatDefaultValueForMigration(field);
  			if (defaultValue) migrationCode += `      default: ${defaultValue},\n`;
  			migrationCode += "    }));\n\n";
-@@ -265,14 +298,22 @@ function generateMigration(dataSource, modelName, modelSchema, timestamp, action
+@@ -265,14 +303,22 @@ function generateMigration(dataSource, modelName, modelSchema, timestamp, action
  	}
  	migrationCode += "  }\n\n";
  	migrationCode += "  public async down(queryRunner: QueryRunner): Promise<void> {\n";
@@ -200,7 +236,28 @@ index 1899a53e47833fd7ec30d0da2b6b9991f7a96187..f9131e160168a6ab21f3a46a2e6c1403
  }
  function createSchemaGenerationDataSource(dataSource) {
  	return new DataSource({
-@@ -380,10 +421,10 @@ const typeormAdapter = (dataSource, options) => createAdapterFactory({
+@@ -333,7 +379,19 @@ const typeormAdapter = (dataSource, options) => createAdapterFactory({
+ 		function buildReverseFieldMap(model) {
+ 			const reverseFieldMap = {};
+ 			const cached = fieldMapCache[model];
+-			if (cached) for (const [originalKey, mappedKey] of Object.entries(cached)) reverseFieldMap[mappedKey] = originalKey;
++			if (cached) {
++				for (const [originalKey, mappedKey] of Object.entries(cached)) reverseFieldMap[mappedKey] = originalKey;
++				return reverseFieldMap;
++			}
++			const defaultModelName = getDefaultModelName(model);
++			const modelFields = schema?.[defaultModelName]?.fields ?? {};
++			for (const fieldKey of Object.keys(modelFields)) {
++				const dbField = resolveColumnName(dataSource, fieldKey, getFieldName({
++					model,
++					field: fieldKey
++				}));
++				reverseFieldMap[dbField] = fieldKey;
++			}
+ 			return reverseFieldMap;
+ 		}
+ 		function convertWhereToFindOptions(model, action, where) {
+@@ -380,10 +438,10 @@ const typeormAdapter = (dataSource, options) => createAdapterFactory({
  			for (let i = 0; i < cleaned.length; i++) {
  				const w = cleaned[i];
  				const prefix = i === 0 ? "" : ` ${w.connector ?? "AND"} `;
@@ -213,7 +270,7 @@ index 1899a53e47833fd7ec30d0da2b6b9991f7a96187..f9131e160168a6ab21f3a46a2e6c1403
  				if (fieldMapCache[model]?.[w.field]) mappedFieldName = fieldMapCache[model][w.field];
  				const col = escapeId(dataSource, mappedFieldName);
  				const isInsensitive = w.mode === "insensitive";
-@@ -484,10 +525,10 @@ const typeormAdapter = (dataSource, options) => createAdapterFactory({
+@@ -484,10 +542,10 @@ const typeormAdapter = (dataSource, options) => createAdapterFactory({
  					}
  				}
  				if (!found) {
@@ -226,9 +283,36 @@ index 1899a53e47833fd7ec30d0da2b6b9991f7a96187..f9131e160168a6ab21f3a46a2e6c1403
  					if (existingColumns?.has(dbFieldName)) createFieldMap[key] = dbFieldName;
  					else if (!existingColumns) createFieldMap[key] = dbFieldName || key;
  				}
-@@ -559,10 +600,10 @@ const typeormAdapter = (dataSource, options) => createAdapterFactory({
+@@ -522,12 +580,12 @@ const typeormAdapter = (dataSource, options) => createAdapterFactory({
+ 				const isSqlite = dataSource.options.type === "better-sqlite3";
+ 				if (isSqlite) await queryRunner.query("PRAGMA foreign_keys = OFF");
+ 				try {
+-					const sql = `INSERT INTO ${escapeId(dataSource, tableName)} (${columns}) VALUES (${placeholders})`;
++					const sql = `INSERT INTO ${escapeTableId(dataSource, tableName)} (${columns}) VALUES (${placeholders})`;
+ 					await queryRunner.query(sql, values);
+ 				} finally {
+ 					if (isSqlite) await queryRunner.query("PRAGMA foreign_keys = ON");
+ 				}
+-				const rows = await queryRunner.query(`SELECT * FROM ${escapeId(dataSource, tableName)} WHERE ${escapeId(dataSource, "id")} = ${createParameterToken(dataSource, 0)}`, [mappedData.id]);
++				const rows = await queryRunner.query(`SELECT * FROM ${escapeTableId(dataSource, tableName)} WHERE ${escapeId(dataSource, "id")} = ${createParameterToken(dataSource, 0)}`, [mappedData.id]);
+ 				if (rows[0]) {
+ 					const reverseFieldMap = {};
+ 					for (const [originalKey, mappedKey] of Object.entries(createFieldMap)) reverseFieldMap[mappedKey] = originalKey;
+@@ -545,7 +603,7 @@ const typeormAdapter = (dataSource, options) => createAdapterFactory({
+ 			const queryRunner = dataSource.createQueryRunner();
+ 			await queryRunner.connect();
+ 			try {
+-				const rows = await queryRunner.query(`SELECT * FROM ${escapeId(dataSource, tableName)}${sql} LIMIT 1`, params);
++				const rows = await queryRunner.query(`SELECT * FROM ${escapeTableId(dataSource, tableName)}${sql} LIMIT 1`, params);
+ 				if (!rows[0]) return null;
+ 				const reverseFieldMap = buildReverseFieldMap(model);
+ 				return await transformOutput(deserializeRow(defaultModelName, rows[0], reverseFieldMap), defaultModelName, select);
+@@ -557,12 +615,12 @@ const typeormAdapter = (dataSource, options) => createAdapterFactory({
+ 			const defaultModelName = getDefaultModelName(model);
+ 			const tableName = getModelName(model);
  			const { sql, params } = buildWhereSql(model, "findMany", where);
- 			let query = `SELECT * FROM ${escapeId(dataSource, tableName)}${sql}`;
+-			let query = `SELECT * FROM ${escapeId(dataSource, tableName)}${sql}`;
++			let query = `SELECT * FROM ${escapeTableId(dataSource, tableName)}${sql}`;
  			if (sortBy?.field) {
 -				let mappedSortField = getFieldName({
 +				let mappedSortField = resolveColumnName(dataSource, sortBy.field, getFieldName({
@@ -239,7 +323,13 @@ index 1899a53e47833fd7ec30d0da2b6b9991f7a96187..f9131e160168a6ab21f3a46a2e6c1403
  				if (fieldMapCache[model]?.[sortBy.field]) mappedSortField = fieldMapCache[model][sortBy.field];
  				query += ` ORDER BY ${escapeId(dataSource, mappedSortField)} ${sortBy.direction === "desc" ? "DESC" : "ASC"}`;
  			}
-@@ -593,7 +634,8 @@ const typeormAdapter = (dataSource, options) => createAdapterFactory({
+@@ -588,16 +646,17 @@ const typeormAdapter = (dataSource, options) => createAdapterFactory({
+ 			const queryRunner = dataSource.createQueryRunner();
+ 			await queryRunner.connect();
+ 			try {
+-				const existing = await queryRunner.query(`SELECT * FROM ${escapeId(dataSource, tableName)}${whereSql} LIMIT 1`, whereParams);
++				const existing = await queryRunner.query(`SELECT * FROM ${escapeTableId(dataSource, tableName)}${whereSql} LIMIT 1`, whereParams);
+ 				if (!existing[0]) return null;
  				const setClauses = [];
  				const setValues = [];
  				for (const [key, value] of Object.entries(transformed)) if (value !== void 0) {
@@ -248,8 +338,32 @@ index 1899a53e47833fd7ec30d0da2b6b9991f7a96187..f9131e160168a6ab21f3a46a2e6c1403
 +					setClauses.push(`${escapeId(dataSource, columnName)} = ${createParameterToken(dataSource, setValues.length)}`);
  					setValues.push(normalizeQueryValue(value, dataSource));
  				}
- 				if (setClauses.length > 0) await queryRunner.query(`UPDATE ${escapeId(dataSource, tableName)} SET ${setClauses.join(", ")} WHERE ${escapeId(dataSource, "id")} = ${createParameterToken(dataSource, setValues.length)}`, [...setValues, existing[0].id]);
-@@ -637,7 +679,8 @@ const typeormAdapter = (dataSource, options) => createAdapterFactory({
+-				if (setClauses.length > 0) await queryRunner.query(`UPDATE ${escapeId(dataSource, tableName)} SET ${setClauses.join(", ")} WHERE ${escapeId(dataSource, "id")} = ${createParameterToken(dataSource, setValues.length)}`, [...setValues, existing[0].id]);
+-				const result = await queryRunner.query(`SELECT * FROM ${escapeId(dataSource, tableName)} WHERE ${escapeId(dataSource, "id")} = ${createParameterToken(dataSource, 0)}`, [existing[0].id]);
++				if (setClauses.length > 0) await queryRunner.query(`UPDATE ${escapeTableId(dataSource, tableName)} SET ${setClauses.join(", ")} WHERE ${escapeId(dataSource, "id")} = ${createParameterToken(dataSource, setValues.length)}`, [...setValues, existing[0].id]);
++				const result = await queryRunner.query(`SELECT * FROM ${escapeTableId(dataSource, tableName)} WHERE ${escapeId(dataSource, "id")} = ${createParameterToken(dataSource, 0)}`, [existing[0].id]);
+ 				if (result[0]) {
+ 					const reverseFieldMap = buildReverseFieldMap(model);
+ 					return await transformOutput(deserializeRow(defaultModelName, result[0], reverseFieldMap), defaultModelName);
+@@ -613,7 +672,7 @@ const typeormAdapter = (dataSource, options) => createAdapterFactory({
+ 			const queryRunner = dataSource.createQueryRunner();
+ 			await queryRunner.connect();
+ 			try {
+-				await queryRunner.query(`DELETE FROM ${escapeId(dataSource, tableName)}${sql}`, params);
++				await queryRunner.query(`DELETE FROM ${escapeTableId(dataSource, tableName)}${sql}`, params);
+ 			} finally {
+ 				await queryRunner.release();
+ 			}
+@@ -624,7 +683,7 @@ const typeormAdapter = (dataSource, options) => createAdapterFactory({
+ 			const queryRunner = dataSource.createQueryRunner();
+ 			await queryRunner.connect();
+ 			try {
+-				const result = await queryRunner.query(`SELECT COUNT(*) as cnt FROM ${escapeId(dataSource, tableName)}${sql}`, params);
++				const result = await queryRunner.query(`SELECT COUNT(*) as cnt FROM ${escapeTableId(dataSource, tableName)}${sql}`, params);
+ 				return Number(result[0]?.cnt ?? 0);
+ 			} finally {
+ 				await queryRunner.release();
+@@ -637,7 +696,8 @@ const typeormAdapter = (dataSource, options) => createAdapterFactory({
  			const setClauses = [];
  			const setValues = [];
  			for (const [key, value] of Object.entries(transformed)) if (value !== void 0) {
@@ -259,7 +373,25 @@ index 1899a53e47833fd7ec30d0da2b6b9991f7a96187..f9131e160168a6ab21f3a46a2e6c1403
  				setValues.push(normalizeQueryValue(value, dataSource));
  			}
  			if (setClauses.length === 0) return 0;
-@@ -766,6 +809,8 @@ const typeormAdapter = (dataSource, options) => createAdapterFactory({
+@@ -645,7 +705,7 @@ const typeormAdapter = (dataSource, options) => createAdapterFactory({
+ 			const queryRunner = dataSource.createQueryRunner();
+ 			await queryRunner.connect();
+ 			try {
+-				return getAffectedRowCount(await queryRunner.query(`UPDATE ${escapeId(dataSource, tableName)} SET ${setClauses.join(", ")}${whereSql}`, [...setValues, ...whereParams], true));
++				return getAffectedRowCount(await queryRunner.query(`UPDATE ${escapeTableId(dataSource, tableName)} SET ${setClauses.join(", ")}${whereSql}`, [...setValues, ...whereParams], true));
+ 			} finally {
+ 				await queryRunner.release();
+ 			}
+@@ -656,7 +716,7 @@ const typeormAdapter = (dataSource, options) => createAdapterFactory({
+ 			const queryRunner = dataSource.createQueryRunner();
+ 			await queryRunner.connect();
+ 			try {
+-				return getAffectedRowCount(await queryRunner.query(`DELETE FROM ${escapeId(dataSource, tableName)}${sql}`, params, true));
++				return getAffectedRowCount(await queryRunner.query(`DELETE FROM ${escapeTableId(dataSource, tableName)}${sql}`, params, true));
+ 			} finally {
+ 				await queryRunner.release();
+ 			}
+@@ -766,18 +826,20 @@ const typeormAdapter = (dataSource, options) => createAdapterFactory({
  					if (!fs.existsSync(entitiesDir)) fs.mkdirSync(entitiesDir, { recursive: true });
  					const queryRunner = schemaDataSource.createQueryRunner();
  					await queryRunner.connect();
@@ -268,7 +400,22 @@ index 1899a53e47833fd7ec30d0da2b6b9991f7a96187..f9131e160168a6ab21f3a46a2e6c1403
  					let changelogContent = `# TypeORM Schema Changes - ${(/* @__PURE__ */ new Date()).toISOString()}\n\n`;
  					let hasChanges = false;
  					const expectedTables = Object.keys(tables);
-@@ -792,7 +837,7 @@ const typeormAdapter = (dataSource, options) => createAdapterFactory({
+ 					for (const modelName of expectedTables) {
+ 						const modelSchema = tables[modelName];
+-						const tableName = modelSchema.modelName;
++						const tableName = getModelName(modelName);
+ 						const tableExists = await queryRunner.hasTable(tableName);
+-						const entityCode = generateEntity(dataSource, modelName, modelSchema);
++						const entityCode = generateEntity(dataSource, modelName, modelSchema, getModelName);
+ 						const entityPath = path.join(entitiesDir, `${modelName.charAt(0).toUpperCase() + modelName.slice(1)}.ts`);
+ 						if (!tableExists) {
+ 							const migrationFileName = `${timestamp}-create-${modelName}.ts`;
+-							const migrationCode = generateMigration(dataSource, modelName, modelSchema, timestamp, "create");
++							const migrationCode = generateMigration(dataSource, modelName, modelSchema, timestamp, "create", void 0, getModelName);
+ 							const migrationPath = path.join(migrationsDir, migrationFileName);
+ 							fs.writeFileSync(migrationPath, migrationCode);
+ 							fs.writeFileSync(entityPath, entityCode);
+@@ -792,7 +854,7 @@ const typeormAdapter = (dataSource, options) => createAdapterFactory({
  							const addColumns = [];
  							const dropColumns = [];
  							for (const [fieldName, field] of Object.entries(expectedFields)) {
@@ -277,7 +424,7 @@ index 1899a53e47833fd7ec30d0da2b6b9991f7a96187..f9131e160168a6ab21f3a46a2e6c1403
  								if (!existingColumns.includes(dbField)) addColumns.push({
  									name: fieldName,
  									field
-@@ -800,7 +845,7 @@ const typeormAdapter = (dataSource, options) => createAdapterFactory({
+@@ -800,7 +862,7 @@ const typeormAdapter = (dataSource, options) => createAdapterFactory({
  							}
  							for (const existingCol of existingColumns) {
  								if (existingCol === "id") continue;
@@ -286,3 +433,12 @@ index 1899a53e47833fd7ec30d0da2b6b9991f7a96187..f9131e160168a6ab21f3a46a2e6c1403
  							}
  							if (addColumns.length > 0 || dropColumns.length > 0) {
  								const migrationFileName = `${timestamp}-alter-${modelName}.ts`;
+@@ -808,7 +870,7 @@ const typeormAdapter = (dataSource, options) => createAdapterFactory({
+ 									addColumns,
+ 									dropColumns,
+ 									modifyColumns: []
+-								});
++								}, getModelName);
+ 								const migrationPath = path.join(migrationsDir, migrationFileName);
+ 								fs.writeFileSync(migrationPath, migrationCode);
+ 								fs.writeFileSync(entityPath, entityCode);

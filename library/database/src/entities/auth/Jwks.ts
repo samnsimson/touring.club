@@ -1,6 +1,6 @@
 import { Column, Entity, PrimaryColumn } from 'typeorm';
 
-@Entity({ schema: 'auth', name: 'jwks' })
+@Entity({ schema: 'auth', name: 'jwkss' })
 export class Jwks {
     @PrimaryColumn('text')
     id!: string;

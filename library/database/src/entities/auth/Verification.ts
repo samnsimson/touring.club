@@ -1,11 +1,11 @@
 import { Column, Entity, Index, PrimaryColumn } from 'typeorm';
 
-@Entity({ schema: 'auth', name: 'verification' })
+@Entity({ schema: 'auth', name: 'verifications' })
 export class Verification {
     @PrimaryColumn('text')
     id!: string;
 
-    @Index('verification_identifier_idx')
+    @Index('verifications_identifier_idx')
     @Column('text', { name: 'identifier' })
     identifier!: string;
 

@@ -26,7 +26,7 @@ export class AppService {
     }
 
     async signUp(dto: SignUpDto) {
-        const response = await this.authService.api.signUpEmail({ body: dto });
+        const response = await this.authService.api.signUpEmail({ body: { ...dto } });
         this.logger.log(`Sign up response: ${JSON.stringify(response)}`);
         if (!response.token) return { ...response.user };
         const accessToken = await this.issueToken(response.token);
@@ -34,7 +34,7 @@ export class AppService {
     }
 
     async signIn(dto: SignInDto) {
-        const response = await this.authService.api.signInEmail({ body: dto });
+        const response = await this.authService.api.signInEmail({ body: { ...dto } });
         this.logger.log(`Sign in response: ${JSON.stringify(response)}`);
         if (!response.token) throw new UnauthorizedException('Failed to sign in');
         const accessToken = await this.issueToken(response.token);
@@ -42,7 +42,7 @@ export class AppService {
     }
 
     async verifyEmail(dto: VerifyEmailDto) {
-        const response = await this.authService.api.verifyEmailOTP({ body: dto });
+        const response = await this.authService.api.verifyEmailOTP({ body: { ...dto } });
         this.logger.log(`Verify email response: ${JSON.stringify(response)}`);
         if (!response.token) throw new UnauthorizedException('Failed to verify email');
         const accessToken = await this.issueToken(response.token);
