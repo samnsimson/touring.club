@@ -4,6 +4,7 @@ import { ConfigModule, ConfigService } from '@tc/config';
 import { DatabaseModuleOptions } from './database.contract';
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { DatabaseUtils } from '@tc/utils';
+import { ENTITIES } from './entities';
 
 @Module({})
 export class DatabaseModule {
@@ -19,8 +20,8 @@ export class DatabaseModule {
                     useFactory: (config: ConfigService) => {
                         const url = config.get('DATABASE_URL');
                         const env = config.get('NODE_ENV');
-                        const dataSourceOptions = DatabaseUtils.createDataSourceOptions({ url, env, loadEntities: false });
-                        return { ...dataSourceOptions, autoLoadEntities: true };
+                        const dataSourceOptions = DatabaseUtils.createDataSourceOptions({ url, env });
+                        return { ...dataSourceOptions, entities: ENTITIES, autoLoadEntities: false };
                     },
                     dataSourceFactory: async (options?: DataSourceOptions) => {
                         if (!options) throw new Error('DataSourceOptions are required');
@@ -34,5 +35,10 @@ export class DatabaseModule {
             providers: [...(options.providers ?? [])],
             exports: [TypeOrmModule, ...(options.exports ?? [])],
         };
+    }
+
+    /** Optional per-module entity registration — only needed for `@InjectRepository()`. */
+    static forFeature(...args: Parameters<typeof TypeOrmModule.forFeature>): DynamicModule {
+        return TypeOrmModule.forFeature(...args);
     }
 }

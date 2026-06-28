@@ -12,7 +12,8 @@
                 "outputPath": "library/database/dist",
                 "main": "library/database/src/index.ts",
                 "tsConfig": "library/database/tsconfig.lib.json",
-                "declarationRootDir": "library/database/src"
+                "declarationRootDir": "library/database/src",
+                "bundle": false
             }
         },
         "migration:run": {

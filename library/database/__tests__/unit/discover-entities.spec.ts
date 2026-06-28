@@ -47,10 +47,10 @@ describe('discoverEntities', () => {
         readdirSyncMock.mockReset();
     });
 
-    it('loads entity classes from non-ignored TypeScript files', async () => {
+    it('loads entity classes from non-ignored TypeScript files', () => {
         class SampleEntity {}
         readdirSyncMock.mockReturnValue(['Sample.ts', 'index.ts', 'helpers.ts'] as unknown as ReturnType<typeof readdirSync>);
-        const loadModule = jest.fn(async (filePath: string) => {
+        const loadModule = jest.fn((filePath: string) => {
             if (filePath.endsWith('Sample.ts')) return { SampleEntity };
             if (filePath.endsWith('helpers.ts')) {
                 const defaultSettings = () => undefined;
@@ -58,20 +58,28 @@ describe('discoverEntities', () => {
             }
             return {};
         });
-        const entities = await discoverEntities('file:///tmp/entities/index.ts', ['index.ts'], loadModule);
+        const entities = discoverEntities('file:///tmp/entities/index.ts', ['index.ts'], loadModule);
         expect(entities).toEqual([SampleEntity]);
         expect(loadModule).toHaveBeenCalledTimes(2);
         expect(loadModule).toHaveBeenCalledWith('/tmp/entities/Sample.ts');
         expect(loadModule).toHaveBeenCalledWith('/tmp/entities/helpers.ts');
     });
 
-    it('skips ignored files and non-TypeScript files', async () => {
+    it('skips ignored files and non-TypeScript files', () => {
         class IgnoredEntity {}
         readdirSyncMock.mockReturnValue(['base.entity.ts', 'index.ts', 'notes.txt', 'Included.ts'] as unknown as ReturnType<typeof readdirSync>);
-        const loadModule = jest.fn(async () => ({ IgnoredEntity }));
-        const entities = await discoverEntities('file:///tmp/general/index.ts', ['base.entity.ts', 'index.ts'], loadModule);
+        const loadModule = jest.fn(() => ({ IgnoredEntity }));
+        const entities = discoverEntities('file:///tmp/general/index.ts', ['base.entity.ts', 'index.ts'], loadModule);
         expect(entities).toEqual([IgnoredEntity]);
         expect(loadModule).toHaveBeenCalledTimes(1);
         expect(loadModule).toHaveBeenCalledWith('/tmp/general/Included.ts');
+    });
+
+    it('loads compiled JavaScript entity files', () => {
+        class CompiledEntity {}
+        readdirSyncMock.mockReturnValue(['Compiled.js', 'index.js'] as unknown as ReturnType<typeof readdirSync>);
+        const loadModule = jest.fn((filePath: string) => (filePath.endsWith('Compiled.js') ? { CompiledEntity } : {}));
+        const entities = discoverEntities('file:///tmp/entities/index.js', ['index.js'], loadModule);
+        expect(entities).toEqual([CompiledEntity]);
     });
 });
