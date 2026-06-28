@@ -15,5 +15,5 @@ export class Message extends BaseEntity {
     messageType!: MessageType;
 
     @Column('text')
-    body!: string;
+    body: string;
 }
