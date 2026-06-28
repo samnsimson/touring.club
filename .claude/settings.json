@@ -16,6 +16,12 @@
         }
     },
     "permissions": {
-        "allow": ["Bash(ln -s ../.agents/skills .claude/skills)"]
+        "allow": [
+            "Bash(ln -s ../.agents/skills .claude/skills)",
+            "Bash(bun nx run-many *)",
+            "Bash(bun nx show *)",
+            "Bash(bun nx build *)",
+            "Bash(bun nx lint *)"
+        ]
     }
 }
