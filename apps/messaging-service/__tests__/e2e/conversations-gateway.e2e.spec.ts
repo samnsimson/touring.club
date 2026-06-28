@@ -1,4 +1,4 @@
-import { E2EApplication, FixtureAuthGuard, FixtureWsAuthGuard, requireDatabase, WsTestClient, type E2EApi } from '@tc/testing';
+import { E2EApplication, MockAuthGuard, MockWsAuthGuard, requireDatabase, WsTestClient, type E2EApi } from '@tc/testing';
 import { getDataSourceToken } from '@nestjs/typeorm';
 import type { DataSource } from '@tc/database';
 import { AppModule } from '../../src/app/app.module';
@@ -9,8 +9,8 @@ const userB = require('./fixtures/users/user-b.json') as { userId: string };
 const e2eApplication = new E2EApplication({
     rootModule: AppModule,
     globalPrefix: 'api',
-    authGuard: FixtureAuthGuard,
-    wsAuthGuard: FixtureWsAuthGuard,
+    authGuard: MockAuthGuard,
+    wsAuthGuard: MockWsAuthGuard,
     listenUrl: 'http://127.0.0.1:0',
 });
 

@@ -14,7 +14,7 @@ function getHandshakeToken(client: Socket): string | undefined {
 
 /** E2e guard: treats the handshake token as an authenticated userId, no JWKS verification. */
 @Injectable()
-export class FixtureWsAuthGuard implements CanActivate {
+export class MockWsAuthGuard implements CanActivate {
     canActivate(context: ExecutionContext): boolean {
         const client = context.switchToWs().getClient<AuthenticatedSocket>();
         const token = getHandshakeToken(client);

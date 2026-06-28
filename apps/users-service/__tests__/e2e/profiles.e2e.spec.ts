@@ -1,4 +1,4 @@
-import { E2EApplication, FixtureAuthGuard, requireDatabase, type E2EApi } from '@tc/testing';
+import { E2EApplication, MockAuthGuard, requireDatabase, type E2EApi } from '@tc/testing';
 import { getDataSourceToken } from '@nestjs/typeorm';
 import type { DataSource } from '@tc/database';
 import { AppModule } from '../../src/app/app.module';
@@ -26,7 +26,7 @@ jest.mock('../../src/app/clients/trips.client', () => ({
 const e2eApplication = new E2EApplication({
     rootModule: AppModule,
     globalPrefix: 'api',
-    authGuard: FixtureAuthGuard,
+    authGuard: MockAuthGuard,
 });
 
 function authedApi(api: E2EApi, userId: string): E2EApi {

@@ -126,7 +126,7 @@ E2e uses `jest/.e2e.swcrc` and `jest/.e2e-database.swcrc` (see `AGENTS.md`). Req
 
 1. Read the full Jest output (`--verbose` if needed)
 2. Follow `.cursor/rules/e2e-test-format.mdc` — reference: `apps/auth-service/__tests__/e2e/auth-password.e2e.spec.ts`
-3. Use `@tc/testing` helpers: `E2EApplication`, `E2EApi`, `requireDatabase`, `FixtureAuthGuard`, `runDatabaseMigrations`
+3. Use `@tc/testing` helpers: `E2EApplication`, `E2EApi`, `requireDatabase`, `MockAuthGuard`, `runDatabaseMigrations`
 4. DB-gated tests: `if (!requireDatabase('…')) return;`
 5. Re-run the failing service’s e2e target until green
 

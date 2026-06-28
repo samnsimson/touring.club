@@ -5,7 +5,7 @@ import type { Auth } from '@tc/auth';
 import { AuthHeaders, IS_PUBLIC_KEY } from '@tc/auth';
 
 @Injectable()
-export class SessionAuthGuard implements CanActivate {
+export class E2eSessionAuthGuard implements CanActivate {
     constructor(
         private readonly authService: AuthService<Auth>,
         private readonly reflector: Reflector,

@@ -1,11 +1,11 @@
-import { E2EApplication, MockEmailService, SessionAuthGuard, type E2EApi } from '@tc/testing';
+import { E2EApplication, MockEmailService, E2eSessionAuthGuard, type E2EApi } from '@tc/testing';
 import { createAuthE2EAppModule } from './support/e2e-app.module';
 
 const mockEmailService = new MockEmailService();
 const e2eApplication = new E2EApplication({
     rootModule: createAuthE2EAppModule(mockEmailService),
     globalPrefix: 'api',
-    authGuard: SessionAuthGuard,
+    authGuard: E2eSessionAuthGuard,
 });
 
 describe('Auth Service health', () => {

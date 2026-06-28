@@ -4,7 +4,7 @@ import { AuthHeaders, IS_PUBLIC_KEY } from '@tc/auth';
 
 /** E2e guard: treats `Authorization: Bearer <userId>` as an authenticated session. */
 @Injectable()
-export class FixtureAuthGuard implements CanActivate {
+export class MockAuthGuard implements CanActivate {
     constructor(private readonly reflector: Reflector) {}
 
     canActivate(context: ExecutionContext): boolean {

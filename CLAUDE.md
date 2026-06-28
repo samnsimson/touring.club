@@ -242,7 +242,7 @@ Libraries must not import from apps. Avoid circular deps between libraries. `@tc
 | `core`                  | lib  | Bootstrap & Swagger                                                                                                                    |
 | `config`                | lib  | Environment & config                                                                                                                   |
 | `database`              | lib  | TypeORM, entities (`auth/` + `general/`), migrations                                                                                   |
-| `testing`               | lib  | Shared e2e testing utilities, incl. `WsTestClient` / `FixtureWsAuthGuard` for WebSocket gateway e2e                                    |
+| `testing`               | lib  | Shared e2e testing utilities, incl. `WsTestClient` / `MockWsAuthGuard` for WebSocket gateway e2e                                       |
 | `utils`                 | lib  | Shared utilities                                                                                                                       |
 | `common`                | lib  | Shared HTTP client — `HttpModule` / `HttpClient` (NestJS axios wrapper)                                                                |
 
@@ -315,7 +315,7 @@ The `auth` library uses **Vitest** for adapter tests — place specs in `library
 - Pattern: client connects, then emits a guarded "join" message (e.g. `conversations:join`, `notifications:join`) to authenticate and join its rooms; the handler returns an ack payload. See `apps/messaging-service/src/app/gateways/conversations.gateway.ts` and `apps/notifications-service/src/app/gateways/notifications.gateway.ts`.
 - Guard with `@UseGuards(WsAuthGuard)` from `@tc/auth` on the `@SubscribeMessage()` handler; it sets `client.data.userId` from the verified JWT.
 - `app.useWebSocketAdapter(new IoAdapter(app.getHttpServer()))` — pass the raw HTTP server, not the Nest app instance. Passing `app` relies on an `instanceof NestApplication` check that fails across this monorepo's separately bundled packages (webpack app bundles vs esbuild lib bundles each carry their own `@nestjs/core`).
-- e2e: use `@tc/testing`'s `WsTestClient` (real `socket.io-client` wrapper: `connect`, `emitWithAck`, `waitForEvent`) and `FixtureWsAuthGuard` (treats the handshake token as the userId, no JWKS round-trip) with `E2EApplication`'s `wsAuthGuard` + `listenUrl` options. Reference: `apps/messaging-service/__tests__/e2e/conversations-gateway.e2e.spec.ts`.
+- e2e: use `@tc/testing`'s `WsTestClient` (real `socket.io-client` wrapper: `connect`, `emitWithAck`, `waitForEvent`) and `MockWsAuthGuard` (treats the handshake token as the userId, no JWKS round-trip) with `E2EApplication`'s `wsAuthGuard` + `listenUrl` options. Reference: `apps/messaging-service/__tests__/e2e/conversations-gateway.e2e.spec.ts`.
 
 ### Modules
 

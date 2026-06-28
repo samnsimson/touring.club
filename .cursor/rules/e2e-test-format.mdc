@@ -28,7 +28,7 @@ Follow `apps/auth-service/__tests__/e2e/auth-password.e2e.spec.ts` when writing 
 
 - Use `jest.mock` at the top of the spec for repositories or external clients.
 - Keep fixture data in `fixtures/**/*.json`; load with `require('./fixtures/...')`.
-- Use `FixtureAuthGuard` from `@tc/testing` with `Authorization: Bearer <userId>` — no DB seeding for auth users.
+- Use `MockAuthGuard` from `@tc/testing` with `Authorization: Bearer <userId>` — no DB seeding for auth users.
 
 ## Example
 

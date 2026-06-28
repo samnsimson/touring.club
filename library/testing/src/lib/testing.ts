@@ -1,12 +1,12 @@
 export { MockEmailService } from './mock-email.service';
 export { E2EApplication } from './e2e-application';
 export { E2EApi, type E2EResponse } from './e2e-request';
-export { FixtureAuthGuard } from './fixture-auth.guard';
-export { FixtureWsAuthGuard } from './fixture-ws-auth.guard';
+export { MockAuthGuard } from './mock-auth.guard';
+export { MockWsAuthGuard } from './mock-ws-auth.guard';
 export { RequestFixtureLoader } from './request-fixture-loader';
 export { requireDatabase } from './require-database';
 export { runDatabaseMigrations } from './run-database-migrations';
-export { SessionAuthGuard } from './session-auth.guard';
+export { E2eSessionAuthGuard } from './e2e-session-auth.guard';
 export { SnapshotRedactor } from './snapshot-redactor';
 export { WsTestClient, type WsTestClientConnectOptions } from './ws-test-client';
 export * from './testing.contracts';
