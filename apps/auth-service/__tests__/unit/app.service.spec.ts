@@ -104,6 +104,13 @@ describe('AppService', () => {
             await expect(service.getMe({ headers: {}, cookies: {} } as never)).resolves.toEqual(user);
         });
 
+        it('accepts access token without session token', async () => {
+            const user = { id: '1', email: 'jane@example.com', name: 'Jane Doe' };
+            (AuthHeaders.getAccessToken as jest.Mock).mockReturnValue('access-token');
+            authApi.getSession.mockResolvedValue({ user });
+            await expect(service.getMe({ headers: {}, cookies: {} } as never)).resolves.toEqual(user);
+        });
+
         it('throws when no session exists', async () => {
             (AuthHeaders.getSessionToken as jest.Mock).mockReturnValue('session-token');
             authApi.getSession.mockResolvedValue(null);
@@ -185,7 +192,12 @@ describe('AppService', () => {
     });
 
     describe('forgotPassword', () => {
-        it('always returns success', async () => {
+        it('returns success when the reset request succeeds', async () => {
+            authApi.requestPasswordReset.mockResolvedValue(undefined);
+            await expect(service.forgotPassword({ email: 'jane@example.com' })).resolves.toEqual({ success: true });
+        });
+
+        it('always returns success when the reset request fails', async () => {
             authApi.requestPasswordReset.mockRejectedValue(new Error('user not found'));
             await expect(service.forgotPassword({ email: 'missing@example.com' })).resolves.toEqual({ success: true });
         });
@@ -206,6 +218,12 @@ describe('AppService', () => {
             await expect(service.changePassword(req, { currentPassword: 'old', newPassword: 'new12345' })).resolves.toEqual({ success: true });
             expect(authApi.changePassword).toHaveBeenCalled();
         });
+
+        it('throws when no session token is present', async () => {
+            await expect(
+                service.changePassword({ headers: {}, cookies: {} } as never, { currentPassword: 'old', newPassword: 'new12345' }),
+            ).rejects.toBeInstanceOf(UnauthorizedException);
+        });
     });
 
     describe('updateProfile', () => {
@@ -215,6 +233,10 @@ describe('AppService', () => {
             authApi.getSession.mockResolvedValue({ user });
             (AuthHeaders.getSessionToken as jest.Mock).mockReturnValue('session-token');
             await expect(service.updateProfile({ headers: {}, cookies: {} } as never, { name: 'Updated' })).resolves.toEqual({ user });
+        });
+
+        it('throws when no session token is present', async () => {
+            await expect(service.updateProfile({ headers: {}, cookies: {} } as never, { name: 'Updated' })).rejects.toBeInstanceOf(UnauthorizedException);
         });
     });
 });

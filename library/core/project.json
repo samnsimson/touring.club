@@ -14,6 +14,13 @@
                 "tsConfig": "library/core/tsconfig.lib.json",
                 "declarationRootDir": "library/core/src"
             }
+        },
+        "test": {
+            "executor": "@nx/jest:jest",
+            "options": {
+                "jestConfig": "library/core/jest.config.cts",
+                "passWithNoTests": true
+            }
         }
     }
 }

@@ -4,6 +4,8 @@ import type { Response } from 'express';
 import { AppController } from '../../src/app/app.controller';
 import { AppService } from '../../src/app/app.service';
 
+type SignInResult = Awaited<ReturnType<AppService['signIn']>>;
+
 jest.mock('@tc/auth', () => ({
     auth: { api: {} },
     AuthGuard: class AuthGuard {},
@@ -92,6 +94,21 @@ describe('AppController', () => {
             expect(appService.setAuthCookies).not.toHaveBeenCalled();
         });
 
+        it('does not set auth cookies when only one token is returned', async () => {
+            const dto = { name: 'Jane Doe', email: 'jane@example.com', password: 'Str0ngPass!', username: 'janedoe' };
+            const res = {} as Response;
+            const accessTokenOnly = { ...serviceResponse, sessionToken: undefined, accessToken: 'jwt-access-token' };
+            const sessionTokenOnly = { ...serviceResponse, sessionToken: 'session-token', accessToken: undefined };
+
+            appService.signUp.mockResolvedValue(accessTokenOnly);
+            await expect(controller.signUp(dto, res)).resolves.toEqual(accessTokenOnly);
+            expect(appService.setAuthCookies).not.toHaveBeenCalled();
+
+            appService.signUp.mockResolvedValue(sessionTokenOnly);
+            await expect(controller.signUp(dto, res)).resolves.toEqual(sessionTokenOnly);
+            expect(appService.setAuthCookies).not.toHaveBeenCalled();
+        });
+
         it('propagates service errors', async () => {
             const dto = { name: 'Jane Doe', email: 'jane@example.com', password: 'Str0ngPass!', username: 'janedoe' };
             const error = new HttpException({ message: 'User already exists' }, HttpStatus.CONFLICT);
@@ -115,6 +132,24 @@ describe('AppController', () => {
             const error = new HttpException({ message: 'Invalid email or password' }, HttpStatus.UNAUTHORIZED);
             appService.signIn.mockRejectedValue(error);
             await expect(controller.signIn({ email: 'jane@example.com', password: 'wrong' }, {} as Response)).rejects.toThrow(error);
+            expect(appService.setAuthCookies).not.toHaveBeenCalled();
+        });
+
+        it('does not set auth cookies when sign-in returns no tokens', async () => {
+            const dto = { email: 'jane@example.com', password: 'Str0ngPass!' };
+            const res = {} as Response;
+            const responseWithoutTokens = { ...serviceResponse, sessionToken: undefined, accessToken: undefined };
+            appService.signIn.mockResolvedValue(responseWithoutTokens as unknown as SignInResult);
+            await expect(controller.signIn(dto, res)).resolves.toEqual(responseWithoutTokens);
+            expect(appService.setAuthCookies).not.toHaveBeenCalled();
+        });
+
+        it('does not set auth cookies when only one token is returned', async () => {
+            const dto = { email: 'jane@example.com', password: 'Str0ngPass!' };
+            const res = {} as Response;
+            const accessTokenOnly = { ...serviceResponse, sessionToken: undefined, accessToken: 'jwt-access-token' };
+            appService.signIn.mockResolvedValue(accessTokenOnly as unknown as SignInResult);
+            await expect(controller.signIn(dto, res)).resolves.toEqual(accessTokenOnly);
             expect(appService.setAuthCookies).not.toHaveBeenCalled();
         });
     });
@@ -162,6 +197,53 @@ describe('AppController', () => {
             appService.signOut.mockResolvedValue({ success: true });
             await expect(controller.signOut(req, res)).resolves.toEqual({ success: true });
             expect(appService.signOut).toHaveBeenCalledWith(req, res);
+        });
+    });
+
+    describe('changePassword', () => {
+        it('delegates to AppService', async () => {
+            const req = {} as import('express').Request;
+            const dto = { currentPassword: 'OldPass123!', newPassword: 'NewPass123!', revokeOtherSessions: true };
+            appService.changePassword.mockResolvedValue({ success: true });
+            await expect(controller.changePassword(req, dto)).resolves.toEqual({ success: true });
+            expect(appService.changePassword).toHaveBeenCalledWith(req, dto);
+        });
+    });
+
+    describe('updateProfile', () => {
+        it('delegates to AppService', async () => {
+            const req = {} as import('express').Request;
+            const dto = { name: 'Jane Doe Updated' };
+            const user = {
+                id: '1',
+                email: 'jane@example.com',
+                name: dto.name,
+                emailVerified: true,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+                banned: false,
+            };
+            appService.updateProfile.mockResolvedValue({ user });
+            await expect(controller.updateProfile(req, dto)).resolves.toEqual({ user });
+            expect(appService.updateProfile).toHaveBeenCalledWith(req, dto);
+        });
+    });
+
+    describe('forgotPassword', () => {
+        it('delegates to AppService', async () => {
+            const dto = { email: 'jane@example.com' };
+            appService.forgotPassword.mockResolvedValue({ success: true });
+            await expect(controller.forgotPassword(dto)).resolves.toEqual({ success: true });
+            expect(appService.forgotPassword).toHaveBeenCalledWith(dto);
+        });
+    });
+
+    describe('resetPassword', () => {
+        it('delegates to AppService', async () => {
+            const dto = { token: 'reset-token', newPassword: 'ResetStr0ng1!' };
+            appService.resetPassword.mockResolvedValue({ success: true });
+            await expect(controller.resetPassword(dto)).resolves.toEqual({ success: true });
+            expect(appService.resetPassword).toHaveBeenCalledWith(dto);
         });
     });
 });

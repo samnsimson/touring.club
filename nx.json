@@ -71,7 +71,11 @@
     ],
     "targetDefaults": {
         "test": {
+            "cache": false,
             "dependsOn": ["^build"]
+        },
+        "e2e": {
+            "cache": false
         },
         "@nx/esbuild:esbuild": {
             "cache": true,

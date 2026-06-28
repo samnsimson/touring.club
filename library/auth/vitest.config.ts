@@ -5,6 +5,7 @@ export default defineConfig({
         name: 'auth',
         root: __dirname,
         include: ['src/lib/adapter/tests/**/*.spec.ts'],
+        passWithNoTests: true,
         testTimeout: 60_000,
         hookTimeout: 60_000,
     },
