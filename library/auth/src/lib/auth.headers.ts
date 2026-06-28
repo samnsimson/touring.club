@@ -6,13 +6,10 @@ const bearerScheme = 'bearer ';
 export class AuthHeaders {
     static fromRequest(request: Pick<Request, 'headers' | 'cookies'>): Headers {
         const headers = new Headers();
-
         const authorization = request.headers.authorization;
         if (authorization) headers.set('authorization', authorization);
-
         const cookieHeader = this.buildSessionCookieHeader(request);
         if (cookieHeader) headers.set('cookie', cookieHeader);
-
         return headers;
     }
 

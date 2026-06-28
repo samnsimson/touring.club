@@ -56,8 +56,8 @@ export class AppController {
         return this.appService.signOut(req, res);
     }
 
-    @Post('sign-up')
     @Public()
+    @Post('sign-up')
     @ApiResource({ type: SignUpResponseDto, operationId: 'signUp', status: HttpStatus.CREATED })
     @ApiResourceExceptions(HttpStatus.BAD_REQUEST, HttpStatus.CONFLICT)
     async signUp(@Body() dto: SignUpDto, @Res({ passthrough: true }) res: Response) {
@@ -67,8 +67,8 @@ export class AppController {
         return response;
     }
 
-    @Post('sign-in')
     @Public()
+    @Post('sign-in')
     @ApiResource({ type: SignInResponseDto, operationId: 'signIn', status: HttpStatus.OK })
     @ApiResourceExceptions(HttpStatus.BAD_REQUEST, HttpStatus.UNAUTHORIZED)
     async signIn(@Body() dto: SignInDto, @Res({ passthrough: true }) res: Response) {
@@ -78,8 +78,8 @@ export class AppController {
         return response;
     }
 
-    @Post('verify-email')
     @Public()
+    @Post('verify-email')
     @ApiResource({ type: VerifyEmailResponseDto, operationId: 'verifyEmail', status: HttpStatus.OK })
     @ApiResourceExceptions(HttpStatus.BAD_REQUEST)
     async verifyEmail(@Body() dto: VerifyEmailDto, @Res({ passthrough: true }) res: Response) {
@@ -88,16 +88,16 @@ export class AppController {
         return response;
     }
 
-    @Post('forgot-password')
     @Public()
+    @Post('forgot-password')
     @ApiResource({ type: ForgotPasswordResponseDto, operationId: 'forgotPassword', status: HttpStatus.OK })
     @ApiResourceExceptions(HttpStatus.BAD_REQUEST)
     async forgotPassword(@Body() dto: ForgotPasswordDto) {
         return this.appService.forgotPassword(dto);
     }
 
-    @Post('reset-password')
     @Public()
+    @Post('reset-password')
     @ApiResource({ type: ResetPasswordResponseDto, operationId: 'resetPassword', status: HttpStatus.OK })
     @ApiResourceExceptions(HttpStatus.BAD_REQUEST)
     async resetPassword(@Body() dto: ResetPasswordDto) {

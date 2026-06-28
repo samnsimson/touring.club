@@ -15,7 +15,7 @@ export class AppService {
 
     constructor(private readonly authService: AuthService<Auth>) {}
 
-    async setAuthCookies(response: Response, accessToken: string, sessionToken: string) {
+    setAuthCookies(response: Response, accessToken: string, sessionToken: string) {
         response.cookie(AUTH_ACCESS_TOKEN_COOKIE, accessToken, { ...this.cookieOptions, maxAge: this.accessTokenMaxAge });
         response.cookie(AUTH_REFRESH_TOKEN_COOKIE, sessionToken, { ...this.cookieOptions, maxAge: this.sessionTokenMaxAge });
     }
@@ -32,9 +32,7 @@ export class AppService {
     }
 
     async getMe(request: Request) {
-        if (!AuthHeaders.getSessionToken(request) && !AuthHeaders.getAccessToken(request)) {
-            throw new UnauthorizedException('Not authenticated');
-        }
+        if (!AuthHeaders.getSessionToken(request) && !AuthHeaders.getAccessToken(request)) throw new UnauthorizedException('Not authenticated');
         const session = await this.authService.api.getSession({ headers: AuthHeaders.fromRequest(request) });
         if (!session?.user) throw new UnauthorizedException('Not authenticated');
         return session.user;
@@ -72,11 +70,7 @@ export class AppService {
     }
 
     async forgotPassword(dto: ForgotPasswordDto) {
-        try {
-            await this.authService.api.requestPasswordReset({ body: { ...dto } });
-        } catch (error) {
-            this.logger.warn(`Forgot password request failed: ${String(error)}`);
-        }
+        await this.authService.api.requestPasswordReset({ body: { ...dto } });
         return { success: true };
     }
 
@@ -87,19 +81,13 @@ export class AppService {
 
     async changePassword(request: Request, dto: ChangePasswordDto) {
         if (!AuthHeaders.getSessionToken(request)) throw new UnauthorizedException('Not authenticated');
-        await this.authService.api.changePassword({
-            body: { ...dto },
-            headers: AuthHeaders.fromRequest(request),
-        });
+        await this.authService.api.changePassword({ body: { ...dto }, headers: AuthHeaders.fromRequest(request) });
         return { success: true };
     }
 
     async updateProfile(request: Request, dto: UpdateProfileDto) {
         if (!AuthHeaders.getSessionToken(request)) throw new UnauthorizedException('Not authenticated');
-        await this.authService.api.updateUser({
-            body: { ...dto },
-            headers: AuthHeaders.fromRequest(request),
-        });
+        await this.authService.api.updateUser({ body: { ...dto }, headers: AuthHeaders.fromRequest(request) });
         const user = await this.getMe(request);
         return { user };
     }
