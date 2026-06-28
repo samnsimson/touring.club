@@ -44,4 +44,23 @@ describe('ConversationParticipantRepository', () => {
             expect(result).toBe(participants);
         });
     });
+
+    describe('findByUserId', () => {
+        let participantRepository: ConversationParticipantRepository;
+        let find: jest.SpiedFunction<ConversationParticipantRepository['find']>;
+
+        beforeEach(() => {
+            const dataSource = { manager: {} } as DataSource;
+            participantRepository = new ConversationParticipantRepository(dataSource);
+            find = jest.spyOn(participantRepository, 'find').mockResolvedValue([]);
+        });
+
+        it('queries participants by user id', async () => {
+            const participants = [{ id: 'participant-1', conversationId: 'conversation-1', userId: 'user-a' }] as ConversationParticipant[];
+            find.mockResolvedValue(participants);
+            const result = await participantRepository.findByUserId('user-a');
+            expect(find).toHaveBeenCalledWith({ where: { userId: 'user-a' } });
+            expect(result).toBe(participants);
+        });
+    });
 });
