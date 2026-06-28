@@ -8,19 +8,11 @@ export class TripMembershipRepository extends BaseRepository<TripMembership> {
         super(TripMembership, dataSource);
     }
 
-    findByTripId(tripId: string) {
-        return this.find({ where: { trip: { id: tripId } }, order: { createdAt: 'ASC' } });
-    }
-
     findByTripAndUser(tripId: string, userId: string) {
         return this.findOne({ where: { trip: { id: tripId }, userId } });
     }
 
-    findByIdForTrip(membershipId: string, tripId: string) {
-        return this.findOne({ where: { id: membershipId, trip: { id: tripId } } });
-    }
-
-    countActiveMembers(tripId: string) {
-        return this.count({ where: { trip: { id: tripId }, status: 'active' } });
+    findActiveByTripId(tripId: string) {
+        return this.find({ where: { trip: { id: tripId }, status: 'active' }, order: { createdAt: 'ASC' } });
     }
 }

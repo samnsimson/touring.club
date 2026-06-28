@@ -21,7 +21,7 @@ describe('MessageRepository', () => {
             const messages = [{ id: 'message-1' }] as Message[];
             find.mockResolvedValue(messages);
             const result = await messageRepository.findByConversationId('conversation-1');
-            expect(find).toHaveBeenCalledWith({ where: { conversationId: 'conversation-1' }, order: { createdAt: 'ASC' } });
+            expect(find).toHaveBeenCalledWith({ where: { conversation: { id: 'conversation-1' } }, order: { createdAt: 'ASC' } });
             expect(result).toBe(messages);
         });
     });

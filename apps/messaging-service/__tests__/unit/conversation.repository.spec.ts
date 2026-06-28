@@ -52,4 +52,23 @@ describe('ConversationRepository', () => {
             expect(result).toBe(conversations);
         });
     });
+
+    describe('findByTripId', () => {
+        let conversationRepository: ConversationRepository;
+        let findOne: jest.SpiedFunction<ConversationRepository['findOne']>;
+
+        beforeEach(() => {
+            const dataSource = { manager: {} } as DataSource;
+            conversationRepository = new ConversationRepository(dataSource);
+            findOne = jest.spyOn(conversationRepository, 'findOne').mockResolvedValue(null);
+        });
+
+        it('queries trip conversations by trip id', async () => {
+            const conversation = { id: 'conversation-1', type: 'trip', tripId: 'trip-1' } as Conversation;
+            findOne.mockResolvedValue(conversation);
+            const result = await conversationRepository.findByTripId('trip-1');
+            expect(findOne).toHaveBeenCalledWith({ where: { type: 'trip', trip: { id: 'trip-1' } } });
+            expect(result).toBe(conversation);
+        });
+    });
 });

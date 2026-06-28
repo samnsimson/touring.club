@@ -1,4 +1,4 @@
-const { readSwcJestConfig } = require('./read-swc-config.cjs');
+const { readE2eSwcJestConfig, readE2eDatabaseSwcJestConfig } = require('./read-swc-config.cjs');
 const { createWorkspaceModuleNameMapper } = require('./create-workspace-module-name-mapper.cjs');
 
 /**
@@ -9,7 +9,8 @@ const { createWorkspaceModuleNameMapper } = require('./create-workspace-module-n
 function createAppE2eJestConfig(displayName, projectRoot, options = {}) {
     const e2eRoot = options.e2eRoot ?? '__tests__/e2e';
     const supportDir = options.supportDir ?? `${e2eRoot}/support`;
-    const swcJestConfig = readSwcJestConfig(projectRoot);
+    const swcJestConfig = readE2eSwcJestConfig(projectRoot);
+    const databaseSwcJestConfig = readE2eDatabaseSwcJestConfig(projectRoot);
 
     return {
         displayName: `${displayName}-e2e`,
@@ -20,6 +21,7 @@ function createAppE2eJestConfig(displayName, projectRoot, options = {}) {
         testEnvironment: 'node',
         moduleNameMapper: createWorkspaceModuleNameMapper(projectRoot),
         transform: {
+            '.+/library/database/src/entities/.+\\.ts$': ['@swc/jest', databaseSwcJestConfig],
             '^.+\\.[tj]s$': ['@swc/jest', swcJestConfig],
             '^.+\\.mjs$': ['@swc/jest', { ...swcJestConfig, module: { type: 'commonjs' } }],
         },

@@ -21,7 +21,7 @@ describe('ConversationParticipantRepository', () => {
             const participant = { id: 'participant-1', conversationId: 'conversation-1', userId: 'user-a' } as ConversationParticipant;
             findOne.mockResolvedValue(participant);
             const result = await participantRepository.findByConversationAndUser('conversation-1', 'user-a');
-            expect(findOne).toHaveBeenCalledWith({ where: { conversationId: 'conversation-1', userId: 'user-a' } });
+            expect(findOne).toHaveBeenCalledWith({ where: { conversation: { id: 'conversation-1' }, userId: 'user-a' } });
             expect(result).toBe(participant);
         });
     });

@@ -8,12 +8,20 @@ jest.mock('@tc/auth', () => ({
 
 describe('AppController', () => {
     let controller: AppController;
-    let appService: jest.Mocked<Pick<AppService, 'createDirectConversation' | 'listConversations' | 'listMessages' | 'sendMessage'>>;
+    let appService: jest.Mocked<
+        Pick<
+            AppService,
+            'createDirectConversation' | 'listConversations' | 'getTripConversation' | 'listTripMessages' | 'sendTripMessage' | 'listMessages' | 'sendMessage'
+        >
+    >;
 
     beforeAll(async () => {
         appService = {
             createDirectConversation: jest.fn(),
             listConversations: jest.fn(),
+            getTripConversation: jest.fn(),
+            listTripMessages: jest.fn(),
+            sendTripMessage: jest.fn(),
             listMessages: jest.fn(),
             sendMessage: jest.fn(),
         };
@@ -43,6 +51,24 @@ describe('AppController', () => {
         appService.listConversations.mockResolvedValue({ conversations: [] });
         await expect(controller.listConversations(userId)).resolves.toEqual({ conversations: [] });
         expect(appService.listConversations).toHaveBeenCalledWith('user-a');
+    });
+
+    it('getTripConversation delegates to AppService', async () => {
+        appService.getTripConversation.mockResolvedValue({ conversation: { id: 'conversation-trip-1', type: 'trip', tripId: 'trip-1' } } as never);
+        await expect(controller.getTripConversation(userId, 'trip-1')).resolves.toMatchObject({ conversation: { type: 'trip' } });
+        expect(appService.getTripConversation).toHaveBeenCalledWith('user-a', 'trip-1');
+    });
+
+    it('listTripMessages delegates to AppService', async () => {
+        appService.listTripMessages.mockResolvedValue({ messages: [] });
+        await expect(controller.listTripMessages(userId, 'trip-1')).resolves.toEqual({ messages: [] });
+        expect(appService.listTripMessages).toHaveBeenCalledWith('user-a', 'trip-1');
+    });
+
+    it('sendTripMessage delegates to AppService', async () => {
+        appService.sendTripMessage.mockResolvedValue({ message: { id: 'message-1', body: 'Hello trip' } } as never);
+        await expect(controller.sendTripMessage(userId, 'trip-1', { body: 'Hello trip' })).resolves.toMatchObject({ message: { body: 'Hello trip' } });
+        expect(appService.sendTripMessage).toHaveBeenCalledWith('user-a', 'trip-1', { body: 'Hello trip' });
     });
 
     it('listMessages delegates to AppService', async () => {

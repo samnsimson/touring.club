@@ -5,6 +5,7 @@ import { AppModule } from '../../src/app/app.module';
 
 const userA = require('./fixtures/users/user-a.json') as { userId: string };
 const userB = require('./fixtures/users/user-b.json') as { userId: string };
+const publishedTrip = require('./fixtures/trips/published-trip.json') as { tripId: string; organizerId: string; memberId: string };
 
 const e2eApplication = new E2EApplication({
     rootModule: AppModule,
@@ -14,6 +15,35 @@ const e2eApplication = new E2EApplication({
 
 function authedApi(api: E2EApi, userId: string): E2EApi {
     return api.setHeader('Authorization', `Bearer ${userId}`);
+}
+
+async function seedPublishedTrip(dataSource: DataSource) {
+    await dataSource.query(
+        `INSERT INTO general.trips (
+            id, organizer_id, title, destination, start_date, end_date, capacity, visibility, status, cover_image_urls, categories, tags, created_at, updated_at
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, NOW(), NOW())
+        ON CONFLICT (id) DO NOTHING`,
+        [
+            publishedTrip.tripId,
+            publishedTrip.organizerId,
+            'E2E Trip Chat',
+            'California, USA',
+            '2026-07-01T09:00:00.000Z',
+            '2026-07-07T18:00:00.000Z',
+            12,
+            'public',
+            'published',
+            [],
+            [],
+            [],
+        ],
+    );
+    await dataSource.query(
+        `INSERT INTO general.trip_memberships (trip_id, user_id, status, created_at, updated_at)
+         VALUES ($1, $2, $3, NOW(), NOW())
+         ON CONFLICT (trip_id, user_id) DO NOTHING`,
+        [publishedTrip.tripId, publishedTrip.memberId, 'active'],
+    );
 }
 
 describe('Conversations', () => {
@@ -43,6 +73,16 @@ describe('Conversations', () => {
                 SELECT conversation_id FROM general.conversation_participants
             )`,
         );
+        await dataSource.query(`DELETE FROM general.messages WHERE conversation_id IN (SELECT id FROM general.conversations WHERE trip_id = $1)`, [
+            publishedTrip.tripId,
+        ]);
+        await dataSource.query(
+            `DELETE FROM general.conversation_participants WHERE conversation_id IN (SELECT id FROM general.conversations WHERE trip_id = $1)`,
+            [publishedTrip.tripId],
+        );
+        await dataSource.query(`DELETE FROM general.conversations WHERE trip_id = $1`, [publishedTrip.tripId]);
+        await dataSource.query(`DELETE FROM general.trip_memberships WHERE trip_id = $1`, [publishedTrip.tripId]);
+        await dataSource.query(`DELETE FROM general.trips WHERE id = $1`, [publishedTrip.tripId]);
     });
 
     it('POST /api/v1/conversations creates a direct conversation', async () => {
@@ -101,5 +141,46 @@ describe('Conversations', () => {
     it('GET /api/v1/conversations requires authentication', async () => {
         const response = await api.get('/api/v1/conversations', {});
         expect(response.status).toBe(401);
+    });
+
+    it('GET /api/v1/conversations/trips/:tripId creates a trip conversation for the organizer', async () => {
+        if (!requireDatabase('trip conversation')) return;
+        const dataSource = e2eApplication.getApp().get<DataSource>(getDataSourceToken());
+        await seedPublishedTrip(dataSource);
+        const response = await authedApi(api, publishedTrip.organizerId).get(`/api/v1/conversations/trips/${publishedTrip.tripId}`);
+        expect(response.status).toBe(200);
+        expect(response.body.conversation.type).toBe('trip');
+        expect(response.body.conversation.tripId).toBe(publishedTrip.tripId);
+    });
+
+    it('POST /api/v1/conversations/trips/:tripId/messages sends a message for an active member', async () => {
+        if (!requireDatabase('trip message')) return;
+        const dataSource = e2eApplication.getApp().get<DataSource>(getDataSourceToken());
+        await seedPublishedTrip(dataSource);
+        const response = await authedApi(api, publishedTrip.memberId).post(`/api/v1/conversations/trips/${publishedTrip.tripId}/messages`, {
+            body: 'See you on the road!',
+        });
+        expect(response.status).toBe(201);
+        expect(response.body.message.body).toBe('See you on the road!');
+        expect(response.body.message.senderId).toBe(publishedTrip.memberId);
+    });
+
+    it('GET /api/v1/conversations/trips/:tripId/messages returns messages for the organizer', async () => {
+        if (!requireDatabase('trip list messages')) return;
+        const dataSource = e2eApplication.getApp().get<DataSource>(getDataSourceToken());
+        await seedPublishedTrip(dataSource);
+        await authedApi(api, publishedTrip.memberId).post(`/api/v1/conversations/trips/${publishedTrip.tripId}/messages`, { body: 'See you on the road!' });
+        const response = await authedApi(api, publishedTrip.organizerId).get(`/api/v1/conversations/trips/${publishedTrip.tripId}/messages`);
+        expect(response.status).toBe(200);
+        expect(response.body.messages).toHaveLength(1);
+        expect(response.body.messages[0].body).toBe('See you on the road!');
+    });
+
+    it('GET /api/v1/conversations/trips/:tripId/messages returns 404 for a non-member', async () => {
+        if (!requireDatabase('trip messages forbidden')) return;
+        const dataSource = e2eApplication.getApp().get<DataSource>(getDataSourceToken());
+        await seedPublishedTrip(dataSource);
+        const response = await authedApi(api, 'e2e-msg-outsider').get(`/api/v1/conversations/trips/${publishedTrip.tripId}/messages`);
+        expect(response.status).toBe(404);
     });
 });

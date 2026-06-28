@@ -9,6 +9,6 @@ export class MessageRepository extends BaseRepository<Message> {
     }
 
     findByConversationId(conversationId: string) {
-        return this.find({ where: { conversationId }, order: { createdAt: 'ASC' } });
+        return this.find({ where: { conversation: { id: conversationId } }, order: { createdAt: 'ASC' } });
     }
 }

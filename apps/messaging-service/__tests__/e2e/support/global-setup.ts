@@ -1,8 +1,9 @@
-import { spawnSync } from 'node:child_process';
 import pg from 'pg';
+import { runDatabaseMigrations } from '@tc/testing';
 
 const userA = require('../fixtures/users/user-a.json') as { userId: string };
 const userB = require('../fixtures/users/user-b.json') as { userId: string };
+const publishedTrip = require('../fixtures/trips/published-trip.json') as { tripId: string };
 
 async function resetFixtureConversations(databaseUrl: string): Promise<void> {
     const client = new pg.Client({ connectionString: databaseUrl });
@@ -25,6 +26,24 @@ async function resetFixtureConversations(databaseUrl: string): Promise<void> {
     }
 }
 
+async function resetFixtureTripChat(databaseUrl: string): Promise<void> {
+    const client = new pg.Client({ connectionString: databaseUrl });
+    await client.connect();
+    try {
+        await client.query(`DELETE FROM general.messages WHERE conversation_id IN (SELECT id FROM general.conversations WHERE trip_id = $1)`, [
+            publishedTrip.tripId,
+        ]);
+        await client.query(`DELETE FROM general.conversation_participants WHERE conversation_id IN (SELECT id FROM general.conversations WHERE trip_id = $1)`, [
+            publishedTrip.tripId,
+        ]);
+        await client.query(`DELETE FROM general.conversations WHERE trip_id = $1`, [publishedTrip.tripId]);
+        await client.query(`DELETE FROM general.trip_memberships WHERE trip_id = $1`, [publishedTrip.tripId]);
+        await client.query(`DELETE FROM general.trips WHERE id = $1`, [publishedTrip.tripId]);
+    } finally {
+        await client.end();
+    }
+}
+
 declare global {
     var __TEARDOWN_MESSAGE__: string;
 }
@@ -33,14 +52,9 @@ module.exports = async function () {
     console.log('\nSetting up messaging-service e2e...\n');
 
     if (process.env.DATABASE_URL) {
-        const result = spawnSync('bun', ['library/database/scripts/run-migrations.ts'], {
-            cwd: process.cwd(),
-            stdio: 'inherit',
-            env: process.env,
-        });
-        if (result.status !== 0) throw new Error('Database migrations failed during e2e global setup');
-
+        runDatabaseMigrations();
         await resetFixtureConversations(process.env.DATABASE_URL);
+        await resetFixtureTripChat(process.env.DATABASE_URL);
     }
 
     globalThis.__TEARDOWN_MESSAGE__ = '\nTearing down messaging-service e2e...\n';

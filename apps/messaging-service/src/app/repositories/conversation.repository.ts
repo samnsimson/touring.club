@@ -23,4 +23,8 @@ export class ConversationRepository extends BaseRepository<Conversation> {
             order: { updatedAt: 'DESC' },
         });
     }
+
+    findByTripId(tripId: string) {
+        return this.findOne({ where: { type: 'trip', trip: { id: tripId } } });
+    }
 }

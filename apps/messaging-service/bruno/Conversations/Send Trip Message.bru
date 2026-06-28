@@ -1,0 +1,25 @@
+meta {
+  name: Send Trip Message
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/api/v1/conversations/trips/{{tripId}}/messages
+  body: json
+  auth: bearer
+}
+
+headers {
+  Authorization: Bearer {{accessToken}}
+}
+
+body:json {
+  {
+    "body": "See you at the trailhead!"
+  }
+}
+
+docs {
+  Send a text message in a trip group chat.
+}

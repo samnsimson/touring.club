@@ -12,7 +12,7 @@ function createAppUnitJestConfig(displayName, projectRoot) {
         },
         moduleFileExtensions: ['ts', 'js', 'html'],
         coverageDirectory: 'test-output/jest/coverage',
-        collectCoverageFrom: ['src/**/*.{ts,tsx}', '!src/**/*.dto.ts', '!src/**/dto/**', '!src/main.ts'],
+        collectCoverageFrom: ['src/**/*.{ts,tsx}', '!src/**/*.dto.ts', '!src/**/dto/**', '!src/main.ts', '!src/entities/**'],
         coverageThreshold: {
             global: {
                 statements: 100,

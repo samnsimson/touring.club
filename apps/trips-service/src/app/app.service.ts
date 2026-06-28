@@ -122,7 +122,7 @@ export class AppService {
             return { membership: membership ? TripMembershipResponse.from(membership) : null };
         }
 
-        const membership = await this.memberships.save(this.memberships.create({ tripId, userId, status }));
+        const membership = await this.memberships.save(this.memberships.create({ trip: { id: tripId } as Trip, userId, status }));
         return { membership: TripMembershipResponse.from(membership) };
     }
 

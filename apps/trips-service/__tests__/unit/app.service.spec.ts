@@ -305,7 +305,7 @@ describe('AppService', () => {
             memberships.findByTripAndUser.mockResolvedValue(null);
             memberships.countActiveMembers.mockResolvedValue(0);
             const result = await service.joinTrip('participant-1', 'trip-1');
-            expect(memberships.create).toHaveBeenCalledWith(expect.objectContaining({ tripId: 'trip-1', userId: 'participant-1', status: 'active' }));
+            expect(memberships.create).toHaveBeenCalledWith(expect.objectContaining({ trip: { id: 'trip-1' }, userId: 'participant-1', status: 'active' }));
             expect(result.membership.status).toBe('active');
         });
 

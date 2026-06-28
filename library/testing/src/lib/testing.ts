@@ -4,6 +4,7 @@ export { E2EApi, type E2EResponse } from './e2e-request';
 export { FixtureAuthGuard } from './fixture-auth.guard';
 export { RequestFixtureLoader } from './request-fixture-loader';
 export { requireDatabase } from './require-database';
+export { runDatabaseMigrations } from './run-database-migrations';
 export { SessionAuthGuard } from './session-auth.guard';
 export { SnapshotRedactor } from './snapshot-redactor';
 export * from './testing.contracts';

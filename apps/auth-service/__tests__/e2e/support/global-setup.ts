@@ -1,5 +1,5 @@
-import { spawnSync } from 'node:child_process';
 import pg from 'pg';
+import { runDatabaseMigrations } from '@tc/testing';
 
 async function resetAuthJwks(databaseUrl: string): Promise<void> {
     const client = new pg.Client({ connectionString: databaseUrl });
@@ -19,13 +19,7 @@ module.exports = async function () {
     console.log('\nSetting up auth-service e2e...\n');
 
     if (process.env.DATABASE_URL) {
-        const result = spawnSync('bun', ['library/database/scripts/run-migrations.ts'], {
-            cwd: process.cwd(),
-            stdio: 'inherit',
-            env: process.env,
-        });
-        if (result.status !== 0) throw new Error('Database migrations failed during e2e global setup');
-
+        runDatabaseMigrations();
         await resetAuthJwks(process.env.DATABASE_URL);
     }
 

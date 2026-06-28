@@ -1,5 +1,5 @@
-import { spawnSync } from 'node:child_process';
 import pg from 'pg';
+import { runDatabaseMigrations } from '@tc/testing';
 
 const defaultUser = require('../fixtures/users/default-user.json') as { userId: string };
 const viewerUser = require('../fixtures/users/viewer-user.json') as { userId: string };
@@ -22,13 +22,7 @@ module.exports = async function () {
     console.log('\nSetting up users-service e2e...\n');
 
     if (process.env.DATABASE_URL) {
-        const result = spawnSync('bun', ['library/database/scripts/run-migrations.ts'], {
-            cwd: process.cwd(),
-            stdio: 'inherit',
-            env: process.env,
-        });
-        if (result.status !== 0) throw new Error('Database migrations failed during e2e global setup');
-
+        runDatabaseMigrations();
         await resetFixtureProfiles(process.env.DATABASE_URL);
     }
 

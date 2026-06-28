@@ -1,19 +1,54 @@
 import { Test } from '@nestjs/testing';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
-import { Conversation, Message } from '@tc/database';
+import { Conversation, Message, Trip, TripMembership } from '@tc/database';
 import { AppService } from '../../src/app/app.service';
-import { ConversationParticipantRepository, ConversationRepository, MessageRepository } from '../../src/app/repositories';
+import {
+    ConversationParticipantRepository,
+    ConversationRepository,
+    MessageRepository,
+    TripMembershipRepository,
+    TripRepository,
+} from '../../src/app/repositories';
 
 describe('AppService', () => {
     let service: AppService;
-    let conversations: jest.Mocked<Pick<ConversationRepository, 'create' | 'save' | 'findDirectBetweenUsers' | 'findForUser' | 'update'>>;
-    let participants: jest.Mocked<Pick<ConversationParticipantRepository, 'create' | 'save' | 'findByConversationAndUser'>>;
+    let conversations: jest.Mocked<Pick<ConversationRepository, 'create' | 'save' | 'findDirectBetweenUsers' | 'findForUser' | 'findByTripId' | 'update'>>;
+    let participants: jest.Mocked<Pick<ConversationParticipantRepository, 'create' | 'save' | 'findByConversationAndUser' | 'findByConversationId' | 'remove'>>;
     let messages: jest.Mocked<Pick<MessageRepository, 'create' | 'save' | 'findByConversationId'>>;
+    let trips: jest.Mocked<Pick<TripRepository, 'findById'>>;
+    let memberships: jest.Mocked<Pick<TripMembershipRepository, 'findByTripAndUser' | 'findActiveByTripId'>>;
 
     const baseConversation: Conversation = {
         id: 'conversation-1',
         type: 'direct',
         tripId: null,
+        createdAt: new Date('2026-01-01T00:00:00.000Z'),
+        updatedAt: new Date('2026-01-02T00:00:00.000Z'),
+        deletedAt: null,
+    };
+
+    const tripConversation: Conversation = {
+        ...baseConversation,
+        id: 'conversation-trip-1',
+        type: 'trip',
+        tripId: 'trip-1',
+    };
+
+    const baseTrip: Trip = {
+        id: 'trip-1',
+        organizerId: 'organizer-1',
+        title: 'Pacific Coast Highway',
+        description: null,
+        destination: 'California, USA',
+        meetingLocation: null,
+        startDate: new Date('2026-07-01T09:00:00.000Z'),
+        endDate: new Date('2026-07-07T18:00:00.000Z'),
+        capacity: 12,
+        visibility: 'public',
+        status: 'published',
+        coverImageUrls: [],
+        categories: [],
+        tags: [],
         createdAt: new Date('2026-01-01T00:00:00.000Z'),
         updatedAt: new Date('2026-01-02T00:00:00.000Z'),
         deletedAt: null,
@@ -33,21 +68,26 @@ describe('AppService', () => {
     beforeAll(async () => {
         conversations = {
             create: jest.fn((data) => data as Conversation),
-            save: jest.fn(async (conversation) => ({ ...baseConversation, ...conversation, id: 'conversation-1' })),
+            save: jest.fn(async (conversation) => ({ ...baseConversation, ...conversation, id: conversation.id ?? 'conversation-1' })),
             findDirectBetweenUsers: jest.fn(),
             findForUser: jest.fn(),
+            findByTripId: jest.fn(),
             update: jest.fn(async () => ({ affected: 1, raw: [], generatedMaps: [] })),
         };
         participants = {
             create: jest.fn((data) => data),
             save: jest.fn(async (rows) => rows),
             findByConversationAndUser: jest.fn(),
+            findByConversationId: jest.fn(),
+            remove: jest.fn(async () => []),
         };
         messages = {
             create: jest.fn((data) => data as Message),
             save: jest.fn(async (message) => ({ ...baseMessage, ...message, id: 'message-1' })),
             findByConversationId: jest.fn(),
         };
+        trips = { findById: jest.fn() };
+        memberships = { findByTripAndUser: jest.fn(), findActiveByTripId: jest.fn() };
 
         const app = await Test.createTestingModule({
             providers: [
@@ -55,6 +95,8 @@ describe('AppService', () => {
                 { provide: ConversationRepository, useValue: conversations },
                 { provide: ConversationParticipantRepository, useValue: participants },
                 { provide: MessageRepository, useValue: messages },
+                { provide: TripRepository, useValue: trips },
+                { provide: TripMembershipRepository, useValue: memberships },
             ],
         }).compile();
 
@@ -71,6 +113,15 @@ describe('AppService', () => {
             updatedAt: new Date(),
             deletedAt: null,
         });
+        trips.findById.mockResolvedValue(baseTrip);
+        conversations.findByTripId.mockResolvedValue(null);
+        conversations.save.mockImplementation(async (conversation) => ({
+            ...tripConversation,
+            ...conversation,
+            id: 'conversation-trip-1',
+        }));
+        memberships.findActiveByTripId.mockResolvedValue([]);
+        participants.findByConversationId.mockResolvedValue([]);
     });
 
     describe('createDirectConversation', () => {
@@ -101,6 +152,62 @@ describe('AppService', () => {
             expect(conversations.findForUser).toHaveBeenCalledWith('user-a');
             expect(result.conversations).toHaveLength(1);
             expect(result.conversations[0].id).toBe('conversation-1');
+        });
+    });
+
+    describe('getTripConversation', () => {
+        it('creates a trip conversation for the organizer and syncs participants', async () => {
+            const result = await service.getTripConversation('organizer-1', 'trip-1');
+            expect(conversations.save).toHaveBeenCalledWith(expect.objectContaining({ type: 'trip', trip: { id: 'trip-1' } }));
+            expect(participants.save).toHaveBeenCalledWith([expect.objectContaining({ userId: 'organizer-1' })]);
+            expect(result.conversation.type).toBe('trip');
+            expect(result.conversation.tripId).toBe('trip-1');
+        });
+
+        it('returns an existing trip conversation for an active member', async () => {
+            conversations.findByTripId.mockResolvedValue(tripConversation);
+            memberships.findByTripAndUser.mockResolvedValue({ id: 'membership-1', tripId: 'trip-1', userId: 'member-1', status: 'active' } as TripMembership);
+            const result = await service.getTripConversation('member-1', 'trip-1');
+            expect(conversations.save).not.toHaveBeenCalled();
+            expect(result.conversation.id).toBe('conversation-trip-1');
+        });
+
+        it('throws when the trip does not exist', async () => {
+            trips.findById.mockResolvedValue(null);
+            await expect(service.getTripConversation('organizer-1', 'trip-1')).rejects.toBeInstanceOf(NotFoundException);
+        });
+
+        it('throws when the user is not an organizer or active member', async () => {
+            memberships.findByTripAndUser.mockResolvedValue({ id: 'membership-1', tripId: 'trip-1', userId: 'outsider', status: 'pending' } as TripMembership);
+            await expect(service.getTripConversation('outsider', 'trip-1')).rejects.toBeInstanceOf(NotFoundException);
+        });
+    });
+
+    describe('listTripMessages', () => {
+        it('returns messages for an active member', async () => {
+            conversations.findByTripId.mockResolvedValue(tripConversation);
+            memberships.findByTripAndUser.mockResolvedValue({ id: 'membership-1', tripId: 'trip-1', userId: 'member-1', status: 'active' } as TripMembership);
+            messages.findByConversationId.mockResolvedValue([baseMessage]);
+            const result = await service.listTripMessages('member-1', 'trip-1');
+            expect(messages.findByConversationId).toHaveBeenCalledWith('conversation-trip-1');
+            expect(result.messages).toHaveLength(1);
+        });
+    });
+
+    describe('sendTripMessage', () => {
+        it('stores a text message in the trip conversation', async () => {
+            conversations.findByTripId.mockResolvedValue(tripConversation);
+            participants.findByConversationAndUser.mockResolvedValue({
+                id: 'participant-1',
+                conversationId: 'conversation-trip-1',
+                userId: 'organizer-1',
+                createdAt: new Date(),
+                updatedAt: new Date(),
+                deletedAt: null,
+            });
+            const result = await service.sendTripMessage('organizer-1', 'trip-1', { body: 'Welcome to the trip!' });
+            expect(messages.save).toHaveBeenCalledWith(expect.objectContaining({ body: 'Welcome to the trip!', senderId: 'organizer-1' }));
+            expect(result.message.body).toBe('Welcome to the trip!');
         });
     });
 

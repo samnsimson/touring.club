@@ -31,6 +31,27 @@ export class AppController {
         return this.appService.listConversations(userId);
     }
 
+    @Get('trips/:tripId')
+    @ApiResource({ type: CreateConversationResponseDto, operationId: 'getTripConversation', status: HttpStatus.OK })
+    @ApiResourceExceptions(HttpStatus.NOT_FOUND, HttpStatus.UNAUTHORIZED)
+    async getTripConversation(@CurrentSession('userId') userId: string, @Param('tripId') tripId: string) {
+        return this.appService.getTripConversation(userId, tripId);
+    }
+
+    @Get('trips/:tripId/messages')
+    @ApiResource({ type: ListMessagesResponseDto, operationId: 'listTripMessages', status: HttpStatus.OK })
+    @ApiResourceExceptions(HttpStatus.NOT_FOUND, HttpStatus.UNAUTHORIZED)
+    async listTripMessages(@CurrentSession('userId') userId: string, @Param('tripId') tripId: string) {
+        return this.appService.listTripMessages(userId, tripId);
+    }
+
+    @Post('trips/:tripId/messages')
+    @ApiResource({ type: SendMessageResponseDto, operationId: 'sendTripMessage', status: HttpStatus.CREATED })
+    @ApiResourceExceptions(HttpStatus.BAD_REQUEST, HttpStatus.NOT_FOUND, HttpStatus.UNAUTHORIZED)
+    async sendTripMessage(@CurrentSession('userId') userId: string, @Param('tripId') tripId: string, @Body() dto: SendMessageDto) {
+        return this.appService.sendTripMessage(userId, tripId, dto);
+    }
+
     @Get(':conversationId/messages')
     @ApiResource({ type: ListMessagesResponseDto, operationId: 'listMessages', status: HttpStatus.OK })
     @ApiResourceExceptions(HttpStatus.NOT_FOUND, HttpStatus.UNAUTHORIZED)

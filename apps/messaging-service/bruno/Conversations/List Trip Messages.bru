@@ -1,0 +1,19 @@
+meta {
+  name: List Trip Messages
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/api/v1/conversations/trips/{{tripId}}/messages
+  body: none
+  auth: bearer
+}
+
+headers {
+  Authorization: Bearer {{accessToken}}
+}
+
+docs {
+  List messages in a trip group chat. Creates the conversation and syncs participants on first access.
+}

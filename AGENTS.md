@@ -74,7 +74,7 @@ touring.club/
 │   ├── auth-service/        # Auth API — sign-up, sign-in, verify-email, sessions
 │   ├── users-service/       # User profiles — GET/PATCH me, travel history, public profile
 │   ├── trips-service/       # Trips — create, discovery, membership
-│   ├── messaging-service/   # Direct messaging — conversations and messages
+│   ├── messaging-service/   # Direct and trip group chat — conversations and messages
 │   └── notifications-service/ # In-app notifications — list and mark read
 ├── library/                 # Shared infrastructure consumed by all services
 │   ├── auth/                # Better Auth config, guards, adapter (shared auth infra)
@@ -94,26 +94,26 @@ touring.club/
 
 **Where to create new files:**
 
-| Artifact                    | Location                                 | Generator                                        |
-| --------------------------- | ---------------------------------------- | ------------------------------------------------ |
-| New domain microservice     | `apps/<domain>-service/`                 | See **Scaffold microservice** below              |
-| New shared library          | `library/<lib-name>/`                    | `nx-generate` skill → `@nx/js:library`           |
-| DTOs, controllers, services | `apps/<service>/src/app/`                | Hand-written — domain logic stays in the service |
-| App unit tests              | `apps/<service>/__tests__/unit/`         | Hand-written Jest specs                          |
-| App e2e tests               | `apps/<service>/__tests__/e2e/`          | `@tc/testing` + Jest e2e target                  |
-| Lib unit tests              | `library/<lib>/__tests__/unit/`          | Hand-written Jest specs (Vitest for `auth` lib)  |
-| App Jest config             | `apps/<service>/jest.config.cts`         | `createAppUnitJestConfig` from `jest/`           |
-| App e2e Jest config         | `apps/<service>/jest.e2e.config.cts`     | `createAppE2eJestConfig` from `jest/`            |
-| Lib Jest config             | `library/<lib>/jest.config.cts`          | `createLibJestConfig` from `jest/`               |
-| Auth DB entities            | `library/database/src/entities/auth/`    | Better Auth generate (`auth:generate`)           |
-| Other DB entities           | `library/database/src/entities/general/` | Hand-written + TypeORM migrations                |
-| Service repositories        | `apps/<service>/src/app/repositories/`   | Extend `BaseRepository` from `@tc/database`      |
-| DB migrations               | `library/database/src/migrations/`       | `bun nx run database:migration:generate`         |
-| DB CLI scripts              | `library/database/scripts/`              | `run-migrations.ts`, `database.datasource.ts`    |
-| Env variables               | `library/config/src/lib/env.schema.ts`   | Hand-written                                     |
-| Shared utilities            | `library/utils/src/lib/`                 | Hand-written                                     |
-| Auth integration (shared)   | `library/auth/src/lib/`                  | Hand-written                                     |
-| Auth CLI scripts            | `library/auth/scripts/`                  | `auth.cli.config.ts` for `auth:generate`         |
+| Artifact                    | Location                                 | Generator                                                                                       |
+| --------------------------- | ---------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| New domain microservice     | `apps/<domain>-service/`                 | See **Scaffold microservice** below                                                             |
+| New shared library          | `library/<lib-name>/`                    | `nx-generate` skill → `@nx/js:library`                                                          |
+| DTOs, controllers, services | `apps/<service>/src/app/`                | Hand-written — domain logic stays in the service                                                |
+| App unit tests              | `apps/<service>/__tests__/unit/`         | Hand-written Jest specs                                                                         |
+| App e2e tests               | `apps/<service>/__tests__/e2e/`          | `@tc/testing` + Jest e2e target                                                                 |
+| Lib unit tests              | `library/<lib>/__tests__/unit/`          | Hand-written Jest specs (Vitest for `auth` lib)                                                 |
+| App Jest config             | `apps/<service>/jest.config.cts`         | `createAppUnitJestConfig` from `jest/`                                                          |
+| App e2e Jest config         | `apps/<service>/jest.e2e.config.cts`     | `createAppE2eJestConfig` from `jest/`                                                           |
+| Lib Jest config             | `library/<lib>/jest.config.cts`          | `createLibJestConfig` from `jest/`                                                              |
+| Auth DB entities            | `library/database/src/entities/auth/`    | Better Auth generate (`auth:generate`)                                                          |
+| Other DB entities           | `library/database/src/entities/general/` | Hand-written + TypeORM migrations                                                               |
+| Service repositories        | `apps/<service>/src/app/repositories/`   | Extend `BaseRepository` from `@tc/database`                                                     |
+| DB migrations               | `library/database/src/migrations/`       | `bun nx run database:migration:generate`                                                        |
+| DB CLI scripts              | `library/database/scripts/`              | `database.datasource.ts`, bundled `run-migrations-entry.ts` → `dist/scripts/run-migrations.cjs` |
+| Env variables               | `library/config/src/lib/env.schema.ts`   | Hand-written                                                                                    |
+| Shared utilities            | `library/utils/src/lib/`                 | Hand-written                                                                                    |
+| Auth integration (shared)   | `library/auth/src/lib/`                  | Hand-written                                                                                    |
+| Auth CLI scripts            | `library/auth/scripts/`                  | `auth.cli.config.ts` for `auth:generate`                                                        |
 
 Do **not** put domain business logic in `library/` or microservice-specific code that belongs in another service's app. Libraries hold **shared infrastructure**; each microservice owns its domain controllers, services, and DTOs. **CLI/tooling entrypoints** (migrations runner, TypeORM data source, Better Auth generate config) live under `library/<lib>/scripts/` — not in `src/`.
 
@@ -162,7 +162,7 @@ Libraries export through `src/index.ts`. Add new public APIs there; keep interna
 - **All other domain entities** — PostgreSQL schema `general`, path `entities/general/` (profiles, trips, messages, etc.)
 - Use `@Entity({ schema: 'general', name: 'table_name' })` for non-auth entities
 - **General entity relations** — entities in the same `general` schema that reference each other must declare TypeORM relations (`@ManyToOne` / `@OneToMany` + `@JoinColumn`; expose FK ids via `@RelationId`). Cross-schema refs (e.g. `userId` → `auth.users`) stay as plain columns. Graph: `Trip` ↔ `TripMembership`, `Trip` ↔ `Conversation`, `Conversation` ↔ `ConversationParticipant` / `Message`.
-- **Repository queries** — prefer `find` / `findOne` with relation filters and find operators re-exported from `@tc/database` (`In`, `Not`, `ILike`, `Raw`, etc.). Use QueryBuilder only when find options cannot express the query.
+- **Repository queries** — prefer `find` / `findOne` with relation filters and find operators re-exported from `@tc/database` (`In`, `Not`, `ILike`, `Raw`, etc.). Use QueryBuilder only when find options cannot express the query. Query by relation (e.g. `{ trip: { id: tripId } }`), not `@RelationId` fields; use relation objects on `create`/`save` for inserts.
 - **All schema migrations** (auth and general) — TypeORM only: `bun run migration:generate --name=...` then `bun run migration:run`
 - Re-exported types (`DataSource`, `EntityTarget`, `FindOptionsWhere`, `ObjectLiteral`) and find operators (`In`, `Not`, `ILike`, `And`, `Raw`, …) — import from `@tc/database`; **do not add a direct `typeorm` dependency to apps** (avoids version conflicts)
 
@@ -238,7 +238,7 @@ Libraries must not import from apps. Avoid circular deps between libraries. `@tc
 | `auth-service`          | app  | Auth microservice — REST API (`/api/v1/auth/*`)                                                |
 | `users-service`         | app  | User profiles microservice — REST API (`/api/v1/profiles/*`)                                   |
 | `trips-service`         | app  | Trips microservice — organizer CRUD/lifecycle, public discovery, join/leave/approve membership |
-| `messaging-service`     | app  | Messaging microservice — direct conversations, send/list messages                              |
+| `messaging-service`     | app  | Messaging microservice — direct conversations, trip group chat, send/list messages             |
 | `notifications-service` | app  | Notifications microservice — list notifications, mark read                                     |
 | `auth`                  | lib  | Shared Better Auth integration (guards, adapter)                                               |
 | `core`                  | lib  | Bootstrap & Swagger                                                                            |
@@ -286,7 +286,7 @@ const { createAppE2eJestConfig } = require('../../jest/create-app-e2e-config.cjs
 module.exports = createAppE2eJestConfig('my-service', __dirname);
 ```
 
-Wire the e2e target in `project.json` to `jest.e2e.config.cts` and follow `__tests__/e2e/support/` conventions (see `.cursor/rules/e2e-test-format.mdc`).
+Wire the e2e target in `project.json` to `jest.e2e.config.cts` and follow `__tests__/e2e/support/` conventions (see `.cursor/rules/e2e-test-format.mdc`). E2e uses `jest/.e2e.swcrc` (CommonJS + decorator metadata for Nest DI) and `jest/.e2e-database.swcrc` (no decorator metadata on `library/database/src/entities/**` only) so circular TypeORM entity imports load without changing entity relation patterns.
 
 ### Lib Jest config
 
@@ -359,7 +359,7 @@ bun nx run auth-service:e2e                   # Auth service e2e (requires Postg
 bun nx affected -t lint test build            # Only changed projects
 
 # Database
-bun run migration:run                         # Apply migrations
+bun run migration:run                         # Build bundled CJS runner, then apply migrations
 bun run migration:generate                  # Generate migration (pass --name=...)
 
 # Auth (entities only — then use migration:generate for schema)

@@ -21,7 +21,7 @@ describe('TripMembershipRepository', () => {
             const members = [{ id: 'membership-1' }] as TripMembership[];
             find.mockResolvedValue(members);
             const result = await membershipRepository.findByTripId('trip-1');
-            expect(find).toHaveBeenCalledWith({ where: { tripId: 'trip-1' }, order: { createdAt: 'ASC' } });
+            expect(find).toHaveBeenCalledWith({ where: { trip: { id: 'trip-1' } }, order: { createdAt: 'ASC' } });
             expect(result).toBe(members);
         });
     });
@@ -40,7 +40,7 @@ describe('TripMembershipRepository', () => {
             const membership = { id: 'membership-1', tripId: 'trip-1', userId: 'participant-1' } as TripMembership;
             findOne.mockResolvedValue(membership);
             const result = await membershipRepository.findByTripAndUser('trip-1', 'participant-1');
-            expect(findOne).toHaveBeenCalledWith({ where: { tripId: 'trip-1', userId: 'participant-1' } });
+            expect(findOne).toHaveBeenCalledWith({ where: { trip: { id: 'trip-1' }, userId: 'participant-1' } });
             expect(result).toBe(membership);
         });
     });
@@ -59,7 +59,7 @@ describe('TripMembershipRepository', () => {
             const membership = { id: 'membership-1', tripId: 'trip-1' } as TripMembership;
             findOne.mockResolvedValue(membership);
             const result = await membershipRepository.findByIdForTrip('membership-1', 'trip-1');
-            expect(findOne).toHaveBeenCalledWith({ where: { id: 'membership-1', tripId: 'trip-1' } });
+            expect(findOne).toHaveBeenCalledWith({ where: { id: 'membership-1', trip: { id: 'trip-1' } } });
             expect(result).toBe(membership);
         });
     });
@@ -77,7 +77,7 @@ describe('TripMembershipRepository', () => {
         it('counts active members for a trip', async () => {
             count.mockResolvedValue(3);
             const result = await membershipRepository.countActiveMembers('trip-1');
-            expect(count).toHaveBeenCalledWith({ where: { tripId: 'trip-1', status: 'active' } });
+            expect(count).toHaveBeenCalledWith({ where: { trip: { id: 'trip-1' }, status: 'active' } });
             expect(result).toBe(3);
         });
     });

@@ -18,10 +18,26 @@
         },
         "migration:run": {
             "executor": "nx:run-commands",
+            "dependsOn": ["database:build-migrations"],
+            "options": {
+                "command": "bun --env-file=.env library/database/dist/scripts/run-migrations.cjs",
+                "cwd": "{workspaceRoot}"
+            }
+        },
+        "build-migrations": {
+            "executor": "@nx/esbuild:esbuild",
+            "outputs": ["{options.outputPath}"],
             "dependsOn": ["config:build", "utils:build"],
             "options": {
-                "command": "bun --bun library/database/scripts/run-migrations.ts",
-                "cwd": "{workspaceRoot}"
+                "outputPath": "library/database/dist/scripts",
+                "main": "library/database/scripts/run-migrations-entry.ts",
+                "tsConfig": "library/database/scripts/tsconfig.json",
+                "bundle": true,
+                "platform": "node",
+                "format": ["cjs"],
+                "outputFileName": "run-migrations.js",
+                "thirdParty": true,
+                "external": ["@tc/config", "@tc/utils", "typeorm", "pg", "pg-native", "reflect-metadata"]
             }
         },
         "migration:generate": {

@@ -12,7 +12,7 @@ function createLibJestConfig(displayName, projectRoot) {
         },
         moduleFileExtensions: ['ts', 'js', 'html'],
         coverageDirectory: 'test-output/jest/coverage',
-        collectCoverageFrom: ['src/**/*.{ts,tsx}'],
+        collectCoverageFrom: ['src/**/*.{ts,tsx}', '!src/entities/**'],
     };
 }
 

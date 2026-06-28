@@ -1,0 +1,19 @@
+meta {
+  name: Get Trip Conversation
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/v1/conversations/trips/{{tripId}}
+  body: none
+  auth: bearer
+}
+
+headers {
+  Authorization: Bearer {{accessToken}}
+}
+
+docs {
+  Get or create the group conversation for a trip. Available to the organizer and active members.
+}
