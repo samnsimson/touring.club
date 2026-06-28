@@ -1,13 +1,19 @@
 import { Test } from '@nestjs/testing';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
-import { Trip } from '@tc/database';
+import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
+import { Trip, TripMembership } from '@tc/database';
 import { AppService } from '../../src/app/app.service';
-import { TripRepository } from '../../src/app/repositories';
+import { TripMembershipRepository, TripRepository } from '../../src/app/repositories';
 
 describe('AppService', () => {
     let service: AppService;
     let trips: jest.Mocked<
-        Pick<TripRepository, 'create' | 'save' | 'findByOrganizerId' | 'findByIdForOrganizer' | 'findPublishedPublic' | 'findPublicById' | 'update'>
+        Pick<
+            TripRepository,
+            'create' | 'save' | 'findByOrganizerId' | 'findByIdForOrganizer' | 'findPublishedPublic' | 'findPublicById' | 'findPublishedById' | 'update'
+        >
+    >;
+    let memberships: jest.Mocked<
+        Pick<TripMembershipRepository, 'create' | 'save' | 'findByTripId' | 'findByTripAndUser' | 'findByIdForTrip' | 'countActiveMembers' | 'update'>
     >;
 
     const baseTrip: Trip = {
@@ -30,6 +36,16 @@ describe('AppService', () => {
         deletedAt: null,
     };
 
+    const baseMembership: TripMembership = {
+        id: 'membership-1',
+        tripId: 'trip-1',
+        userId: 'participant-1',
+        status: 'active',
+        createdAt: new Date('2026-01-01T00:00:00.000Z'),
+        updatedAt: new Date('2026-01-02T00:00:00.000Z'),
+        deletedAt: null,
+    };
+
     beforeAll(async () => {
         trips = {
             create: jest.fn((data) => data as Trip),
@@ -38,11 +54,21 @@ describe('AppService', () => {
             findByIdForOrganizer: jest.fn(),
             findPublishedPublic: jest.fn(),
             findPublicById: jest.fn(),
+            findPublishedById: jest.fn(),
+            update: jest.fn(async () => ({ affected: 1, raw: [], generatedMaps: [] })),
+        };
+        memberships = {
+            create: jest.fn((data) => data as TripMembership),
+            save: jest.fn(async (membership) => ({ ...baseMembership, ...membership, id: 'membership-1' })),
+            findByTripId: jest.fn(),
+            findByTripAndUser: jest.fn(),
+            findByIdForTrip: jest.fn(),
+            countActiveMembers: jest.fn(),
             update: jest.fn(async () => ({ affected: 1, raw: [], generatedMaps: [] })),
         };
 
         const app = await Test.createTestingModule({
-            providers: [AppService, { provide: TripRepository, useValue: trips }],
+            providers: [AppService, { provide: TripRepository, useValue: trips }, { provide: TripMembershipRepository, useValue: memberships }],
         }).compile();
 
         service = app.get<AppService>(AppService);
@@ -166,6 +192,59 @@ describe('AppService', () => {
         it('throws when the trip is not publicly discoverable', async () => {
             trips.findPublicById.mockResolvedValue(null);
             await expect(service.getPublicTrip('missing')).rejects.toBeInstanceOf(NotFoundException);
+        });
+    });
+
+    describe('joinTrip', () => {
+        it('creates an active membership for a published public trip', async () => {
+            trips.findPublishedById.mockResolvedValue({ ...baseTrip, status: 'published', visibility: 'public' });
+            memberships.findByTripAndUser.mockResolvedValue(null);
+            memberships.countActiveMembers.mockResolvedValue(0);
+            const result = await service.joinTrip('participant-1', 'trip-1');
+            expect(memberships.create).toHaveBeenCalledWith(expect.objectContaining({ tripId: 'trip-1', userId: 'participant-1', status: 'active' }));
+            expect(result.membership.status).toBe('active');
+        });
+
+        it('creates a pending membership for a published private trip', async () => {
+            trips.findPublishedById.mockResolvedValue({ ...baseTrip, status: 'published', visibility: 'private' });
+            memberships.findByTripAndUser.mockResolvedValue(null);
+            const result = await service.joinTrip('participant-1', 'trip-1');
+            expect(memberships.create).toHaveBeenCalledWith(expect.objectContaining({ status: 'pending' }));
+            expect(result.membership.status).toBe('pending');
+        });
+
+        it('rejects when the user is already a member', async () => {
+            trips.findPublishedById.mockResolvedValue({ ...baseTrip, status: 'published' });
+            memberships.findByTripAndUser.mockResolvedValue({ ...baseMembership, status: 'active' });
+            await expect(service.joinTrip('participant-1', 'trip-1')).rejects.toBeInstanceOf(ConflictException);
+        });
+
+        it('rejects when the organizer tries to join their own trip', async () => {
+            trips.findPublishedById.mockResolvedValue({ ...baseTrip, status: 'published' });
+            await expect(service.joinTrip('organizer-1', 'trip-1')).rejects.toBeInstanceOf(BadRequestException);
+        });
+    });
+
+    describe('leaveTrip', () => {
+        it('marks an active membership as left', async () => {
+            memberships.findByTripAndUser
+                .mockResolvedValueOnce({ ...baseMembership, status: 'active' })
+                .mockResolvedValueOnce({ ...baseMembership, status: 'left' });
+            const result = await service.leaveTrip('participant-1', 'trip-1');
+            expect(memberships.update).toHaveBeenCalledWith({ id: 'membership-1' }, { status: 'left' });
+            expect(result.membership.status).toBe('left');
+        });
+    });
+
+    describe('approveMembership', () => {
+        it('approves a pending membership when capacity allows', async () => {
+            trips.findByIdForOrganizer.mockResolvedValue({ ...baseTrip, status: 'published' });
+            memberships.findByIdForTrip
+                .mockResolvedValueOnce({ ...baseMembership, status: 'pending' })
+                .mockResolvedValueOnce({ ...baseMembership, status: 'active' });
+            memberships.countActiveMembers.mockResolvedValue(0);
+            const result = await service.approveMembership('organizer-1', 'trip-1', 'membership-1');
+            expect(result.membership.status).toBe('active');
         });
     });
 });

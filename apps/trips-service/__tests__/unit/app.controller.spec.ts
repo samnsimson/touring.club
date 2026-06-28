@@ -11,7 +11,21 @@ describe('AppController', () => {
     let appService: jest.Mocked<
         Pick<
             AppService,
-            'createTrip' | 'listMyTrips' | 'getTrip' | 'updateTrip' | 'publishTrip' | 'cancelTrip' | 'archiveTrip' | 'discoverTrips' | 'getPublicTrip'
+            | 'createTrip'
+            | 'listMyTrips'
+            | 'getTrip'
+            | 'updateTrip'
+            | 'publishTrip'
+            | 'cancelTrip'
+            | 'archiveTrip'
+            | 'discoverTrips'
+            | 'getPublicTrip'
+            | 'joinTrip'
+            | 'leaveTrip'
+            | 'listTripMembers'
+            | 'approveMembership'
+            | 'rejectMembership'
+            | 'removeMembership'
         >
     >;
 
@@ -26,6 +40,12 @@ describe('AppController', () => {
             archiveTrip: jest.fn(),
             discoverTrips: jest.fn(),
             getPublicTrip: jest.fn(),
+            joinTrip: jest.fn(),
+            leaveTrip: jest.fn(),
+            listTripMembers: jest.fn(),
+            approveMembership: jest.fn(),
+            rejectMembership: jest.fn(),
+            removeMembership: jest.fn(),
         };
 
         const app = await Test.createTestingModule({
@@ -41,7 +61,9 @@ describe('AppController', () => {
     });
 
     const req = { session: { userId: 'organizer-1', sub: 'organizer-1' } } as never;
+    const participantReq = { session: { userId: 'participant-1', sub: 'participant-1' } } as never;
     const tripResponse = { trip: { id: 'trip-1', organizerId: 'organizer-1', status: 'draft' } };
+    const membershipResponse = { membership: { id: 'membership-1', tripId: 'trip-1', userId: 'participant-1', status: 'active' } };
 
     it('createTrip delegates to AppService', async () => {
         const dto = {
@@ -91,5 +113,17 @@ describe('AppController', () => {
         appService.getPublicTrip.mockResolvedValue(tripResponse as never);
         await expect(controller.getPublicTrip('trip-1')).resolves.toEqual(tripResponse);
         expect(appService.getPublicTrip).toHaveBeenCalledWith('trip-1');
+    });
+
+    it('joinTrip delegates to AppService', async () => {
+        appService.joinTrip.mockResolvedValue(membershipResponse as never);
+        await expect(controller.joinTrip(participantReq, 'trip-1')).resolves.toEqual(membershipResponse);
+        expect(appService.joinTrip).toHaveBeenCalledWith('participant-1', 'trip-1');
+    });
+
+    it('listTripMembers delegates to AppService', async () => {
+        appService.listTripMembers.mockResolvedValue({ members: [] });
+        await expect(controller.listTripMembers(req, 'trip-1')).resolves.toEqual({ members: [] });
+        expect(appService.listTripMembers).toHaveBeenCalledWith('organizer-1', 'trip-1');
     });
 });

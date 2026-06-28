@@ -1,0 +1,19 @@
+meta {
+  name: Join Trip
+  type: http
+  seq: 10
+}
+
+post {
+  url: {{baseUrl}}/api/v1/trips/{{tripId}}/join
+  body: none
+  auth: bearer
+}
+
+headers {
+  Authorization: Bearer {{accessToken}}
+}
+
+docs {
+  Join a published trip. Public trips join as active; private trips create a pending request.
+}

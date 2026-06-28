@@ -1,12 +1,17 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { Trip } from '@tc/database';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { Trip, TripMembership, type TripMembershipStatus } from '@tc/database';
 import { CreateTripDto, DiscoverTripsQueryDto, UpdateTripDto } from './dto';
-import { TripRepository } from './repositories';
+import { TripMembershipRepository, TripRepository } from './repositories';
 import { TripStatusUtils } from './trip.status';
+
+const OPEN_MEMBERSHIP_STATUSES: TripMembershipStatus[] = ['pending', 'active'];
 
 @Injectable()
 export class AppService {
-    constructor(private readonly trips: TripRepository) {}
+    constructor(
+        private readonly trips: TripRepository,
+        private readonly memberships: TripMembershipRepository,
+    ) {}
 
     async createTrip(organizerId: string, dto: CreateTripDto) {
         const startDate = new Date(dto.startDate);
@@ -31,17 +36,17 @@ export class AppService {
             }),
         );
 
-        return { trip: this.toDto(trip) };
+        return { trip: this.toTripDto(trip) };
     }
 
     async listMyTrips(organizerId: string) {
         const trips = await this.trips.findByOrganizerId(organizerId);
-        return { trips: trips.map((trip) => this.toDto(trip)) };
+        return { trips: trips.map((trip) => this.toTripDto(trip)) };
     }
 
     async getTrip(organizerId: string, tripId: string) {
         const trip = await this.requireOwnedTrip(organizerId, tripId);
-        return { trip: this.toDto(trip) };
+        return { trip: this.toTripDto(trip) };
     }
 
     async updateTrip(organizerId: string, tripId: string, dto: UpdateTripDto) {
@@ -86,13 +91,82 @@ export class AppService {
 
     async discoverTrips(query: DiscoverTripsQueryDto) {
         const trips = await this.trips.findPublishedPublic(query);
-        return { trips: trips.map((trip) => this.toDto(trip)) };
+        return { trips: trips.map((trip) => this.toTripDto(trip)) };
     }
 
     async getPublicTrip(tripId: string) {
         const trip = await this.trips.findPublicById(tripId);
         if (!trip) throw new NotFoundException('Trip not found');
-        return { trip: this.toDto(trip) };
+        return { trip: this.toTripDto(trip) };
+    }
+
+    async joinTrip(userId: string, tripId: string) {
+        const trip = await this.requireJoinableTrip(tripId);
+        if (trip.organizerId === userId) throw new BadRequestException('Organizers cannot join their own trip');
+
+        const status = trip.visibility === 'public' ? 'active' : 'pending';
+        if (status === 'active') await this.assertTripHasCapacity(tripId, trip.capacity);
+
+        const existing = await this.memberships.findByTripAndUser(tripId, userId);
+        if (existing) {
+            if (OPEN_MEMBERSHIP_STATUSES.includes(existing.status)) {
+                throw new ConflictException('Already a member of this trip');
+            }
+            await this.memberships.update({ id: existing.id }, { status });
+            const membership = await this.memberships.findByTripAndUser(tripId, userId);
+            return { membership: this.toMembershipDto(membership!) };
+        }
+
+        const membership = await this.memberships.save(
+            this.memberships.create({
+                tripId,
+                userId,
+                status,
+            }),
+        );
+
+        return { membership: this.toMembershipDto(membership) };
+    }
+
+    async leaveTrip(userId: string, tripId: string) {
+        const membership = await this.requireOpenMembership(tripId, userId);
+        await this.memberships.update({ id: membership.id }, { status: 'left' });
+        const updated = await this.memberships.findByTripAndUser(tripId, userId);
+        return { membership: this.toMembershipDto(updated!) };
+    }
+
+    async listTripMembers(organizerId: string, tripId: string) {
+        await this.requireOwnedTrip(organizerId, tripId);
+        const members = await this.memberships.findByTripId(tripId);
+        return { members: members.map((member) => this.toMembershipDto(member)) };
+    }
+
+    async approveMembership(organizerId: string, tripId: string, membershipId: string) {
+        const trip = await this.requireOwnedTrip(organizerId, tripId);
+        const membership = await this.requireMembershipForTrip(tripId, membershipId);
+        if (membership.status !== 'pending') throw new BadRequestException('Only pending requests can be approved');
+        await this.assertTripHasCapacity(tripId, trip.capacity);
+        await this.memberships.update({ id: membershipId }, { status: 'active' });
+        const updated = await this.memberships.findByIdForTrip(membershipId, tripId);
+        return { membership: this.toMembershipDto(updated!) };
+    }
+
+    async rejectMembership(organizerId: string, tripId: string, membershipId: string) {
+        await this.requireOwnedTrip(organizerId, tripId);
+        const membership = await this.requireMembershipForTrip(tripId, membershipId);
+        if (membership.status !== 'pending') throw new BadRequestException('Only pending requests can be rejected');
+        await this.memberships.update({ id: membershipId }, { status: 'rejected' });
+        const updated = await this.memberships.findByIdForTrip(membershipId, tripId);
+        return { membership: this.toMembershipDto(updated!) };
+    }
+
+    async removeMembership(organizerId: string, tripId: string, membershipId: string) {
+        await this.requireOwnedTrip(organizerId, tripId);
+        const membership = await this.requireMembershipForTrip(tripId, membershipId);
+        if (membership.status !== 'active') throw new BadRequestException('Only active members can be removed');
+        await this.memberships.update({ id: membershipId }, { status: 'removed' });
+        const updated = await this.memberships.findByIdForTrip(membershipId, tripId);
+        return { membership: this.toMembershipDto(updated!) };
     }
 
     private async transitionTrip(organizerId: string, tripId: string, status: Trip['status']) {
@@ -108,11 +182,36 @@ export class AppService {
         return trip;
     }
 
+    private async requireJoinableTrip(tripId: string) {
+        const trip = await this.trips.findPublishedById(tripId);
+        if (!trip) throw new NotFoundException('Trip not found');
+        return trip;
+    }
+
+    private async requireOpenMembership(tripId: string, userId: string) {
+        const membership = await this.memberships.findByTripAndUser(tripId, userId);
+        if (!membership || !OPEN_MEMBERSHIP_STATUSES.includes(membership.status)) {
+            throw new NotFoundException('Membership not found');
+        }
+        return membership;
+    }
+
+    private async requireMembershipForTrip(tripId: string, membershipId: string) {
+        const membership = await this.memberships.findByIdForTrip(membershipId, tripId);
+        if (!membership) throw new NotFoundException('Membership not found');
+        return membership;
+    }
+
+    private async assertTripHasCapacity(tripId: string, capacity: number) {
+        const activeCount = await this.memberships.countActiveMembers(tripId);
+        if (activeCount >= capacity) throw new BadRequestException('Trip is at capacity');
+    }
+
     private assertValidDateRange(startDate: Date, endDate: Date) {
         if (endDate <= startDate) throw new BadRequestException('End date must be after start date');
     }
 
-    private toDto(trip: Trip) {
+    private toTripDto(trip: Trip) {
         return {
             id: trip.id,
             organizerId: trip.organizerId,
@@ -130,6 +229,17 @@ export class AppService {
             tags: trip.tags,
             createdAt: trip.createdAt,
             updatedAt: trip.updatedAt,
+        };
+    }
+
+    private toMembershipDto(membership: TripMembership) {
+        return {
+            id: membership.id,
+            tripId: membership.tripId,
+            userId: membership.userId,
+            status: membership.status,
+            createdAt: membership.createdAt,
+            updatedAt: membership.updatedAt,
         };
     }
 }

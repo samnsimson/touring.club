@@ -4,6 +4,7 @@ import type { DataSource } from '@tc/database';
 import { AppModule } from '../../src/app/app.module';
 
 const organizer = require('./fixtures/users/organizer.json') as { userId: string };
+const participant = require('./fixtures/users/participant.json') as { userId: string };
 
 const e2eApplication = new E2EApplication({
     rootModule: AppModule,
@@ -30,6 +31,9 @@ describe('Trips', () => {
     beforeEach(async () => {
         if (!process.env.DATABASE_URL) return;
         const dataSource = e2eApplication.getApp().get<DataSource>(getDataSourceToken());
+        await dataSource.query('DELETE FROM general.trip_memberships WHERE trip_id IN (SELECT id FROM general.trips WHERE organizer_id = $1)', [
+            organizer.userId,
+        ]);
         await dataSource.query('DELETE FROM general.trips WHERE organizer_id = $1', [organizer.userId]);
     });
 
@@ -258,5 +262,97 @@ describe('Trips', () => {
         await client.post(`/api/v1/trips/${createRes.body.trip.id}/publish`);
         const response = await api.get(`/api/v1/trips/discover/${createRes.body.trip.id}`, {});
         expect(response.status).toBe(404);
+    });
+
+    it('POST /api/v1/trips/:tripId/join adds an active member to a published public trip', async () => {
+        if (!requireDatabase('join public trip')) return;
+        const organizerClient = authedApi(api, organizer.userId);
+        const createRes = await organizerClient.post('/api/v1/trips', {
+            title: 'Coastal Drive',
+            destination: 'California, USA',
+            startDate: '2026-07-01T09:00:00.000Z',
+            endDate: '2026-07-07T18:00:00.000Z',
+            capacity: 12,
+            visibility: 'public',
+        });
+        await organizerClient.post(`/api/v1/trips/${createRes.body.trip.id}/publish`);
+        const response = await authedApi(api, participant.userId).post(`/api/v1/trips/${createRes.body.trip.id}/join`);
+        expect(response.status).toBe(200);
+        expect(response.body.membership.status).toBe('active');
+        expect(response.body.membership.userId).toBe(participant.userId);
+    });
+
+    it('POST /api/v1/trips/:tripId/join creates a pending request for a published private trip', async () => {
+        if (!requireDatabase('join private trip')) return;
+        const organizerClient = authedApi(api, organizer.userId);
+        const createRes = await organizerClient.post('/api/v1/trips', {
+            title: 'Private Drive',
+            destination: 'California, USA',
+            startDate: '2026-07-01T09:00:00.000Z',
+            endDate: '2026-07-07T18:00:00.000Z',
+            capacity: 12,
+            visibility: 'private',
+        });
+        await organizerClient.post(`/api/v1/trips/${createRes.body.trip.id}/publish`);
+        const response = await authedApi(api, participant.userId).post(`/api/v1/trips/${createRes.body.trip.id}/join`);
+        expect(response.status).toBe(200);
+        expect(response.body.membership.status).toBe('pending');
+    });
+
+    it('POST /api/v1/trips/:tripId/members/:membershipId/approve approves a pending request', async () => {
+        if (!requireDatabase('approve membership')) return;
+        const tripId = (
+            await authedApi(api, organizer.userId).post('/api/v1/trips', {
+                title: 'Private Drive',
+                destination: 'California, USA',
+                startDate: '2026-07-01T09:00:00.000Z',
+                endDate: '2026-07-07T18:00:00.000Z',
+                capacity: 12,
+                visibility: 'private',
+            })
+        ).body.trip.id;
+        await authedApi(api, organizer.userId).post(`/api/v1/trips/${tripId}/publish`);
+        const joinRes = await authedApi(api, participant.userId).post(`/api/v1/trips/${tripId}/join`);
+        const response = await authedApi(api, organizer.userId).post(`/api/v1/trips/${tripId}/members/${joinRes.body.membership.id}/approve`);
+        expect(response.status).toBe(200);
+        expect(response.body.membership.status).toBe('active');
+    });
+
+    it('POST /api/v1/trips/:tripId/leave marks a membership as left', async () => {
+        if (!requireDatabase('leave trip')) return;
+        const organizerClient = authedApi(api, organizer.userId);
+        const createRes = await organizerClient.post('/api/v1/trips', {
+            title: 'Coastal Drive',
+            destination: 'California, USA',
+            startDate: '2026-07-01T09:00:00.000Z',
+            endDate: '2026-07-07T18:00:00.000Z',
+            capacity: 12,
+            visibility: 'public',
+        });
+        await organizerClient.post(`/api/v1/trips/${createRes.body.trip.id}/publish`);
+        await authedApi(api, participant.userId).post(`/api/v1/trips/${createRes.body.trip.id}/join`);
+        const response = await authedApi(api, participant.userId).post(`/api/v1/trips/${createRes.body.trip.id}/leave`);
+        expect(response.status).toBe(200);
+        expect(response.body.membership.status).toBe('left');
+    });
+
+    it('GET /api/v1/trips/:tripId/members lists trip members for the organizer', async () => {
+        if (!requireDatabase('list members')) return;
+        const tripId = (
+            await authedApi(api, organizer.userId).post('/api/v1/trips', {
+                title: 'Coastal Drive',
+                destination: 'California, USA',
+                startDate: '2026-07-01T09:00:00.000Z',
+                endDate: '2026-07-07T18:00:00.000Z',
+                capacity: 12,
+                visibility: 'public',
+            })
+        ).body.trip.id;
+        await authedApi(api, organizer.userId).post(`/api/v1/trips/${tripId}/publish`);
+        await authedApi(api, participant.userId).post(`/api/v1/trips/${tripId}/join`);
+        const response = await authedApi(api, organizer.userId).get(`/api/v1/trips/${tripId}/members`);
+        expect(response.status).toBe(200);
+        expect(response.body.members).toHaveLength(1);
+        expect(response.body.members[0].userId).toBe(participant.userId);
     });
 });

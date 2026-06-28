@@ -1,0 +1,19 @@
+meta {
+  name: Leave Trip
+  type: http
+  seq: 11
+}
+
+post {
+  url: {{baseUrl}}/api/v1/trips/{{tripId}}/leave
+  body: none
+  auth: bearer
+}
+
+headers {
+  Authorization: Bearer {{accessToken}}
+}
+
+docs {
+  Leave a trip the authenticated user has joined or requested access to.
+}

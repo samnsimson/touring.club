@@ -17,6 +17,14 @@ export class TripRepository extends BaseRepository<Trip> {
         return this.findOne({ where: { id: tripId, organizerId } });
     }
 
+    findById(tripId: string) {
+        return this.findOne({ where: { id: tripId } });
+    }
+
+    findPublishedById(tripId: string) {
+        return this.findOne({ where: { id: tripId, status: 'published' } });
+    }
+
     findPublicById(tripId: string) {
         return this.findOne({ where: { id: tripId, status: 'published', visibility: 'public' } });
     }
