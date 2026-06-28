@@ -172,6 +172,35 @@ describe('AppService', () => {
             expect(result.conversation.id).toBe('conversation-trip-1');
         });
 
+        it('syncs trip participants when members join or leave', async () => {
+            conversations.findByTripId.mockResolvedValue(tripConversation);
+            memberships.findActiveByTripId.mockResolvedValue([
+                { id: 'membership-1', tripId: 'trip-1', userId: 'member-1', status: 'active' } as TripMembership,
+                { id: 'membership-2', tripId: 'trip-1', userId: 'member-2', status: 'active' } as TripMembership,
+            ]);
+            participants.findByConversationId.mockResolvedValue([
+                {
+                    id: 'participant-1',
+                    conversationId: 'conversation-trip-1',
+                    userId: 'organizer-1',
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                    deletedAt: null,
+                },
+                {
+                    id: 'participant-2',
+                    conversationId: 'conversation-trip-1',
+                    userId: 'former-member',
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                    deletedAt: null,
+                },
+            ]);
+            await service.getTripConversation('organizer-1', 'trip-1');
+            expect(participants.save).toHaveBeenCalledWith([expect.objectContaining({ userId: 'member-1' }), expect.objectContaining({ userId: 'member-2' })]);
+            expect(participants.remove).toHaveBeenCalledWith([expect.objectContaining({ userId: 'former-member' })]);
+        });
+
         it('throws when the trip does not exist', async () => {
             trips.findById.mockResolvedValue(null);
             await expect(service.getTripConversation('organizer-1', 'trip-1')).rejects.toBeInstanceOf(NotFoundException);

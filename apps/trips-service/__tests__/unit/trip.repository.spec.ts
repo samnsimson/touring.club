@@ -142,6 +142,32 @@ describe('TripRepository', () => {
             });
             expect(options.where.categories).toMatchObject({ _type: 'raw', _objectLiteralParameters: { category: 'Road Trip' } });
             expect(options.where.tags).toMatchObject({ _type: 'raw', _objectLiteralParameters: { tag: 'coastal' } });
+            expect(options.where.categories._getSql('trip.categories')).toBe(':category = ANY(trip.categories)');
+            expect(options.where.tags._getSql('trip.tags')).toBe(':tag = ANY(trip.tags)');
+        });
+
+        it('applies only a startDateFrom filter', async () => {
+            await tripRepository.findPublishedPublic({ startDateFrom: '2026-07-01T00:00:00.000Z' });
+            expect(find).toHaveBeenCalledWith({
+                where: {
+                    status: 'published',
+                    visibility: 'public',
+                    startDate: MoreThanOrEqual(new Date('2026-07-01T00:00:00.000Z')),
+                },
+                order: { startDate: 'ASC' },
+            });
+        });
+
+        it('applies only a startDateTo filter', async () => {
+            await tripRepository.findPublishedPublic({ startDateTo: '2026-08-01T00:00:00.000Z' });
+            expect(find).toHaveBeenCalledWith({
+                where: {
+                    status: 'published',
+                    visibility: 'public',
+                    startDate: LessThanOrEqual(new Date('2026-08-01T00:00:00.000Z')),
+                },
+                order: { startDate: 'ASC' },
+            });
         });
     });
 
