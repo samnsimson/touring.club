@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { Trip } from '@tc/database';
-import { CreateTripDto, UpdateTripDto } from './dto';
+import { CreateTripDto, DiscoverTripsQueryDto, UpdateTripDto } from './dto';
 import { TripRepository } from './repositories';
 import { TripStatusUtils } from './trip.status';
 
@@ -82,6 +82,17 @@ export class AppService {
 
     async archiveTrip(organizerId: string, tripId: string) {
         return this.transitionTrip(organizerId, tripId, 'archived');
+    }
+
+    async discoverTrips(query: DiscoverTripsQueryDto) {
+        const trips = await this.trips.findPublishedPublic(query);
+        return { trips: trips.map((trip) => this.toDto(trip)) };
+    }
+
+    async getPublicTrip(tripId: string) {
+        const trip = await this.trips.findPublicById(tripId);
+        if (!trip) throw new NotFoundException('Trip not found');
+        return { trip: this.toDto(trip) };
     }
 
     private async transitionTrip(organizerId: string, tripId: string, status: Trip['status']) {

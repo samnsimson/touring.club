@@ -260,7 +260,7 @@ No GraphQL.
 | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `auth-service`          | Sign-up, sign-in, sessions, password, email                                                                                                                          |
 | `users-service`         | Profiles, interests, privacy, avatar URL, travel history — `GET/PATCH /api/v1/profiles/me`, `GET /api/v1/profiles/me/travel-history`, `GET /api/v1/profiles/:userId` |
-| `trips-service`         | Trip creation — `POST/GET/PATCH /api/v1/trips`, `POST /api/v1/trips/:id/{publish,cancel,archive}`; discovery and membership planned                                  |
+| `trips-service`         | Trip creation + discovery — organizer CRUD/lifecycle; public `GET /api/v1/trips/discover` with filters; membership planned                                           |
 | `messaging-service`     | Conversations and messages                                                                                                                                           |
 | `notifications-service` | Notification delivery and preferences                                                                                                                                |
 

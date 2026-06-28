@@ -6,7 +6,9 @@ import { TripRepository } from '../../src/app/repositories';
 
 describe('AppService', () => {
     let service: AppService;
-    let trips: jest.Mocked<Pick<TripRepository, 'create' | 'save' | 'findByOrganizerId' | 'findByIdForOrganizer' | 'update'>>;
+    let trips: jest.Mocked<
+        Pick<TripRepository, 'create' | 'save' | 'findByOrganizerId' | 'findByIdForOrganizer' | 'findPublishedPublic' | 'findPublicById' | 'update'>
+    >;
 
     const baseTrip: Trip = {
         id: 'trip-1',
@@ -34,6 +36,8 @@ describe('AppService', () => {
             save: jest.fn(async (trip) => ({ ...baseTrip, ...trip, id: 'trip-1' })),
             findByOrganizerId: jest.fn(),
             findByIdForOrganizer: jest.fn(),
+            findPublishedPublic: jest.fn(),
+            findPublicById: jest.fn(),
             update: jest.fn(async () => ({ affected: 1, raw: [], generatedMaps: [] })),
         };
 
@@ -139,6 +143,29 @@ describe('AppService', () => {
             trips.findByIdForOrganizer.mockResolvedValueOnce({ ...baseTrip, status: 'cancelled' }).mockResolvedValueOnce({ ...baseTrip, status: 'archived' });
             const result = await service.archiveTrip('organizer-1', 'trip-1');
             expect(result.trip.status).toBe('archived');
+        });
+    });
+
+    describe('discoverTrips', () => {
+        it('returns published public trips matching filters', async () => {
+            trips.findPublishedPublic.mockResolvedValue([{ ...baseTrip, status: 'published' }]);
+            const result = await service.discoverTrips({ destination: 'California' });
+            expect(trips.findPublishedPublic).toHaveBeenCalledWith({ destination: 'California' });
+            expect(result.trips).toHaveLength(1);
+            expect(result.trips[0].status).toBe('published');
+        });
+    });
+
+    describe('getPublicTrip', () => {
+        it('returns a published public trip', async () => {
+            trips.findPublicById.mockResolvedValue({ ...baseTrip, status: 'published' });
+            const result = await service.getPublicTrip('trip-1');
+            expect(result.trip.id).toBe('trip-1');
+        });
+
+        it('throws when the trip is not publicly discoverable', async () => {
+            trips.findPublicById.mockResolvedValue(null);
+            await expect(service.getPublicTrip('missing')).rejects.toBeInstanceOf(NotFoundException);
         });
     });
 });

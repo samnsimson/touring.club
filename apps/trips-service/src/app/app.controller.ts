@@ -1,9 +1,19 @@
-import { Body, Controller, Get, HttpStatus, Param, Patch, Post, Req } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Param, Patch, Post, Query, Req } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import type { AuthenticatedRequest } from '@tc/auth';
+import { Public } from '@tc/auth';
 import { ApiResource, ApiResourceExceptions } from '@tc/utils';
 import { AppService } from './app.service';
-import { CreateTripDto, CreateTripResponseDto, GetTripResponseDto, ListTripsResponseDto, UpdateTripDto, UpdateTripResponseDto } from './dto';
+import {
+    CreateTripDto,
+    CreateTripResponseDto,
+    DiscoverTripsQueryDto,
+    DiscoverTripsResponseDto,
+    GetTripResponseDto,
+    ListTripsResponseDto,
+    UpdateTripDto,
+    UpdateTripResponseDto,
+} from './dto';
 import { TripUtils } from './trip.utils';
 
 @ApiTags('Trips')
@@ -23,6 +33,22 @@ export class AppController {
     @ApiResourceExceptions(HttpStatus.UNAUTHORIZED)
     async listMyTrips(@Req() req: AuthenticatedRequest) {
         return this.appService.listMyTrips(TripUtils.getUserId(req));
+    }
+
+    @Public()
+    @Get('discover')
+    @ApiResource({ type: DiscoverTripsResponseDto, operationId: 'discoverTrips', status: HttpStatus.OK })
+    @ApiResourceExceptions(HttpStatus.BAD_REQUEST)
+    async discoverTrips(@Query() query: DiscoverTripsQueryDto) {
+        return this.appService.discoverTrips(query);
+    }
+
+    @Public()
+    @Get('discover/:tripId')
+    @ApiResource({ type: GetTripResponseDto, operationId: 'getPublicTrip', status: HttpStatus.OK })
+    @ApiResourceExceptions(HttpStatus.NOT_FOUND)
+    async getPublicTrip(@Param('tripId') tripId: string) {
+        return this.appService.getPublicTrip(tripId);
     }
 
     @Post(':tripId/publish')

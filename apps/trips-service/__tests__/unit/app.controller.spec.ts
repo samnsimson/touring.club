@@ -2,9 +2,18 @@ import { Test } from '@nestjs/testing';
 import { AppController } from '../../src/app/app.controller';
 import { AppService } from '../../src/app/app.service';
 
+jest.mock('@tc/auth', () => ({
+    Public: () => () => undefined,
+}));
+
 describe('AppController', () => {
     let controller: AppController;
-    let appService: jest.Mocked<Pick<AppService, 'createTrip' | 'listMyTrips' | 'getTrip' | 'updateTrip' | 'publishTrip' | 'cancelTrip' | 'archiveTrip'>>;
+    let appService: jest.Mocked<
+        Pick<
+            AppService,
+            'createTrip' | 'listMyTrips' | 'getTrip' | 'updateTrip' | 'publishTrip' | 'cancelTrip' | 'archiveTrip' | 'discoverTrips' | 'getPublicTrip'
+        >
+    >;
 
     beforeAll(async () => {
         appService = {
@@ -15,6 +24,8 @@ describe('AppController', () => {
             publishTrip: jest.fn(),
             cancelTrip: jest.fn(),
             archiveTrip: jest.fn(),
+            discoverTrips: jest.fn(),
+            getPublicTrip: jest.fn(),
         };
 
         const app = await Test.createTestingModule({
@@ -68,5 +79,17 @@ describe('AppController', () => {
         appService.publishTrip.mockResolvedValue({ trip: { ...tripResponse.trip, status: 'published' } } as never);
         await expect(controller.publishTrip(req, 'trip-1')).resolves.toMatchObject({ trip: { status: 'published' } });
         expect(appService.publishTrip).toHaveBeenCalledWith('organizer-1', 'trip-1');
+    });
+
+    it('discoverTrips delegates to AppService', async () => {
+        appService.discoverTrips.mockResolvedValue({ trips: [] });
+        await expect(controller.discoverTrips({ destination: 'California' })).resolves.toEqual({ trips: [] });
+        expect(appService.discoverTrips).toHaveBeenCalledWith({ destination: 'California' });
+    });
+
+    it('getPublicTrip delegates to AppService', async () => {
+        appService.getPublicTrip.mockResolvedValue(tripResponse as never);
+        await expect(controller.getPublicTrip('trip-1')).resolves.toEqual(tripResponse);
+        expect(appService.getPublicTrip).toHaveBeenCalledWith('trip-1');
     });
 });

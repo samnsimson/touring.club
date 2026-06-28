@@ -1,0 +1,15 @@
+meta {
+  name: Get Public Trip
+  type: http
+  seq: 9
+}
+
+get {
+  url: {{baseUrl}}/api/v1/trips/discover/{{tripId}}
+  body: none
+  auth: none
+}
+
+docs {
+  Fetch a published public trip by id without authentication.
+}

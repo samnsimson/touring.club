@@ -1,0 +1,15 @@
+meta {
+  name: Discover Trips
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{baseUrl}}/api/v1/trips/discover?destination=California&category=Road%20Trips
+  body: none
+  auth: none
+}
+
+docs {
+  Browse published public trips. Supports destination, startDateFrom, startDateTo, category, and tag filters.
+}

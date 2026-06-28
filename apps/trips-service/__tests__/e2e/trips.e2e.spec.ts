@@ -160,4 +160,103 @@ describe('Trips', () => {
         expect(response.status).toBe(200);
         expect(response.body.trip.status).toBe('archived');
     });
+
+    it('GET /api/v1/trips/discover returns published public trips without authentication', async () => {
+        if (!requireDatabase('discover trips')) return;
+        const client = authedApi(api, organizer.userId);
+        const createRes = await client.post('/api/v1/trips', {
+            title: 'Coastal Drive',
+            destination: 'California, USA',
+            startDate: '2026-07-01T09:00:00.000Z',
+            endDate: '2026-07-07T18:00:00.000Z',
+            capacity: 12,
+            visibility: 'public',
+            categories: ['Road Trips'],
+            tags: ['coastal'],
+        });
+        await client.post(`/api/v1/trips/${createRes.body.trip.id}/publish`);
+        const response = await api.get('/api/v1/trips/discover', {});
+        expect(response.status).toBe(200);
+        expect(response.body.trips).toHaveLength(1);
+        expect(response.body.trips[0].title).toBe('Coastal Drive');
+    });
+
+    it('GET /api/v1/trips/discover excludes draft and private published trips', async () => {
+        if (!requireDatabase('discover visibility filter')) return;
+        const client = authedApi(api, organizer.userId);
+        await client.post('/api/v1/trips', {
+            title: 'Draft Trip',
+            destination: 'California, USA',
+            startDate: '2026-07-01T09:00:00.000Z',
+            endDate: '2026-07-07T18:00:00.000Z',
+            capacity: 12,
+            visibility: 'public',
+        });
+        const privateRes = await client.post('/api/v1/trips', {
+            title: 'Private Trip',
+            destination: 'California, USA',
+            startDate: '2026-08-01T09:00:00.000Z',
+            endDate: '2026-08-05T18:00:00.000Z',
+            capacity: 8,
+            visibility: 'private',
+        });
+        await client.post(`/api/v1/trips/${privateRes.body.trip.id}/publish`);
+        const response = await api.get('/api/v1/trips/discover', {});
+        expect(response.status).toBe(200);
+        expect(response.body.trips).toEqual([]);
+    });
+
+    it('GET /api/v1/trips/discover filters by destination and category', async () => {
+        if (!requireDatabase('discover filters')) return;
+        const client = authedApi(api, organizer.userId);
+        const createRes = await client.post('/api/v1/trips', {
+            title: 'Desert Loop',
+            destination: 'Arizona, USA',
+            startDate: '2026-08-01T09:00:00.000Z',
+            endDate: '2026-08-05T18:00:00.000Z',
+            capacity: 8,
+            visibility: 'public',
+            categories: ['Road Trips'],
+        });
+        await client.post(`/api/v1/trips/${createRes.body.trip.id}/publish`);
+        const matchRes = await api.get('/api/v1/trips/discover?destination=Arizona&category=Road%20Trips', {});
+        expect(matchRes.status).toBe(200);
+        expect(matchRes.body.trips).toHaveLength(1);
+        const missRes = await api.get('/api/v1/trips/discover?destination=California', {});
+        expect(missRes.status).toBe(200);
+        expect(missRes.body.trips).toEqual([]);
+    });
+
+    it('GET /api/v1/trips/discover/:tripId returns a published public trip without authentication', async () => {
+        if (!requireDatabase('public trip detail')) return;
+        const client = authedApi(api, organizer.userId);
+        const createRes = await client.post('/api/v1/trips', {
+            title: 'Coastal Drive',
+            destination: 'California, USA',
+            startDate: '2026-07-01T09:00:00.000Z',
+            endDate: '2026-07-07T18:00:00.000Z',
+            capacity: 12,
+            visibility: 'public',
+        });
+        await client.post(`/api/v1/trips/${createRes.body.trip.id}/publish`);
+        const response = await api.get(`/api/v1/trips/discover/${createRes.body.trip.id}`, {});
+        expect(response.status).toBe(200);
+        expect(response.body.trip.title).toBe('Coastal Drive');
+    });
+
+    it('GET /api/v1/trips/discover/:tripId returns 404 for a non-public trip', async () => {
+        if (!requireDatabase('public trip not found')) return;
+        const client = authedApi(api, organizer.userId);
+        const createRes = await client.post('/api/v1/trips', {
+            title: 'Private Trip',
+            destination: 'California, USA',
+            startDate: '2026-07-01T09:00:00.000Z',
+            endDate: '2026-07-07T18:00:00.000Z',
+            capacity: 12,
+            visibility: 'private',
+        });
+        await client.post(`/api/v1/trips/${createRes.body.trip.id}/publish`);
+        const response = await api.get(`/api/v1/trips/discover/${createRes.body.trip.id}`, {});
+        expect(response.status).toBe(404);
+    });
 });

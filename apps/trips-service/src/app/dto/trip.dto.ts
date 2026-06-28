@@ -212,3 +212,46 @@ export class UpdateTripResponseDto {
     @ApiProperty({ type: TripDto })
     trip!: TripDto;
 }
+
+export type DiscoverTripsFilters = {
+    destination?: string;
+    startDateFrom?: string;
+    startDateTo?: string;
+    category?: string;
+    tag?: string;
+};
+
+export class DiscoverTripsQueryDto implements DiscoverTripsFilters {
+    @ApiPropertyOptional({ example: 'California' })
+    @IsOptional()
+    @IsString()
+    @MaxLength(200)
+    destination?: string;
+
+    @ApiPropertyOptional({ example: '2026-07-01T00:00:00.000Z' })
+    @IsOptional()
+    @IsDateString()
+    startDateFrom?: string;
+
+    @ApiPropertyOptional({ example: '2026-12-31T23:59:59.000Z' })
+    @IsOptional()
+    @IsDateString()
+    startDateTo?: string;
+
+    @ApiPropertyOptional({ example: 'Road Trips' })
+    @IsOptional()
+    @IsString()
+    @MaxLength(64)
+    category?: string;
+
+    @ApiPropertyOptional({ example: 'coastal' })
+    @IsOptional()
+    @IsString()
+    @MaxLength(64)
+    tag?: string;
+}
+
+export class DiscoverTripsResponseDto {
+    @ApiProperty({ type: [TripDto] })
+    trips!: TripDto[];
+}
