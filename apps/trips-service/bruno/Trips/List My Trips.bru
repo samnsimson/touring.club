@@ -1,0 +1,19 @@
+meta {
+  name: List My Trips
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/v1/trips
+  body: none
+  auth: bearer
+}
+
+headers {
+  Authorization: Bearer {{accessToken}}
+}
+
+docs {
+  List trips created by the authenticated organizer.
+}

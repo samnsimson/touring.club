@@ -1,0 +1,93 @@
+{
+    "name": "trips-service",
+    "$schema": "../../node_modules/nx/schemas/project-schema.json",
+    "sourceRoot": "apps/trips-service/src",
+    "projectType": "application",
+    "tags": ["trips-service"],
+    "targets": {
+        "build": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "webpack-cli build",
+                "env": {
+                    "NODE_ENV": "production"
+                },
+                "cwd": "apps/trips-service"
+            },
+            "configurations": {
+                "development": {
+                    "env": {
+                        "NODE_ENV": "development"
+                    }
+                }
+            }
+        },
+        "prune-lockfile": {
+            "dependsOn": ["build"],
+            "cache": true,
+            "executor": "@nx/js:prune-lockfile",
+            "outputs": ["{workspaceRoot}/apps/trips-service/dist/package.json", "{workspaceRoot}/apps/trips-service/dist/bun.lock"],
+            "options": {
+                "buildTarget": "build"
+            }
+        },
+        "copy-workspace-modules": {
+            "dependsOn": ["build"],
+            "cache": true,
+            "outputs": ["{workspaceRoot}/apps/trips-service/dist/workspace_modules"],
+            "executor": "@nx/js:copy-workspace-modules",
+            "options": {
+                "buildTarget": "build"
+            }
+        },
+        "prune": {
+            "dependsOn": ["prune-lockfile", "copy-workspace-modules"],
+            "executor": "nx:noop"
+        },
+        "serve": {
+            "continuous": true,
+            "executor": "@nx/js:node",
+            "defaultConfiguration": "development",
+            "dependsOn": [
+                {
+                    "target": "build",
+                    "params": "forward"
+                }
+            ],
+            "options": {
+                "buildTarget": "trips-service:build",
+                "runBuildTargetDependencies": false
+            },
+            "configurations": {
+                "development": {
+                    "buildTarget": "trips-service:build:development"
+                },
+                "production": {
+                    "buildTarget": "trips-service:build:production"
+                }
+            }
+        },
+        "e2e": {
+            "executor": "@nx/jest:jest",
+            "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+            "options": {
+                "jestConfig": "apps/trips-service/jest.e2e.config.cts",
+                "passWithNoTests": false
+            }
+        },
+        "test": {
+            "executor": "@nx/jest:jest",
+            "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+            "options": {
+                "jestConfig": "apps/trips-service/jest.config.cts",
+                "passWithNoTests": true
+            },
+            "configurations": {
+                "ci": {
+                    "coverage": true,
+                    "coverageReporters": ["text", "html"]
+                }
+            }
+        }
+    }
+}

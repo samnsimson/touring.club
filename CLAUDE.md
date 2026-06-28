@@ -72,8 +72,9 @@ Reference implementation: `apps/auth-service/` + `@tc/auth` (shared Better Auth 
 touring.club/
 ├── apps/                    # Deployable NestJS microservices (one per domain)
 │   ├── auth-service/        # Auth API — sign-up, sign-in, verify-email, sessions
-│   └── users-service/       # User profiles — GET/PATCH me, travel history, public profile
-│   # trips-service, messaging-service, notifications-service (planned)
+│   ├── users-service/       # User profiles — GET/PATCH me, travel history, public profile
+│   └── trips-service/       # Trips — POST/GET /api/v1/trips (organizer)
+│   # messaging-service, notifications-service (planned)
 ├── library/                 # Shared infrastructure consumed by all services
 │   ├── auth/                # Better Auth config, guards, adapter (shared auth infra)
 │   ├── config/              # Zod env schema, ConfigModule/ConfigService
@@ -230,6 +231,7 @@ Libraries must not import from apps. Avoid circular deps between libraries. `@tc
 | --------------- | ---- | ------------------------------------------------------------ |
 | `auth-service`  | app  | Auth microservice — REST API (`/api/v1/auth/*`)              |
 | `users-service` | app  | User profiles microservice — REST API (`/api/v1/profiles/*`) |
+| `trips-service` | app  | Trips microservice — REST API (`/api/v1/trips`)              |
 | `auth`          | lib  | Shared Better Auth integration (guards, adapter)             |
 | `core`          | lib  | Bootstrap & Swagger                                          |
 | `config`        | lib  | Environment & config                                         |
@@ -238,7 +240,7 @@ Libraries must not import from apps. Avoid circular deps between libraries. `@tc
 | `utils`         | lib  | Shared utilities                                             |
 | `common`        | lib  | Shared types (minimal)                                       |
 
-**Planned microservices:** `trips-service`, `messaging-service`, `notifications-service` (see `docs/PROJECT.md`).
+**Planned microservices:** `messaging-service`, `notifications-service` (see `docs/PROJECT.md`).
 
 ## Application Patterns
 

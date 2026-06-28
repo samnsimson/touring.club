@@ -29,6 +29,9 @@
         },
         {
             "path": "./apps/users-service"
+        },
+        {
+            "path": "./apps/trips-service"
         }
     ]
 }
