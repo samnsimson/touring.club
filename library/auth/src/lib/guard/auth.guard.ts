@@ -8,6 +8,10 @@ import type { AuthenticatedRequest, AuthJwtPayload } from './auth.request';
 export class AuthGuard implements CanActivate {
     private static jwks: ReturnType<typeof createRemoteJWKSet> | undefined;
 
+    static resetJwksCacheForTests(): void {
+        AuthGuard.jwks = undefined;
+    }
+
     async canActivate(context: ExecutionContext): Promise<boolean> {
         try {
             const request = context.switchToHttp().getRequest<AuthenticatedRequest>();

@@ -14,6 +14,8 @@ export interface E2EApplicationOptions {
     rootModule: Type<unknown>;
     globalPrefix?: string;
     fixturesDir?: string;
+    /** When set, the app listens on this URL so remote JWKS validation (AuthGuard) can reach the in-process server. */
+    listenUrl?: string;
     configure?: (app: NestExpressApplication) => void | Promise<void>;
 }
 

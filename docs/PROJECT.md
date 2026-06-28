@@ -221,7 +221,7 @@ The project uses an **Nx monorepo** with a **microservices backend**: one deploy
 ```
 apps/                          # One NestJS microservice per domain
   auth-service                 # Authentication (implemented)
-  users-service                # User profiles (implemented — MVP)
+  users-service                # User profiles — GET/PATCH me, travel history, public profile
   trips-service                # Trip creation, discovery, membership
   messaging-service            # Direct and trip group chat
   notifications-service        # In-app and push notifications
@@ -256,13 +256,13 @@ Do **not** create domain libraries (e.g. `library/users`, `library/trips`). Each
 
 No GraphQL.
 
-| Service                 | Domain responsibility                                                |
-| ----------------------- | -------------------------------------------------------------------- |
-| `auth-service`          | Sign-up, sign-in, sessions, password, email                          |
-| `users-service`         | Profiles, interests, privacy — `GET/PATCH /api/v1/profiles/me` (MVP) |
-| `trips-service`         | Trip CRUD, discovery, membership                                     |
-| `messaging-service`     | Conversations and messages                                           |
-| `notifications-service` | Notification delivery and preferences                                |
+| Service                 | Domain responsibility                                                                                                                                                |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auth-service`          | Sign-up, sign-in, sessions, password, email                                                                                                                          |
+| `users-service`         | Profiles, interests, privacy, avatar URL, travel history — `GET/PATCH /api/v1/profiles/me`, `GET /api/v1/profiles/me/travel-history`, `GET /api/v1/profiles/:userId` |
+| `trips-service`         | Trip CRUD, discovery, membership                                                                                                                                     |
+| `messaging-service`     | Conversations and messages                                                                                                                                           |
+| `notifications-service` | Notification delivery and preferences                                                                                                                                |
 
 Services communicate over HTTP (and WebSockets where needed). Shared auth validation uses `@tc/auth` guards and JWT/bearer tokens issued by `auth-service`.
 

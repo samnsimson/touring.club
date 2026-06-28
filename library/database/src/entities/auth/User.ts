@@ -15,7 +15,7 @@ export class User {
     emailVerified!: boolean;
 
     @Column('text', { name: 'image', nullable: true })
-    image: string | null;
+    image: string | null = null;
 
     @Column('timestamptz', { name: 'created_at', default: () => 'CURRENT_TIMESTAMP' })
     createdAt!: Date;
@@ -24,20 +24,20 @@ export class User {
     updatedAt!: Date;
 
     @Column('text', { name: 'role', nullable: true })
-    role: string | null;
+    role: string | null = null;
 
     @Column('boolean', { name: 'banned', nullable: true, default: false })
-    banned: boolean | null;
+    banned: boolean | null = null;
 
     @Column('text', { name: 'ban_reason', nullable: true })
-    banReason: string | null;
+    banReason: string | null = null;
 
     @Column('timestamptz', { name: 'ban_expires', nullable: true })
-    banExpires: Date | null;
+    banExpires: Date | null = null;
 
     @Column('text', { name: 'username', nullable: true, unique: true })
-    username: string | null;
+    username: string | null = null;
 
     @Column('text', { name: 'display_username', nullable: true })
-    displayUsername: string | null;
+    displayUsername: string | null = null;
 }

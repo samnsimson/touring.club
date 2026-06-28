@@ -1,0 +1,19 @@
+meta {
+  name: Get Public Profile
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/v1/profiles/{{userId}}
+  body: none
+  auth: bearer
+}
+
+headers {
+  Authorization: Bearer {{accessToken}}
+}
+
+docs {
+  View another user's public profile. Email and travel history respect privacy settings.
+}

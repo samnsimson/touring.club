@@ -16,6 +16,9 @@ export class Profile extends BaseEntity {
     @Column('text', { name: 'user_id', unique: true })
     userId!: string;
 
+    @Column('text', { name: 'avatar_url', nullable: true })
+    avatarUrl: string | null = null;
+
     @Column('text', { name: 'biography', nullable: true })
     biography: string | null = null;
 

@@ -25,16 +25,22 @@
             "path": "../../library/utils/tsconfig.lib.json"
         },
         {
-            "path": "../../library/config/tsconfig.lib.json"
+            "path": "../../library/core/tsconfig.lib.json"
         },
         {
-            "path": "../../library/core/tsconfig.lib.json"
+            "path": "../../library/config/tsconfig.lib.json"
         },
         {
             "path": "../../library/database/tsconfig.lib.json"
         },
         {
             "path": "../../library/auth/tsconfig.lib.json"
+        },
+        {
+            "path": "../auth-service/tsconfig.app.json"
+        },
+        {
+            "path": "../../library/testing/tsconfig.lib.json"
         }
     ]
 }

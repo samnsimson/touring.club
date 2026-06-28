@@ -31,6 +31,12 @@ export class E2EApplication {
 
         await this.app.init();
 
+        if (this.options.listenUrl) {
+            const url = new URL(this.options.listenUrl);
+            const port = url.port ? Number(url.port) : url.protocol === 'https:' ? 443 : 80;
+            await this.app.listen(port, url.hostname);
+        }
+
         this.api = new E2EApi({
             server: this.app.getHttpServer(),
             fixturesDir: this.options.fixturesDir,

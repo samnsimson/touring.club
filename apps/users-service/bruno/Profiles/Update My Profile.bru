@@ -1,0 +1,32 @@
+meta {
+  name: Update My Profile
+  type: http
+  seq: 2
+}
+
+patch {
+  url: {{baseUrl}}/api/v1/profiles/me
+  body: json
+  auth: bearer
+}
+
+headers {
+  Authorization: Bearer {{accessToken}}
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "biography": "Road trip enthusiast and photographer.",
+    "interests": ["Hiking", "Road Trips"],
+    "avatarUrl": "https://cdn.touring.club/avatars/example.png",
+    "privacySettings": {
+      "showEmail": false,
+      "showTravelHistory": true
+    }
+  }
+}
+
+docs {
+  Update biography, interests, avatar URL, and privacy settings. Set avatarUrl after uploading to object storage.
+}

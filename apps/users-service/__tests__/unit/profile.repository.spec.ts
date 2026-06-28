@@ -36,12 +36,15 @@ describe('ProfileRepository', () => {
         it('creates a profile when none exists', async () => {
             repository.findOne.mockResolvedValue(null);
             const result = await profileRepository.findOrCreateByUserId('user-1');
-            expect(repository.create).toHaveBeenCalledWith({
-                userId: 'user-1',
-                biography: null,
-                interests: [],
-                privacySettings: defaultPrivacySettings(),
-            });
+            expect(repository.create).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    userId: 'user-1',
+                    avatarUrl: null,
+                    biography: null,
+                    interests: [],
+                    privacySettings: defaultPrivacySettings(),
+                }),
+            );
             expect(repository.save).toHaveBeenCalled();
             expect(result.userId).toBe('user-1');
         });

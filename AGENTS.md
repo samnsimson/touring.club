@@ -72,7 +72,7 @@ Reference implementation: `apps/auth-service/` + `@tc/auth` (shared Better Auth 
 touring.club/
 ├── apps/                    # Deployable NestJS microservices (one per domain)
 │   ├── auth-service/        # Auth API — sign-up, sign-in, verify-email, sessions
-│   └── users-service/       # User profiles — GET/PATCH /api/v1/profiles/me
+│   └── users-service/       # User profiles — GET/PATCH me, travel history, public profile
 │   # trips-service, messaging-service, notifications-service (planned)
 ├── library/                 # Shared infrastructure consumed by all services
 │   ├── auth/                # Better Auth config, guards, adapter (shared auth infra)

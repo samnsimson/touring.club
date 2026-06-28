@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
+import { randomUUID } from 'node:crypto';
 import { BaseRepository, defaultPrivacySettings, Profile, type DataSource } from '@tc/database';
 
 @Injectable()
@@ -16,7 +17,14 @@ export class ProfileRepository extends BaseRepository<Profile> {
         const existing = await this.findByUserId(userId);
         if (existing) return existing;
         const privacySettings = defaultPrivacySettings();
-        const profile = this.create({ userId, biography: null, interests: [], privacySettings });
+        const profile = this.create({
+            id: randomUUID(),
+            userId,
+            avatarUrl: null,
+            biography: null,
+            interests: [],
+            privacySettings,
+        });
         return this.save(profile);
     }
 }
