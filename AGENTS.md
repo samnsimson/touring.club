@@ -30,7 +30,7 @@ This document gives agents the full context needed to work effectively in this r
 
 **Touring Club** (`touring.club`) is a social travel and touring platform — discover, organize, and join group trips, experiences, and community-driven travel events. Read **[docs/PROJECT.md](docs/PROJECT.md)** for the full product vision, domain model, feature roadmap, user types, and target architecture.
 
-**Current codebase:** Early-stage Nx monorepo focused on **authentication** — a dedicated `auth-service` backed by [Better Auth](https://www.better-auth.com/), TypeORM, and PostgreSQL. The architecture is designed to grow into additional services and client apps. Treat `docs/PROJECT.md` as the product north star; follow existing repo patterns unless explicitly migrating.
+**Current codebase:** Early-stage Nx monorepo with a **microservices architecture** — one NestJS service per domain. Today only `auth-service` is implemented. Shared infrastructure lives in `library/` (`@tc/*`). Treat `docs/PROJECT.md` as the product north star; follow existing repo patterns unless explicitly migrating.
 
 **Package manager:** Bun (`bun.lock`). Always prefix Nx commands with `bun` (e.g. `bun nx serve auth-service`).
 
@@ -53,14 +53,28 @@ This document gives agents the full context needed to work effectively in this r
 
 Local infrastructure: `docker compose up` starts PostgreSQL 17 on port 5432 (`touring_club` database).
 
+## Architecture
+
+**Microservices — one service per domain.** Each domain (auth, users, trips, messaging, notifications) is a deployable NestJS app under `apps/<domain>-service/`. Services are independently deployable and scalable.
+
+**Libraries are shared infrastructure only.** `library/` holds cross-cutting code consumed by all services: config, bootstrap, database, Better Auth integration, utilities, and test helpers. Do **not** create domain libraries (e.g. `library/users`, `library/trips`) — domain logic belongs in the owning microservice.
+
+| Layer        | Location                 | Contains                                                             |
+| ------------ | ------------------------ | -------------------------------------------------------------------- |
+| Microservice | `apps/<domain>-service/` | Controllers, DTOs, domain services, module wiring for one domain     |
+| Shared lib   | `library/<name>/`        | Config, core bootstrap, TypeORM, auth guards, utils, testing helpers |
+
+Reference implementation: `apps/auth-service/` + `@tc/auth` (shared Better Auth integration, not a substitute for the auth microservice).
+
 ## Repository Layout
 
 ```
 touring.club/
-├── apps/                    # Deployable NestJS microservices
-│   └── auth-service/        # Auth API (sign-up, sign-in, verify-email)
-├── library/                 # Shared libraries consumed by apps
-│   ├── auth/                # Better Auth config, module, guards, adapter
+├── apps/                    # Deployable NestJS microservices (one per domain)
+│   └── auth-service/        # Auth API — sign-up, sign-in, verify-email, sessions
+│   # users-service, trips-service, messaging-service, notifications-service (planned)
+├── library/                 # Shared infrastructure consumed by all services
+│   ├── auth/                # Better Auth config, guards, adapter (shared auth infra)
 │   ├── config/              # Zod env schema, ConfigModule/ConfigService
 │   ├── core/                # App bootstrap, Swagger, health routes
 │   ├── database/            # TypeORM module, entities, migrations
@@ -77,22 +91,33 @@ touring.club/
 
 **Where to create new files:**
 
-| Artifact                    | Location                               | Generator                                    |
-| --------------------------- | -------------------------------------- | -------------------------------------------- |
-| New microservice            | `apps/<service-name>/`                 | `nx-generate` skill → `@nx/nest:application` |
-| New shared library          | `library/<lib-name>/`                  | `nx-generate` skill → `@nx/js:library`       |
-| DTOs, controllers, services | `apps/<app>/src/app/`                  | Hand-written or Nest schematics              |
-| App unit tests              | `apps/<app>/__tests__/unit/`           | Hand-written Jest specs                      |
-| App e2e tests               | `apps/<app>/__tests__/e2e/`            | `@tc/testing` + Jest e2e target              |
-| App Jest config             | `apps/<app>/jest.config.cts`           | `createAppUnitJestConfig` from `jest/`       |
-| App e2e Jest config         | `apps/<app>/jest.e2e.config.cts`       | `createAppE2eJestConfig` from `jest/`        |
-| DB entities                 | `library/database/src/entities/`       | Better Auth generate or TypeORM migrations   |
-| DB migrations               | `library/database/src/migrations/`     | `bun nx run database:migration:generate`     |
-| Env variables               | `library/config/src/lib/env.schema.ts` | Hand-written                                 |
-| Shared utilities            | `library/utils/src/lib/`               | Hand-written                                 |
-| Auth plugins/config         | `library/auth/src/lib/`                | Hand-written                                 |
+| Artifact                    | Location                                 | Generator                                        |
+| --------------------------- | ---------------------------------------- | ------------------------------------------------ |
+| New domain microservice     | `apps/<domain>-service/`                 | See **Scaffold microservice** below              |
+| New shared library          | `library/<lib-name>/`                    | `nx-generate` skill → `@nx/js:library`           |
+| DTOs, controllers, services | `apps/<service>/src/app/`                | Hand-written — domain logic stays in the service |
+| App unit tests              | `apps/<service>/__tests__/unit/`         | Hand-written Jest specs                          |
+| App e2e tests               | `apps/<service>/__tests__/e2e/`          | `@tc/testing` + Jest e2e target                  |
+| App Jest config             | `apps/<service>/jest.config.cts`         | `createAppUnitJestConfig` from `jest/`           |
+| App e2e Jest config         | `apps/<service>/jest.e2e.config.cts`     | `createAppE2eJestConfig` from `jest/`            |
+| Auth DB entities            | `library/database/src/entities/auth/`    | Better Auth generate (`auth:generate`)           |
+| Other DB entities           | `library/database/src/entities/general/` | Hand-written + TypeORM migrations                |
+| DB migrations               | `library/database/src/migrations/`       | `bun nx run database:migration:generate`         |
+| Env variables               | `library/config/src/lib/env.schema.ts`   | Hand-written                                     |
+| Shared utilities            | `library/utils/src/lib/`                 | Hand-written                                     |
+| Auth integration (shared)   | `library/auth/src/lib/`                  | Hand-written                                     |
 
-Do **not** put application code in `library/` or shared library code in `apps/`. Apps are thin orchestration layers; reusable logic belongs in libraries.
+Do **not** put domain business logic in `library/` or microservice-specific code that belongs in another service's app. Libraries hold **shared infrastructure**; each microservice owns its domain controllers, services, and DTOs.
+
+### Scaffold microservice
+
+When creating a new domain microservice, invoke the `nx-generate` skill and run:
+
+```bash
+bun nx generate @nx/nest:application --directory=apps/<domain>-service --linter=eslint --name=<domain>-service --tags=<domain>-service --unitTestRunner=jest --useProjectJson=true --no-interactive
+```
+
+Replace `<domain>-service` with the target name (e.g. `users-service`). Use these flags exactly — do not substitute other generator options unless the user asks.
 
 ## Package Naming & Imports
 
@@ -124,15 +149,17 @@ Libraries export through `src/index.ts`. Add new public APIs there; keep interna
 
 - `DatabaseModule.forRootAsync()` — global TypeORM setup (auto-loaded entities, snake_case naming)
 - Entities in `src/entities/`, migrations in `src/migrations/`
-- Auth-related entities are generated/managed by Better Auth adapter into `entities/auth/`
+- **Auth entities** — PostgreSQL schema `auth`, path `entities/auth/`; generated/managed by Better Auth adapter
+- **All other domain entities** — PostgreSQL schema `general`, path `entities/general/` (profiles, trips, messages, etc.)
+- Use `@Entity({ schema: 'general', name: 'table_name' })` for non-auth entities
 - Run migrations: `bun run migration:run` (root) or `bun nx run database:migration:run`
 
 ### `@tc/auth`
 
-- Better Auth instance (`auth.config.ts`), `AuthModule.forRoot()`, guards, middleware
+- Shared **auth infrastructure** consumed by all microservices — Better Auth instance (`auth.config.ts`), `AuthModule.forRoot()`, guards, middleware
 - Custom TypeORM adapter for Better Auth (with patched `@hedystia/better-auth-typeorm`)
 - Generate auth schema: `bun run auth:generate` or `bun nx run auth:generate`
-- **All auth domain logic lives here**, not duplicated in apps
+- **Not a domain service** — the auth microservice is `apps/auth-service/`; `@tc/auth` provides integration other services import for token validation and guards
 
 ### `@tc/utils`
 
@@ -168,16 +195,18 @@ Libraries must not import from apps. Avoid circular deps between libraries. `@tc
 
 ## Current Projects
 
-| Project        | Type | Purpose                          |
-| -------------- | ---- | -------------------------------- |
-| `auth-service` | app  | Auth REST API (`/api/v1/auth/*`) |
-| `auth`         | lib  | Better Auth integration          |
-| `core`         | lib  | Bootstrap & Swagger              |
-| `config`       | lib  | Environment & config             |
-| `database`     | lib  | TypeORM & migrations             |
-| `testing`      | lib  | Shared e2e testing utilities     |
-| `utils`        | lib  | Shared utilities                 |
-| `common`       | lib  | Shared types (minimal)           |
+| Project        | Type | Purpose                                              |
+| -------------- | ---- | ---------------------------------------------------- |
+| `auth-service` | app  | Auth microservice — REST API (`/api/v1/auth/*`)      |
+| `auth`         | lib  | Shared Better Auth integration (guards, adapter)     |
+| `core`         | lib  | Bootstrap & Swagger                                  |
+| `config`       | lib  | Environment & config                                 |
+| `database`     | lib  | TypeORM, entities (`auth/` + `general/`), migrations |
+| `testing`      | lib  | Shared e2e testing utilities                         |
+| `utils`        | lib  | Shared utilities                                     |
+| `common`       | lib  | Shared types (minimal)                               |
+
+**Planned microservices:** `users-service`, `trips-service`, `messaging-service`, `notifications-service` (see `docs/PROJECT.md`).
 
 ## Application Patterns
 
@@ -229,8 +258,9 @@ Wire the e2e target in `project.json` to `jest.e2e.config.cts` and follow `__tes
 
 ### Modules
 
-- App modules import domain modules (e.g. `AuthModule.forRoot()`) and declare controllers/providers
-- `RootModule` (from `@tc/core`) already provides Config + Database globally
+- Service modules import shared libs (`AuthModule.forRoot()` where needed, etc.) and declare domain controllers/providers
+- `RootModule` (from `@tc/core`) provides Config + Database globally
+- Each microservice owns its domain module; do not split domain logic into `library/<domain>/`
 
 ## Coding Standards
 
@@ -290,8 +320,8 @@ bun nx graph                                  # Dependency graph
 2. **Use affected commands** for incremental work — `bun nx affected -t test`
 3. **Build deps first** — lib `test` targets depend on `^build`; run `bun nx run-many -t build` if imports fail
 4. **Link workspace packages properly** — use `link-workspace-packages` skill, not tsconfig path hacks
-5. **Generate, don't hand-scaffold** — use `nx-generate` skill for new apps/libs
-6. **Keep apps thin** — business logic in libraries; apps wire routes and service-specific config
+5. **Generate, don't hand-scaffold** — use `nx-generate` skill for new **services** and shared libs
+6. **One service per domain** — new domains get `apps/<domain>-service/`, not `library/<domain>/`
 7. **One env schema** — extend `EnvSchema` in `@tc/config` for new services/ports
 8. **Migrations are committed** — never rely on `synchronize: true` in production
 
@@ -312,13 +342,13 @@ Workspace skills live in `.agents/skills/`. Read the relevant skill file before 
 
 When given a task:
 
-1. **Clarify scope** — is this a new service, library feature, bug fix, or infra change?
+1. **Clarify scope** — is this a new microservice, shared lib change, bug fix, or infra change?
 2. **Identify affected projects** — `bun nx show projects`, check dependency graph
-3. **Pick the right library** — use the "When to Use What" table above
+3. **Pick the right target** — new domain → `apps/<domain>-service/`; cross-cutting → `library/<name>/`
 4. **Read existing code** in that area before writing
-5. **Scaffold if needed** — `nx-generate` skill for new projects
+5. **Scaffold if needed** — `nx-generate` skill for new services
 6. **Wire dependencies** — `link-workspace-packages` skill
-7. **Implement minimally** — match patterns in `auth-service` and sibling libs
+7. **Implement minimally** — match patterns in `auth-service` and sibling shared libs
 8. **Verify** — `bun nx affected -t lint test build` on touched projects
 9. **Don't commit unless asked** — user controls git operations
 
@@ -327,6 +357,7 @@ For auth-related work, always check `library/auth/src/lib/auth.config.ts` and th
 ## Patches & Special Notes
 
 - `@hedystia/better-auth-typeorm@1.0.1` is patched via `patches/` (bun `patchedDependencies`)
-- Auth entities output to `library/database/src/entities/auth/`
+- Auth entities: `library/database/src/entities/auth/` (PostgreSQL schema `auth`)
+- Non-auth entities: `library/database/src/entities/general/` (PostgreSQL schema `general`)
 - `auth` lib tests use Vitest; most other projects use Jest
 - API routes are versioned: `/api/v1/...` (configured in `bootstrapApplication`)

@@ -112,6 +112,29 @@ Before generating, examine the target area of the codebase:
 - Note which test runners, build tools, and linters are used
 - Configure the generator to match these patterns
 
+#### New NestJS microservices (required command)
+
+When scaffolding a **new domain microservice** under `apps/`, always use this command shape. Prefix with `bun` (this workspace's package manager). Substitute `<domain>-service` for the service name (e.g. `users-service`, `trips-service`):
+
+```bash
+bun nx generate @nx/nest:application \
+  --directory=apps/<domain>-service \
+  --linter=eslint \
+  --name=<domain>-service \
+  --tags=<domain>-service \
+  --unitTestRunner=jest \
+  --useProjectJson=true \
+  --no-interactive
+```
+
+Example (users domain):
+
+```bash
+bun nx generate @nx/nest:application --directory=apps/users-service --linter=eslint --name=users-service --tags=users-service --unitTestRunner=jest --useProjectJson=true --no-interactive
+```
+
+Do **not** improvise different flags for `@nx/nest:application` unless the user explicitly asks. After generation, wire workspace deps via `link-workspace-packages`, add env vars to `@tc/config`, and follow `auth-service` patterns (Jest config from `jest/`, e2e under `__tests__/e2e/`).
+
 ### 6. Dry-Run to Verify File Placement
 
 **Always run with `--dry-run` first** to verify files will be created in the correct location:
