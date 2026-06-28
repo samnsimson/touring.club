@@ -1,25 +1,81 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { AuthUserDto } from './auth-user.dto';
+import { AuthUserLike, AuthUserResponse, AuthUserResponseInit } from './auth-user.dto';
 
-export class AuthSessionResponseDto extends AuthUserDto {
+export type AuthSessionResponseInit = AuthUserResponseInit & {
+    sessionToken: string;
+    accessToken: string;
+};
+
+export class AuthSessionResponse extends AuthUserResponse {
     @ApiProperty({ description: 'Better Auth session token; also set as an httpOnly refresh-token cookie' })
     sessionToken!: string;
 
     @ApiProperty({ description: 'JWT access token; also set as an httpOnly access-token cookie' })
     accessToken!: string;
+
+    constructor(data: AuthSessionResponseInit) {
+        super(data);
+        this.sessionToken = data.sessionToken;
+        this.accessToken = data.accessToken;
+    }
+
+    static fromAuth(user: AuthUserLike, sessionToken: string, accessToken: string): AuthSessionResponse {
+        return new AuthSessionResponse({
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            emailVerified: user.emailVerified,
+            username: user.username,
+            displayUsername: user.displayUsername,
+            role: user.role,
+            image: user.image,
+            createdAt: user.createdAt,
+            updatedAt: user.updatedAt,
+            sessionToken,
+            accessToken,
+        });
+    }
 }
 
-export class SignUpResponseDto extends AuthUserDto {
+export type SignUpResponseInit = AuthUserResponseInit & {
+    sessionToken?: string;
+    accessToken?: string;
+};
+
+export class SignUpResponse extends AuthUserResponse {
     @ApiPropertyOptional({ description: 'Session token; omitted until email is verified' })
     sessionToken?: string;
 
     @ApiPropertyOptional({ description: 'JWT access token; omitted until email is verified' })
     accessToken?: string;
+
+    constructor(data: SignUpResponseInit) {
+        super(data);
+        this.sessionToken = data.sessionToken;
+        this.accessToken = data.accessToken;
+    }
+
+    static fromSignUp(user: AuthUserLike, sessionToken?: string, accessToken?: string): SignUpResponse {
+        return new SignUpResponse({
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            emailVerified: user.emailVerified,
+            username: user.username,
+            displayUsername: user.displayUsername,
+            role: user.role,
+            image: user.image,
+            createdAt: user.createdAt,
+            updatedAt: user.updatedAt,
+            sessionToken,
+            accessToken,
+        });
+    }
 }
 
-export class SignInResponseDto extends AuthSessionResponseDto {}
+export class SignInResponse extends AuthSessionResponse {}
 
-export class VerifyEmailResponseDto extends AuthSessionResponseDto {}
+export class VerifyEmailResponse extends AuthSessionResponse {}
 
 export class AuthErrorResponseDto {
     @ApiProperty({ example: 'Invalid email or password' })

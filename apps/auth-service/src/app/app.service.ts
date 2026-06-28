@@ -1,7 +1,18 @@
 import type { Auth } from '@tc/auth';
 import { AuthHeaders, AUTH_ACCESS_TOKEN_COOKIE, AUTH_REFRESH_TOKEN_COOKIE } from '@tc/auth';
 import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
-import { SignInDto, SignUpDto, SignUpResponseDto, VerifyEmailDto, ForgotPasswordDto, ResetPasswordDto, ChangePasswordDto, UpdateProfileDto } from './dto';
+import {
+    AuthSessionResponse,
+    AuthUserResponse,
+    ChangePasswordDto,
+    ForgotPasswordDto,
+    ResetPasswordDto,
+    SignInDto,
+    SignUpDto,
+    SignUpResponse,
+    UpdateProfileDto,
+    VerifyEmailDto,
+} from './dto';
 import { AuthUtils } from './auth.utils';
 import { CookieOptions, Request, Response } from 'express';
 import { AuthService } from '@thallesp/nestjs-better-auth';
@@ -35,7 +46,7 @@ export class AppService {
         if (!AuthHeaders.getSessionToken(request) && !AuthHeaders.getAccessToken(request)) throw new UnauthorizedException('Not authenticated');
         const session = await this.authService.api.getSession({ headers: AuthHeaders.fromRequest(request) });
         if (!session?.user) throw new UnauthorizedException('Not authenticated');
-        return session.user;
+        return AuthUserResponse.from(session.user);
     }
 
     async signOut(request: Request, response: Response) {
@@ -45,12 +56,12 @@ export class AppService {
         return { success: true };
     }
 
-    async signUp(dto: SignUpDto): Promise<SignUpResponseDto> {
+    async signUp(dto: SignUpDto): Promise<SignUpResponse> {
         const response = await this.authService.api.signUpEmail({ body: { ...dto } });
         this.logger.log(`Sign up response: ${JSON.stringify(response)}`);
-        if (!response.token) return { ...response.user };
+        if (!response.token) return SignUpResponse.fromSignUp(response.user);
         const accessToken = await this.issueToken(response.token);
-        return { ...response.user, sessionToken: response.token, accessToken };
+        return SignUpResponse.fromSignUp(response.user, response.token, accessToken);
     }
 
     async signIn(dto: SignInDto) {
@@ -58,7 +69,7 @@ export class AppService {
         this.logger.log(`Sign in response: ${JSON.stringify(response)}`);
         if (!response.token) throw new UnauthorizedException('Failed to sign in');
         const accessToken = await this.issueToken(response.token);
-        return { ...response.user, sessionToken: response.token, accessToken };
+        return AuthSessionResponse.fromAuth(response.user, response.token, accessToken);
     }
 
     async verifyEmail(dto: VerifyEmailDto) {
@@ -66,7 +77,7 @@ export class AppService {
         this.logger.log(`Verify email response: ${JSON.stringify(response)}`);
         if (!response.token) throw new UnauthorizedException('Failed to verify email');
         const accessToken = await this.issueToken(response.token);
-        return { ...response.user, sessionToken: response.token, accessToken };
+        return AuthSessionResponse.fromAuth(response.user, response.token, accessToken);
     }
 
     async forgotPassword(dto: ForgotPasswordDto) {

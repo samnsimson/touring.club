@@ -1,7 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
-import type { TripMembershipStatus } from '@tc/database';
+import { TripMembership, type TripMembershipStatus } from '@tc/database';
 
-export class TripMembershipDto {
+export type TripMembershipResponseInit = Pick<TripMembershipResponse, 'id' | 'tripId' | 'userId' | 'status' | 'createdAt' | 'updatedAt'>;
+
+export class TripMembershipResponse {
     @ApiProperty({ example: 'membership_abc123' })
     id!: string;
 
@@ -19,24 +21,39 @@ export class TripMembershipDto {
 
     @ApiProperty()
     updatedAt!: Date;
+
+    constructor(data: TripMembershipResponseInit) {
+        Object.assign(this, data);
+    }
+
+    static from(membership: TripMembership): TripMembershipResponse {
+        return new TripMembershipResponse({
+            id: membership.id,
+            tripId: membership.tripId,
+            userId: membership.userId,
+            status: membership.status,
+            createdAt: membership.createdAt,
+            updatedAt: membership.updatedAt,
+        });
+    }
 }
 
 export class JoinTripResponseDto {
-    @ApiProperty({ type: TripMembershipDto })
-    membership!: TripMembershipDto;
+    @ApiProperty({ type: TripMembershipResponse })
+    membership!: TripMembershipResponse;
 }
 
 export class LeaveTripResponseDto {
-    @ApiProperty({ type: TripMembershipDto })
-    membership!: TripMembershipDto;
+    @ApiProperty({ type: TripMembershipResponse })
+    membership!: TripMembershipResponse;
 }
 
 export class ListTripMembersResponseDto {
-    @ApiProperty({ type: [TripMembershipDto] })
-    members!: TripMembershipDto[];
+    @ApiProperty({ type: [TripMembershipResponse] })
+    members!: TripMembershipResponse[];
 }
 
 export class TripMembershipActionResponseDto {
-    @ApiProperty({ type: TripMembershipDto })
-    membership!: TripMembershipDto;
+    @ApiProperty({ type: TripMembershipResponse })
+    membership!: TripMembershipResponse;
 }

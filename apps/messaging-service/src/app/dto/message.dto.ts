@@ -1,8 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, MaxLength, MinLength } from 'class-validator';
-import type { MessageType } from '@tc/database';
+import { Message, type MessageType } from '@tc/database';
 
-export class MessageDto {
+export type MessageResponseInit = Pick<MessageResponse, 'id' | 'conversationId' | 'senderId' | 'messageType' | 'body' | 'createdAt' | 'updatedAt'>;
+
+export class MessageResponse {
     @ApiProperty({ example: 'message_abc123' })
     id!: string;
 
@@ -23,6 +25,22 @@ export class MessageDto {
 
     @ApiProperty()
     updatedAt!: Date;
+
+    constructor(data: MessageResponseInit) {
+        Object.assign(this, data);
+    }
+
+    static from(message: Message): MessageResponse {
+        return new MessageResponse({
+            id: message.id,
+            conversationId: message.conversationId,
+            senderId: message.senderId,
+            messageType: message.messageType,
+            body: message.body,
+            createdAt: message.createdAt,
+            updatedAt: message.updatedAt,
+        });
+    }
 }
 
 export class SendMessageDto {
@@ -34,11 +52,11 @@ export class SendMessageDto {
 }
 
 export class SendMessageResponseDto {
-    @ApiProperty({ type: MessageDto })
-    message!: MessageDto;
+    @ApiProperty({ type: MessageResponse })
+    message!: MessageResponse;
 }
 
 export class ListMessagesResponseDto {
-    @ApiProperty({ type: [MessageDto] })
-    messages!: MessageDto[];
+    @ApiProperty({ type: [MessageResponse] })
+    messages!: MessageResponse[];
 }

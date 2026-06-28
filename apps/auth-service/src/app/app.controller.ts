@@ -5,18 +5,18 @@ import {
     ChangePasswordResponseDto,
     ForgotPasswordDto,
     ForgotPasswordResponseDto,
-    GetMeResponseDto,
+    GetMeResponse,
     ResetPasswordDto,
     ResetPasswordResponseDto,
     SignInDto,
-    SignInResponseDto,
+    SignInResponse,
     SignOutResponseDto,
     SignUpDto,
-    SignUpResponseDto,
+    SignUpResponse,
     UpdateProfileDto,
     UpdateProfileResponseDto,
     VerifyEmailDto,
-    VerifyEmailResponseDto,
+    VerifyEmailResponse,
 } from './dto';
 import { Public } from '@tc/auth';
 import { AppService } from './app.service';
@@ -29,7 +29,7 @@ export class AppController {
     constructor(private readonly appService: AppService) {}
 
     @Get('me')
-    @ApiResource({ type: GetMeResponseDto, operationId: 'getMe', status: HttpStatus.OK })
+    @ApiResource({ type: GetMeResponse, operationId: 'getMe', status: HttpStatus.OK })
     @ApiResourceExceptions(HttpStatus.UNAUTHORIZED)
     async getMe(@Req() req: Request) {
         return this.appService.getMe(req);
@@ -58,7 +58,7 @@ export class AppController {
 
     @Public()
     @Post('sign-up')
-    @ApiResource({ type: SignUpResponseDto, operationId: 'signUp', status: HttpStatus.CREATED })
+    @ApiResource({ type: SignUpResponse, operationId: 'signUp', status: HttpStatus.CREATED })
     @ApiResourceExceptions(HttpStatus.BAD_REQUEST, HttpStatus.CONFLICT)
     async signUp(@Body() dto: SignUpDto, @Res({ passthrough: true }) res: Response) {
         const response = await this.appService.signUp(dto);
@@ -69,7 +69,7 @@ export class AppController {
 
     @Public()
     @Post('sign-in')
-    @ApiResource({ type: SignInResponseDto, operationId: 'signIn', status: HttpStatus.OK })
+    @ApiResource({ type: SignInResponse, operationId: 'signIn', status: HttpStatus.OK })
     @ApiResourceExceptions(HttpStatus.BAD_REQUEST, HttpStatus.UNAUTHORIZED)
     async signIn(@Body() dto: SignInDto, @Res({ passthrough: true }) res: Response) {
         const response = await this.appService.signIn(dto);
@@ -80,7 +80,7 @@ export class AppController {
 
     @Public()
     @Post('verify-email')
-    @ApiResource({ type: VerifyEmailResponseDto, operationId: 'verifyEmail', status: HttpStatus.OK })
+    @ApiResource({ type: VerifyEmailResponse, operationId: 'verifyEmail', status: HttpStatus.OK })
     @ApiResourceExceptions(HttpStatus.BAD_REQUEST)
     async verifyEmail(@Body() dto: VerifyEmailDto, @Res({ passthrough: true }) res: Response) {
         const response = await this.appService.verifyEmail(dto);

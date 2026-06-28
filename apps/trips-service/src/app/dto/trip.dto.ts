@@ -1,9 +1,29 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { ArrayMaxSize, IsArray, IsDateString, IsIn, IsInt, IsOptional, IsString, IsUrl, Max, MaxLength, Min } from 'class-validator';
-import type { TripStatus, TripVisibility } from '@tc/database';
+import { Trip, type TripStatus, type TripVisibility } from '@tc/database';
 
-export class TripDto {
+export type TripResponseInit = Pick<
+    TripResponse,
+    | 'id'
+    | 'organizerId'
+    | 'title'
+    | 'description'
+    | 'destination'
+    | 'meetingLocation'
+    | 'startDate'
+    | 'endDate'
+    | 'capacity'
+    | 'visibility'
+    | 'status'
+    | 'coverImageUrls'
+    | 'categories'
+    | 'tags'
+    | 'createdAt'
+    | 'updatedAt'
+>;
+
+export class TripResponse {
     @ApiProperty({ example: 'trip_abc123' })
     id!: string;
 
@@ -51,6 +71,31 @@ export class TripDto {
 
     @ApiProperty()
     updatedAt!: Date;
+
+    constructor(data: TripResponseInit) {
+        Object.assign(this, data);
+    }
+
+    static from(trip: Trip): TripResponse {
+        return new TripResponse({
+            id: trip.id,
+            organizerId: trip.organizerId,
+            title: trip.title,
+            description: trip.description,
+            destination: trip.destination,
+            meetingLocation: trip.meetingLocation,
+            startDate: trip.startDate,
+            endDate: trip.endDate,
+            capacity: trip.capacity,
+            visibility: trip.visibility,
+            status: trip.status,
+            coverImageUrls: trip.coverImageUrls,
+            categories: trip.categories,
+            tags: trip.tags,
+            createdAt: trip.createdAt,
+            updatedAt: trip.updatedAt,
+        });
+    }
 }
 
 export class CreateTripDto {
@@ -121,18 +166,18 @@ export class CreateTripDto {
 }
 
 export class CreateTripResponseDto {
-    @ApiProperty({ type: TripDto })
-    trip!: TripDto;
+    @ApiProperty({ type: TripResponse })
+    trip!: TripResponse;
 }
 
 export class ListTripsResponseDto {
-    @ApiProperty({ type: [TripDto] })
-    trips!: TripDto[];
+    @ApiProperty({ type: [TripResponse] })
+    trips!: TripResponse[];
 }
 
 export class GetTripResponseDto {
-    @ApiProperty({ type: TripDto })
-    trip!: TripDto;
+    @ApiProperty({ type: TripResponse })
+    trip!: TripResponse;
 }
 
 export class UpdateTripDto {
@@ -209,8 +254,8 @@ export class UpdateTripDto {
 }
 
 export class UpdateTripResponseDto {
-    @ApiProperty({ type: TripDto })
-    trip!: TripDto;
+    @ApiProperty({ type: TripResponse })
+    trip!: TripResponse;
 }
 
 export type DiscoverTripsFilters = {
@@ -252,6 +297,6 @@ export class DiscoverTripsQueryDto implements DiscoverTripsFilters {
 }
 
 export class DiscoverTripsResponseDto {
-    @ApiProperty({ type: [TripDto] })
-    trips!: TripDto[];
+    @ApiProperty({ type: [TripResponse] })
+    trips!: TripResponse[];
 }

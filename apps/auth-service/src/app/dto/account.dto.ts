@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsBoolean, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
-import { AuthUserDto } from './auth-user.dto';
+import { AuthUserResponse } from './auth-user.dto';
 
 export class ChangePasswordDto {
     @ApiProperty({ example: 'OldPass123!' })
@@ -42,6 +42,6 @@ export class UpdateProfileDto {
 }
 
 export class UpdateProfileResponseDto {
-    @ApiProperty({ type: AuthUserDto })
-    user!: AuthUserDto;
+    @ApiProperty({ type: AuthUserResponse })
+    user!: AuthUserResponse;
 }

@@ -1,7 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { defaultPrivacySettings, Profile } from '@tc/database';
-import { GetPublicProfileResponseDto, TravelHistoryResponseDto, UpdateProfileDto } from './dto';
+import { defaultPrivacySettings } from '@tc/database';
+import { ProfileResponse, TravelHistoryResponse, UpdateProfileDto } from './dto';
 import { ProfileRepository, UserRepository } from './repositories';
+import type { Profile } from '@tc/database';
 
 @Injectable()
 export class AppService {
@@ -12,7 +13,7 @@ export class AppService {
 
     async getProfile(userId: string) {
         const profile = await this.profiles.findOrCreateByUserId(userId);
-        return { profile: this.toDto(profile) };
+        return { profile: ProfileResponse.from(profile) };
     }
 
     async updateProfile(userId: string, dto: UpdateProfileDto) {
@@ -34,41 +35,26 @@ export class AppService {
         return this.getProfile(userId);
     }
 
-    async getTravelHistory(userId: string): Promise<TravelHistoryResponseDto> {
+    async getTravelHistory(userId: string): Promise<TravelHistoryResponse> {
         void userId;
-        return { trips: [] };
+        return TravelHistoryResponse.empty();
     }
 
-    async getPublicProfile(targetUserId: string): Promise<GetPublicProfileResponseDto> {
+    async getPublicProfile(targetUserId: string) {
         const user = await this.users.findById(targetUserId);
         if (!user) throw new NotFoundException('Profile not found');
 
         const storedProfile = await this.profiles.findByUserId(targetUserId);
         const privacySettings = storedProfile?.privacySettings ?? defaultPrivacySettings();
-        const profile: GetPublicProfileResponseDto['profile'] = {
-            userId: user.id,
-            name: user.name,
-            username: user.username,
-            avatarUrl: storedProfile?.avatarUrl ?? user.image,
-            biography: storedProfile?.biography ?? null,
-            interests: storedProfile?.interests ?? [],
-        };
+        const travelHistory = privacySettings.showTravelHistory ? await this.getTravelHistory(targetUserId) : undefined;
 
-        if (privacySettings.showEmail) profile.email = user.email;
-        if (privacySettings.showTravelHistory) profile.travelHistory = await this.getTravelHistory(targetUserId);
-
-        return { profile };
-    }
-
-    private toDto(profile: Profile) {
         return {
-            userId: profile.userId,
-            avatarUrl: profile.avatarUrl,
-            biography: profile.biography,
-            interests: profile.interests,
-            privacySettings: profile.privacySettings,
-            createdAt: profile.createdAt,
-            updatedAt: profile.updatedAt,
+            profile: PublicProfileResponse.from({
+                user,
+                profile: storedProfile,
+                privacySettings,
+                travelHistory,
+            }),
         };
     }
 }

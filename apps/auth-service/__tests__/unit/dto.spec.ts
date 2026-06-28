@@ -1,28 +1,28 @@
 import { validate } from 'class-validator';
 import {
     AuthErrorResponseDto,
-    AuthSessionResponseDto,
-    AuthUserDto,
+    AuthSessionResponse,
+    AuthUserResponse,
     ChangePasswordDto,
     ChangePasswordResponseDto,
     ForgotPasswordDto,
     ForgotPasswordResponseDto,
-    GetMeResponseDto,
+    GetMeResponse,
     ResetPasswordDto,
     ResetPasswordResponseDto,
     SignInDto,
-    SignInResponseDto,
+    SignInResponse,
     SignOutResponseDto,
     SignUpDto,
-    SignUpResponseDto,
+    SignUpResponse,
     UpdateProfileDto,
     UpdateProfileResponseDto,
     VerifyEmailDto,
-    VerifyEmailResponseDto,
+    VerifyEmailResponse,
 } from '../../src/app/dto';
 
-const authUser = (): AuthUserDto =>
-    Object.assign(new AuthUserDto(), {
+const authUser = (): AuthUserResponse =>
+    new AuthUserResponse({
         id: 'usr_1',
         email: 'jane@example.com',
         name: 'Jane Doe',
@@ -38,25 +38,29 @@ const authUser = (): AuthUserDto =>
 describe('DTOs', () => {
     it('covers auth user and session response shapes', () => {
         const user = authUser();
-        const minimalUser = Object.assign(new AuthUserDto(), { id: 'usr_2', email: 'minimal@example.com', name: 'Minimal User' });
-        const sessionResponse = Object.assign(new AuthSessionResponseDto(), user, {
+        const minimalUser = new AuthUserResponse({ id: 'usr_2', email: 'minimal@example.com', name: 'Minimal User' });
+        const sessionResponse = new AuthSessionResponse({
+            ...user,
             sessionToken: 'session-token',
             accessToken: 'access-token',
         });
-        const signUpResponse = Object.assign(new SignUpResponseDto(), user, {
+        const signUpResponse = new SignUpResponse({
+            ...user,
             sessionToken: 'session-token',
             accessToken: 'access-token',
         });
-        const signUpPending = Object.assign(new SignUpResponseDto(), user);
-        const signInResponse = Object.assign(new SignInResponseDto(), user, {
+        const signUpPending = new SignUpResponse({ ...user });
+        const signInResponse = new SignInResponse({
+            ...user,
             sessionToken: 'session-token',
             accessToken: 'access-token',
         });
-        const verifyResponse = Object.assign(new VerifyEmailResponseDto(), user, {
+        const verifyResponse = new VerifyEmailResponse({
+            ...user,
             sessionToken: 'session-token',
             accessToken: 'access-token',
         });
-        const getMeResponse = Object.assign(new GetMeResponseDto(), user);
+        const getMeResponse = new GetMeResponse({ ...user });
         const updateProfileResponse = Object.assign(new UpdateProfileResponseDto(), { user });
         const signOutResponse = Object.assign(new SignOutResponseDto(), { success: true });
         const changePasswordResponse = Object.assign(new ChangePasswordResponseDto(), { success: true });

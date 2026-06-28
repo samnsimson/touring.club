@@ -1,6 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { Conversation, ConversationParticipant, Message } from '@tc/database';
-import { CreateDirectConversationDto, SendMessageDto } from './dto';
+import { ConversationResponse, CreateDirectConversationDto, MessageResponse, SendMessageDto } from './dto';
 import { ConversationParticipantRepository, ConversationRepository, MessageRepository } from './repositories';
 
 @Injectable()
@@ -15,7 +14,7 @@ export class AppService {
         if (dto.participantUserId === userId) throw new BadRequestException('Cannot start a conversation with yourself');
 
         const existing = await this.conversations.findDirectBetweenUsers(userId, dto.participantUserId);
-        if (existing) return { conversation: this.toConversationDto(existing) };
+        if (existing) return { conversation: ConversationResponse.from(existing) };
 
         const conversation = await this.conversations.save(this.conversations.create({ type: 'direct', tripId: null }));
         await this.participants.save([
@@ -23,18 +22,18 @@ export class AppService {
             this.participants.create({ conversationId: conversation.id, userId: dto.participantUserId }),
         ]);
 
-        return { conversation: this.toConversationDto(conversation) };
+        return { conversation: ConversationResponse.from(conversation) };
     }
 
     async listConversations(userId: string) {
         const conversations = await this.conversations.findForUser(userId);
-        return { conversations: conversations.map((conversation) => this.toConversationDto(conversation)) };
+        return { conversations: conversations.map((conversation) => ConversationResponse.from(conversation)) };
     }
 
     async listMessages(userId: string, conversationId: string) {
         await this.requireParticipant(conversationId, userId);
         const messages = await this.messages.findByConversationId(conversationId);
-        return { messages: messages.map((message) => this.toMessageDto(message)) };
+        return { messages: messages.map((message) => MessageResponse.from(message)) };
     }
 
     async sendMessage(userId: string, conversationId: string, dto: SendMessageDto) {
@@ -48,33 +47,11 @@ export class AppService {
             }),
         );
         await this.conversations.update({ id: conversationId }, { updatedAt: new Date() });
-        return { message: this.toMessageDto(message) };
+        return { message: MessageResponse.from(message) };
     }
 
     private async requireParticipant(conversationId: string, userId: string) {
         const participant = await this.participants.findByConversationAndUser(conversationId, userId);
         if (!participant) throw new NotFoundException('Conversation not found');
-    }
-
-    private toConversationDto(conversation: Conversation) {
-        return {
-            id: conversation.id,
-            type: conversation.type,
-            tripId: conversation.tripId,
-            createdAt: conversation.createdAt,
-            updatedAt: conversation.updatedAt,
-        };
-    }
-
-    private toMessageDto(message: Message) {
-        return {
-            id: message.id,
-            conversationId: message.conversationId,
-            senderId: message.senderId,
-            messageType: message.messageType,
-            body: message.body,
-            createdAt: message.createdAt,
-            updatedAt: message.updatedAt,
-        };
     }
 }

@@ -1,7 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
-import type { NotificationType } from '@tc/database';
+import { Notification, type NotificationType } from '@tc/database';
 
-export class NotificationDto {
+export type NotificationResponseInit = Pick<NotificationResponse, 'id' | 'type' | 'title' | 'body' | 'readAt' | 'createdAt' | 'updatedAt'>;
+
+export class NotificationResponse {
     @ApiProperty({ example: 'notification_abc123' })
     id!: string;
 
@@ -22,14 +24,30 @@ export class NotificationDto {
 
     @ApiProperty()
     updatedAt!: Date;
+
+    constructor(data: NotificationResponseInit) {
+        Object.assign(this, data);
+    }
+
+    static from(notification: Notification): NotificationResponse {
+        return new NotificationResponse({
+            id: notification.id,
+            type: notification.type,
+            title: notification.title,
+            body: notification.body,
+            readAt: notification.readAt,
+            createdAt: notification.createdAt,
+            updatedAt: notification.updatedAt,
+        });
+    }
 }
 
 export class ListNotificationsResponseDto {
-    @ApiProperty({ type: [NotificationDto] })
-    notifications!: NotificationDto[];
+    @ApiProperty({ type: [NotificationResponse] })
+    notifications!: NotificationResponse[];
 }
 
 export class MarkNotificationReadResponseDto {
-    @ApiProperty({ type: NotificationDto })
-    notification!: NotificationDto;
+    @ApiProperty({ type: NotificationResponse })
+    notification!: NotificationResponse;
 }

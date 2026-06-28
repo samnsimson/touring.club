@@ -1,1 +1,1 @@
-export { ListNotificationsResponseDto, MarkNotificationReadResponseDto, NotificationDto } from './notification.dto';
+export { ListNotificationsResponseDto, MarkNotificationReadResponseDto, NotificationResponse, type NotificationResponseInit } from './notification.dto';

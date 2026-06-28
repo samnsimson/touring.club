@@ -3,7 +3,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { CurrentSession } from '@tc/auth';
 import { ApiResource, ApiResourceExceptions } from '@tc/utils';
 import { AppService } from './app.service';
-import { GetProfileResponseDto, GetPublicProfileResponseDto, TravelHistoryResponseDto, UpdateProfileDto, UpdateProfileResponseDto } from './dto';
+import { GetProfileResponseDto, GetPublicProfileResponseDto, TravelHistoryResponse, UpdateProfileDto, UpdateProfileResponseDto } from './dto';
 
 @ApiTags('Profiles')
 @Controller('profiles')
@@ -25,7 +25,7 @@ export class AppController {
     }
 
     @Get('me/travel-history')
-    @ApiResource({ type: TravelHistoryResponseDto, operationId: 'getMyTravelHistory', status: HttpStatus.OK })
+    @ApiResource({ type: TravelHistoryResponse, operationId: 'getMyTravelHistory', status: HttpStatus.OK })
     @ApiResourceExceptions(HttpStatus.UNAUTHORIZED)
     async getMyTravelHistory(@CurrentSession('userId') userId: string) {
         return this.appService.getTravelHistory(userId);
