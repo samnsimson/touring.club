@@ -161,8 +161,10 @@ Libraries export through `src/index.ts`. Add new public APIs there; keep interna
 - **Auth entities** — PostgreSQL schema `auth`, path `entities/auth/`; regenerated via `auth:generate` (entities only — no migration files). After `auth:generate`, add new entity classes to `entities/auth/index.ts`.
 - **All other domain entities** — PostgreSQL schema `general`, path `entities/general/` (profiles, trips, messages, etc.)
 - Use `@Entity({ schema: 'general', name: 'table_name' })` for non-auth entities
+- **General entity relations** — entities in the same `general` schema that reference each other must declare TypeORM relations (`@ManyToOne` / `@OneToMany` + `@JoinColumn`; expose FK ids via `@RelationId`). Cross-schema refs (e.g. `userId` → `auth.users`) stay as plain columns. Graph: `Trip` ↔ `TripMembership`, `Trip` ↔ `Conversation`, `Conversation` ↔ `ConversationParticipant` / `Message`.
+- **Repository queries** — prefer `find` / `findOne` with relation filters and find operators re-exported from `@tc/database` (`In`, `Not`, `ILike`, `Raw`, etc.). Use QueryBuilder only when find options cannot express the query.
 - **All schema migrations** (auth and general) — TypeORM only: `bun run migration:generate --name=...` then `bun run migration:run`
-- Re-exported types (`DataSource`, `EntityTarget`, `ObjectLiteral`) — import from `@tc/database`; **do not add a direct `typeorm` dependency to apps** (avoids version conflicts)
+- Re-exported types (`DataSource`, `EntityTarget`, `FindOptionsWhere`, `ObjectLiteral`) and find operators (`In`, `Not`, `ILike`, `And`, `Raw`, …) — import from `@tc/database`; **do not add a direct `typeorm` dependency to apps** (avoids version conflicts)
 
 #### Repository pattern (required for DB access in services)
 

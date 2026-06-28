@@ -13,6 +13,7 @@ import {
     LeaveTripResponseDto,
     ListTripMembersResponseDto,
     ListTripsResponseDto,
+    TravelHistoryResponseDto,
     TripMembershipActionResponseDto,
     UpdateTripDto,
     UpdateTripResponseDto,
@@ -43,6 +44,13 @@ export class AppController {
     @ApiResourceExceptions(HttpStatus.BAD_REQUEST)
     async discoverTrips(@Query() query: DiscoverTripsQueryDto) {
         return this.appService.discoverTrips(query);
+    }
+
+    @Get('users/:userId/travel-history')
+    @ApiResource({ type: TravelHistoryResponseDto, operationId: 'getUserTravelHistory', status: HttpStatus.OK })
+    @ApiResourceExceptions(HttpStatus.UNAUTHORIZED)
+    async getTravelHistory(@Param('userId') userId: string) {
+        return this.appService.getTravelHistory(userId);
     }
 
     @Public()

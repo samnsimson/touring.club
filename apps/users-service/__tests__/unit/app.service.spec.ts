@@ -2,12 +2,14 @@ import { Test } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
 import { defaultPrivacySettings, Profile } from '@tc/database';
 import { AppService } from '../../src/app/app.service';
+import { TripsClient } from '../../src/app/clients';
 import { ProfileRepository, UserRepository } from '../../src/app/repositories';
 
 describe('AppService', () => {
     let service: AppService;
     let profiles: jest.Mocked<Pick<ProfileRepository, 'findOrCreateByUserId' | 'findByUserId' | 'update'>>;
     let users: jest.Mocked<Pick<UserRepository, 'findById'>>;
+    let tripsClient: jest.Mocked<Pick<TripsClient, 'getTravelHistory'>>;
 
     beforeAll(async () => {
         profiles = {
@@ -18,9 +20,17 @@ describe('AppService', () => {
         users = {
             findById: jest.fn(),
         };
+        tripsClient = {
+            getTravelHistory: jest.fn(),
+        };
 
         const app = await Test.createTestingModule({
-            providers: [AppService, { provide: ProfileRepository, useValue: profiles }, { provide: UserRepository, useValue: users }],
+            providers: [
+                AppService,
+                { provide: ProfileRepository, useValue: profiles },
+                { provide: UserRepository, useValue: users },
+                { provide: TripsClient, useValue: tripsClient },
+            ],
         }).compile();
 
         service = app.get<AppService>(AppService);
@@ -96,9 +106,22 @@ describe('AppService', () => {
     });
 
     describe('getTravelHistory', () => {
-        it('returns an empty trip list', async () => {
-            const result = await service.getTravelHistory('user-1');
-            expect(result.trips).toEqual([]);
+        it('returns trips from trips-service', async () => {
+            tripsClient.getTravelHistory.mockResolvedValue({
+                trips: [
+                    {
+                        id: 'trip-1',
+                        title: 'Pacific Coast Highway',
+                        destination: 'California, USA',
+                        startDate: '2026-07-01T09:00:00.000Z',
+                        endDate: '2026-07-07T18:00:00.000Z',
+                    },
+                ],
+            });
+            const result = await service.getTravelHistory('user-1', 'Bearer user-1');
+            expect(tripsClient.getTravelHistory).toHaveBeenCalledWith('user-1', 'Bearer user-1');
+            expect(result.trips).toHaveLength(1);
+            expect(result.trips[0].title).toBe('Pacific Coast Highway');
         });
     });
 
@@ -115,9 +138,11 @@ describe('AppService', () => {
                 ...storedProfile,
                 privacySettings: { showEmail: true, showTravelHistory: true },
             });
-            const result = await service.getPublicProfile('user-1');
+            tripsClient.getTravelHistory.mockResolvedValue({ trips: [] });
+            const result = await service.getPublicProfile('user-1', 'Bearer viewer-1');
             expect(result.profile.email).toBe('jane@touring.club.test');
             expect(result.profile.travelHistory).toEqual({ trips: [] });
+            expect(tripsClient.getTravelHistory).toHaveBeenCalledWith('user-1', 'Bearer viewer-1');
         });
 
         it('throws when the user does not exist', async () => {
@@ -134,7 +159,8 @@ describe('AppService', () => {
                 image: 'https://cdn.touring.club/avatars/user-1.png',
             } as never);
             profiles.findByUserId.mockResolvedValue(null);
-            const result = await service.getPublicProfile('user-1');
+            tripsClient.getTravelHistory.mockResolvedValue({ trips: [] });
+            const result = await service.getPublicProfile('user-1', 'Bearer viewer-1');
             expect(result.profile.avatarUrl).toBe('https://cdn.touring.club/avatars/user-1.png');
             expect(result.profile.email).toBeUndefined();
             expect(result.profile.travelHistory).toEqual({ trips: [] });
@@ -152,9 +178,10 @@ describe('AppService', () => {
                 ...storedProfile,
                 privacySettings: { showEmail: false, showTravelHistory: false },
             });
-            const result = await service.getPublicProfile('user-1');
+            const result = await service.getPublicProfile('user-1', 'Bearer viewer-1');
             expect(result.profile.email).toBeUndefined();
             expect(result.profile.travelHistory).toBeUndefined();
+            expect(tripsClient.getTravelHistory).not.toHaveBeenCalled();
         });
     });
 });

@@ -63,20 +63,20 @@ describe('AppController', () => {
     });
 
     describe('getMyTravelHistory', () => {
-        it('delegates to AppService with the authenticated user id', async () => {
+        it('delegates to AppService with the authenticated user id and authorization header', async () => {
             appService.getTravelHistory.mockResolvedValue({ trips: [] });
-            const result = await controller.getMyTravelHistory(userId);
-            expect(appService.getTravelHistory).toHaveBeenCalledWith('user-1');
+            const result = await controller.getMyTravelHistory(userId, 'Bearer user-1');
+            expect(appService.getTravelHistory).toHaveBeenCalledWith('user-1', 'Bearer user-1');
             expect(result).toEqual({ trips: [] });
         });
     });
 
     describe('getPublicProfile', () => {
-        it('delegates to AppService with the requested user id', async () => {
+        it('delegates to AppService with the requested user id and authorization header', async () => {
             const publicProfile = { profile: { userId: 'user-2', name: 'Jane', username: 'jane', avatarUrl: null, biography: null, interests: [] } };
             appService.getPublicProfile.mockResolvedValue(publicProfile);
-            const result = await controller.getPublicProfile('user-2');
-            expect(appService.getPublicProfile).toHaveBeenCalledWith('user-2');
+            const result = await controller.getPublicProfile('user-2', 'Bearer viewer-1');
+            expect(appService.getPublicProfile).toHaveBeenCalledWith('user-2', 'Bearer viewer-1');
             expect(result).toEqual(publicProfile);
         });
     });

@@ -17,6 +17,12 @@ jest.mock('../../src/app/repositories/user.repository', () => ({
     UserRepository: jest.fn().mockImplementation(() => ({ findById: mockFindById })),
 }));
 
+const mockGetTravelHistory = jest.fn(async () => ({ trips: [] }));
+
+jest.mock('../../src/app/clients/trips.client', () => ({
+    TripsClient: jest.fn().mockImplementation(() => ({ getTravelHistory: mockGetTravelHistory })),
+}));
+
 const e2eApplication = new E2EApplication({
     rootModule: AppModule,
     globalPrefix: 'api',
@@ -40,6 +46,7 @@ describe('Profiles', () => {
     });
 
     beforeEach(async () => {
+        mockGetTravelHistory.mockResolvedValue({ trips: [] });
         if (!process.env.DATABASE_URL) return;
         const dataSource = e2eApplication.getApp().get<DataSource>(getDataSourceToken());
         await dataSource.query('DELETE FROM general.profiles WHERE user_id = ANY($1)', [[defaultUser.userId, viewerUser.userId]]);
@@ -65,11 +72,24 @@ describe('Profiles', () => {
         expect(response.body.profile.avatarUrl).toBe('https://cdn.touring.club/avatars/e2e.png');
     });
 
-    it('GET /api/v1/profiles/me/travel-history returns an empty trip list until trips-service exists', async () => {
+    it('GET /api/v1/profiles/me/travel-history returns trips from trips-service', async () => {
         if (!requireDatabase('travel history')) return;
+        mockGetTravelHistory.mockResolvedValue({
+            trips: [
+                {
+                    id: 'trip-1',
+                    title: 'Pacific Coast Highway',
+                    destination: 'California, USA',
+                    startDate: '2026-07-01T09:00:00.000Z',
+                    endDate: '2026-07-07T18:00:00.000Z',
+                },
+            ],
+        });
         const response = await authedApi(api, defaultUser.userId).get('/api/v1/profiles/me/travel-history');
         expect(response.status).toBe(200);
-        expect(response.body.trips).toEqual([]);
+        expect(response.body.trips).toHaveLength(1);
+        expect(response.body.trips[0].title).toBe('Pacific Coast Highway');
+        expect(mockGetTravelHistory).toHaveBeenCalledWith(defaultUser.userId, `Bearer ${defaultUser.userId}`);
     });
 
     it('GET /api/v1/profiles/:userId returns a public profile without email by default', async () => {

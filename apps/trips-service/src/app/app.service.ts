@@ -1,6 +1,6 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { Trip, type TripMembershipStatus } from '@tc/database';
-import { CreateTripDto, DiscoverTripsQueryDto, TripMembershipResponse, TripResponse, UpdateTripDto } from './dto';
+import { CreateTripDto, DiscoverTripsQueryDto, TravelHistoryResponseDto, TripMembershipResponse, TripResponse, UpdateTripDto } from './dto';
 import { TripMembershipRepository, TripRepository } from './repositories';
 import { TripStatusUtils } from './trip.status';
 
@@ -42,6 +42,11 @@ export class AppService {
     async listMyTrips(organizerId: string) {
         const trips = await this.trips.findByOrganizerId(organizerId);
         return { trips: trips.map((trip) => TripResponse.from(trip)) };
+    }
+
+    async getTravelHistory(userId: string) {
+        const trips = await this.trips.findTravelHistoryForUser(userId);
+        return new TravelHistoryResponseDto(trips);
     }
 
     async getTrip(organizerId: string, tripId: string) {
@@ -114,17 +119,10 @@ export class AppService {
             }
             await this.memberships.update({ id: existing.id }, { status });
             const membership = await this.memberships.findByTripAndUser(tripId, userId);
-            return { membership: TripMembershipResponse.from(membership!) };
+            return { membership: membership ? TripMembershipResponse.from(membership) : null };
         }
 
-        const membership = await this.memberships.save(
-            this.memberships.create({
-                tripId,
-                userId,
-                status,
-            }),
-        );
-
+        const membership = await this.memberships.save(this.memberships.create({ tripId, userId, status }));
         return { membership: TripMembershipResponse.from(membership) };
     }
 
@@ -132,7 +130,7 @@ export class AppService {
         const membership = await this.requireOpenMembership(tripId, userId);
         await this.memberships.update({ id: membership.id }, { status: 'left' });
         const updated = await this.memberships.findByTripAndUser(tripId, userId);
-        return { membership: TripMembershipResponse.from(updated!) };
+        return { membership: updated ? TripMembershipResponse.from(updated) : null };
     }
 
     async listTripMembers(organizerId: string, tripId: string) {
@@ -148,7 +146,7 @@ export class AppService {
         await this.assertTripHasCapacity(tripId, trip.capacity);
         await this.memberships.update({ id: membershipId }, { status: 'active' });
         const updated = await this.memberships.findByIdForTrip(membershipId, tripId);
-        return { membership: TripMembershipResponse.from(updated!) };
+        return { membership: updated ? TripMembershipResponse.from(updated) : null };
     }
 
     async rejectMembership(organizerId: string, tripId: string, membershipId: string) {
@@ -157,7 +155,7 @@ export class AppService {
         if (membership.status !== 'pending') throw new BadRequestException('Only pending requests can be rejected');
         await this.memberships.update({ id: membershipId }, { status: 'rejected' });
         const updated = await this.memberships.findByIdForTrip(membershipId, tripId);
-        return { membership: TripMembershipResponse.from(updated!) };
+        return { membership: updated ? TripMembershipResponse.from(updated) : null };
     }
 
     async removeMembership(organizerId: string, tripId: string, membershipId: string) {
@@ -166,7 +164,7 @@ export class AppService {
         if (membership.status !== 'active') throw new BadRequestException('Only active members can be removed');
         await this.memberships.update({ id: membershipId }, { status: 'removed' });
         const updated = await this.memberships.findByIdForTrip(membershipId, tripId);
-        return { membership: TripMembershipResponse.from(updated!) };
+        return { membership: updated ? TripMembershipResponse.from(updated) : null };
     }
 
     private async transitionTrip(organizerId: string, tripId: string, status: Trip['status']) {

@@ -21,6 +21,7 @@ describe('AppController', () => {
             | 'archiveTrip'
             | 'discoverTrips'
             | 'getPublicTrip'
+            | 'getTravelHistory'
             | 'joinTrip'
             | 'leaveTrip'
             | 'listTripMembers'
@@ -41,6 +42,7 @@ describe('AppController', () => {
             archiveTrip: jest.fn(),
             discoverTrips: jest.fn(),
             getPublicTrip: jest.fn(),
+            getTravelHistory: jest.fn(),
             joinTrip: jest.fn(),
             leaveTrip: jest.fn(),
             listTripMembers: jest.fn(),
@@ -120,6 +122,12 @@ describe('AppController', () => {
         appService.discoverTrips.mockResolvedValue({ trips: [] });
         await expect(controller.discoverTrips({ destination: 'California' })).resolves.toEqual({ trips: [] });
         expect(appService.discoverTrips).toHaveBeenCalledWith({ destination: 'California' });
+    });
+
+    it('getTravelHistory delegates to AppService', async () => {
+        appService.getTravelHistory.mockResolvedValue({ trips: [] });
+        await expect(controller.getTravelHistory('participant-1')).resolves.toEqual({ trips: [] });
+        expect(appService.getTravelHistory).toHaveBeenCalledWith('participant-1');
     });
 
     it('getPublicTrip delegates to AppService', async () => {

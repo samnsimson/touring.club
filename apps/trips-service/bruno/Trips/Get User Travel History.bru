@@ -1,0 +1,19 @@
+meta {
+  name: Get User Travel History
+  type: http
+  seq: 18
+}
+
+get {
+  url: {{baseUrl}}/api/v1/trips/users/{{userId}}/travel-history
+  body: none
+  auth: bearer
+}
+
+headers {
+  Authorization: Bearer {{accessToken}}
+}
+
+docs {
+  Return trips a user has joined (active or left membership) or organized (non-draft).
+}

@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { defaultPrivacySettings } from '@tc/database';
 import { ProfileResponse, PublicProfileResponse, TravelHistoryResponse, UpdateProfileDto } from './dto';
+import { TripsClient } from './clients';
 import { ProfileRepository, UserRepository } from './repositories';
 import type { Profile } from '@tc/database';
 
@@ -9,6 +10,7 @@ export class AppService {
     constructor(
         private readonly profiles: ProfileRepository,
         private readonly users: UserRepository,
+        private readonly tripsClient: TripsClient,
     ) {}
 
     async getProfile(userId: string) {
@@ -35,18 +37,18 @@ export class AppService {
         return this.getProfile(userId);
     }
 
-    async getTravelHistory(userId: string): Promise<TravelHistoryResponse> {
-        void userId;
-        return TravelHistoryResponse.empty();
+    async getTravelHistory(userId: string, authorization: string): Promise<TravelHistoryResponse> {
+        const data = await this.tripsClient.getTravelHistory(userId, authorization);
+        return new TravelHistoryResponse({ trips: data.trips });
     }
 
-    async getPublicProfile(targetUserId: string) {
+    async getPublicProfile(targetUserId: string, authorization: string) {
         const user = await this.users.findById(targetUserId);
         if (!user) throw new NotFoundException('Profile not found');
 
         const storedProfile = await this.profiles.findByUserId(targetUserId);
         const privacySettings = storedProfile?.privacySettings ?? defaultPrivacySettings();
-        const travelHistory = privacySettings.showTravelHistory ? await this.getTravelHistory(targetUserId) : undefined;
+        const travelHistory = privacySettings.showTravelHistory ? await this.getTravelHistory(targetUserId, authorization) : undefined;
 
         return {
             profile: PublicProfileResponse.from({

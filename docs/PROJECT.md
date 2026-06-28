@@ -256,13 +256,13 @@ Do **not** create domain libraries (e.g. `library/users`, `library/trips`). Each
 
 No GraphQL.
 
-| Service                 | Domain responsibility                                                                                                                                                |
-| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `auth-service`          | Sign-up, sign-in, sessions, password, email                                                                                                                          |
-| `users-service`         | Profiles, interests, privacy, avatar URL, travel history — `GET/PATCH /api/v1/profiles/me`, `GET /api/v1/profiles/me/travel-history`, `GET /api/v1/profiles/:userId` |
-| `trips-service`         | Trip creation + discovery + membership — organizer CRUD/lifecycle; public discovery; join/leave; organizer approve/reject/remove                                     |
-| `messaging-service`     | Direct messaging — `POST/GET /api/v1/conversations`, `POST/GET /api/v1/conversations/:id/messages`; trip group chat planned                                          |
-| `notifications-service` | In-app notifications — `GET /api/v1/notifications`, `PATCH /api/v1/notifications/:id/read`; push delivery planned                                                    |
+| Service                 | Domain responsibility                                                                                                                                                                                         |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auth-service`          | Sign-up, sign-in, sessions, password, email                                                                                                                                                                   |
+| `trips-service`         | Trip creation + discovery + membership — organizer CRUD/lifecycle; public discovery; join/leave; organizer approve/reject/remove; `GET /api/v1/trips/users/:userId/travel-history` for profile travel history |
+| `users-service`         | Profiles, interests, privacy, avatar URL, travel history — `GET/PATCH /api/v1/profiles/me`, `GET /api/v1/profiles/me/travel-history` (via `trips-service`), `GET /api/v1/profiles/:userId`                    |
+| `messaging-service`     | Direct messaging — `POST/GET /api/v1/conversations`, `POST/GET /api/v1/conversations/:id/messages`; trip group chat planned                                                                                   |
+| `notifications-service` | In-app notifications — `GET /api/v1/notifications`, `PATCH /api/v1/notifications/:id/read`; push delivery planned                                                                                             |
 
 Services communicate over HTTP (and WebSockets where needed). Shared auth validation uses `@tc/auth` guards and JWT/bearer tokens issued by `auth-service`.
 

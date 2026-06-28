@@ -9,7 +9,15 @@ describe('AppService', () => {
     let trips: jest.Mocked<
         Pick<
             TripRepository,
-            'create' | 'save' | 'findByOrganizerId' | 'findByIdForOrganizer' | 'findPublishedPublic' | 'findPublicById' | 'findPublishedById' | 'update'
+            | 'create'
+            | 'save'
+            | 'findByOrganizerId'
+            | 'findByIdForOrganizer'
+            | 'findPublishedPublic'
+            | 'findPublicById'
+            | 'findPublishedById'
+            | 'findTravelHistoryForUser'
+            | 'update'
         >
     >;
     let memberships: jest.Mocked<
@@ -55,6 +63,7 @@ describe('AppService', () => {
             findPublishedPublic: jest.fn(),
             findPublicById: jest.fn(),
             findPublishedById: jest.fn(),
+            findTravelHistoryForUser: jest.fn(),
             update: jest.fn(async () => ({ affected: 1, raw: [], generatedMaps: [] })),
         };
         memberships = {
@@ -143,6 +152,16 @@ describe('AppService', () => {
             expect(trips.findByOrganizerId).toHaveBeenCalledWith('organizer-1');
             expect(result.trips).toHaveLength(1);
             expect(result.trips[0].title).toBe('Desert Loop');
+        });
+    });
+
+    describe('getTravelHistory', () => {
+        it('returns joined and organized trips for the user', async () => {
+            trips.findTravelHistoryForUser.mockResolvedValue([{ ...baseTrip, status: 'published' }]);
+            const result = await service.getTravelHistory('participant-1');
+            expect(trips.findTravelHistoryForUser).toHaveBeenCalledWith('participant-1');
+            expect(result.trips).toHaveLength(1);
+            expect(result.trips[0].title).toBe('Pacific Coast Highway');
         });
     });
 

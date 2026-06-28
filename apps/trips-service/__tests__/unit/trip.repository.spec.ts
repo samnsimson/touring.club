@@ -1,4 +1,4 @@
-import { Trip, type DataSource } from '@tc/database';
+import { And, ILike, In, LessThanOrEqual, MoreThanOrEqual, Not, Trip, type DataSource } from '@tc/database';
 import { TripRepository } from '../../src/app/repositories/trip.repository';
 
 describe('TripRepository', () => {
@@ -104,33 +104,22 @@ describe('TripRepository', () => {
 
     describe('findPublishedPublic', () => {
         let tripRepository: TripRepository;
-        let queryBuilder: {
-            where: jest.Mock;
-            andWhere: jest.Mock;
-            orderBy: jest.Mock;
-            getMany: jest.Mock;
-        };
+        let find: jest.SpiedFunction<TripRepository['find']>;
 
         beforeEach(() => {
             const dataSource = { manager: {} } as DataSource;
             tripRepository = new TripRepository(dataSource);
-            queryBuilder = {
-                where: jest.fn().mockReturnThis(),
-                andWhere: jest.fn().mockReturnThis(),
-                orderBy: jest.fn().mockReturnThis(),
-                getMany: jest.fn().mockResolvedValue([]),
-            };
-            jest.spyOn(tripRepository, 'createQueryBuilder').mockReturnValue(queryBuilder as never);
+            find = jest.spyOn(tripRepository, 'find').mockResolvedValue([]);
         });
 
         it('queries published public trips without optional filters', async () => {
             const trips = [{ id: 'trip-1' }] as Trip[];
-            queryBuilder.getMany.mockResolvedValue(trips);
+            find.mockResolvedValue(trips);
             const result = await tripRepository.findPublishedPublic({});
-            expect(tripRepository.createQueryBuilder).toHaveBeenCalledWith('trip');
-            expect(queryBuilder.where).toHaveBeenCalledWith('trip.status = :status', { status: 'published' });
-            expect(queryBuilder.andWhere).toHaveBeenCalledWith('trip.visibility = :visibility', { visibility: 'public' });
-            expect(queryBuilder.orderBy).toHaveBeenCalledWith('trip.startDate', 'ASC');
+            expect(find).toHaveBeenCalledWith({
+                where: { status: 'published', visibility: 'public' },
+                order: { startDate: 'ASC' },
+            });
             expect(result).toBe(trips);
         });
 
@@ -142,15 +131,39 @@ describe('TripRepository', () => {
                 category: 'Road Trip',
                 tag: 'coastal',
             });
-            expect(queryBuilder.andWhere).toHaveBeenCalledWith('trip.destination ILIKE :destination', { destination: '%California%' });
-            expect(queryBuilder.andWhere).toHaveBeenCalledWith('trip.startDate >= :startDateFrom', {
-                startDateFrom: new Date('2026-07-01T00:00:00.000Z'),
+            expect(find).toHaveBeenCalledTimes(1);
+            const options = find.mock.calls[0][0];
+            expect(options.order).toEqual({ startDate: 'ASC' });
+            expect(options.where).toMatchObject({
+                status: 'published',
+                visibility: 'public',
+                destination: ILike('%California%'),
+                startDate: And(MoreThanOrEqual(new Date('2026-07-01T00:00:00.000Z')), LessThanOrEqual(new Date('2026-08-01T00:00:00.000Z'))),
             });
-            expect(queryBuilder.andWhere).toHaveBeenCalledWith('trip.startDate <= :startDateTo', {
-                startDateTo: new Date('2026-08-01T00:00:00.000Z'),
+            expect(options.where.categories).toMatchObject({ _type: 'raw', _objectLiteralParameters: { category: 'Road Trip' } });
+            expect(options.where.tags).toMatchObject({ _type: 'raw', _objectLiteralParameters: { tag: 'coastal' } });
+        });
+    });
+
+    describe('findTravelHistoryForUser', () => {
+        let tripRepository: TripRepository;
+        let find: jest.SpiedFunction<TripRepository['find']>;
+
+        beforeEach(() => {
+            const dataSource = { manager: {} } as DataSource;
+            tripRepository = new TripRepository(dataSource);
+            find = jest.spyOn(tripRepository, 'find').mockResolvedValue([]);
+        });
+
+        it('queries organized and joined trips ordered by startDate descending', async () => {
+            const trips = [{ id: 'trip-1' }] as Trip[];
+            find.mockResolvedValue(trips);
+            const result = await tripRepository.findTravelHistoryForUser('user-1');
+            expect(find).toHaveBeenCalledWith({
+                where: [{ organizerId: 'user-1', status: Not('draft') }, { memberships: { userId: 'user-1', status: In(['active', 'left']) } }],
+                order: { startDate: 'DESC' },
             });
-            expect(queryBuilder.andWhere).toHaveBeenCalledWith(':category = ANY(trip.categories)', { category: 'Road Trip' });
-            expect(queryBuilder.andWhere).toHaveBeenCalledWith(':tag = ANY(trip.tags)', { tag: 'coastal' });
+            expect(result).toBe(trips);
         });
     });
 });

@@ -282,6 +282,29 @@ describe('Trips', () => {
         expect(response.body.membership.userId).toBe(participant.userId);
     });
 
+    it('GET /api/v1/trips/users/:userId/travel-history returns joined and organized trips', async () => {
+        if (!requireDatabase('travel history')) return;
+        const organizerClient = authedApi(api, organizer.userId);
+        const createRes = await organizerClient.post('/api/v1/trips', {
+            title: 'Coastal Drive',
+            destination: 'California, USA',
+            startDate: '2026-07-01T09:00:00.000Z',
+            endDate: '2026-07-07T18:00:00.000Z',
+            capacity: 12,
+            visibility: 'public',
+        });
+        await organizerClient.post(`/api/v1/trips/${createRes.body.trip.id}/publish`);
+        await authedApi(api, participant.userId).post(`/api/v1/trips/${createRes.body.trip.id}/join`);
+        const participantHistory = await authedApi(api, participant.userId).get(`/api/v1/trips/users/${participant.userId}/travel-history`);
+        expect(participantHistory.status).toBe(200);
+        expect(participantHistory.body.trips).toHaveLength(1);
+        expect(participantHistory.body.trips[0].title).toBe('Coastal Drive');
+        const organizerHistory = await authedApi(api, organizer.userId).get(`/api/v1/trips/users/${organizer.userId}/travel-history`);
+        expect(organizerHistory.status).toBe(200);
+        expect(organizerHistory.body.trips).toHaveLength(1);
+        expect(organizerHistory.body.trips[0].title).toBe('Coastal Drive');
+    });
+
     it('POST /api/v1/trips/:tripId/join creates a pending request for a published private trip', async () => {
         if (!requireDatabase('join private trip')) return;
         const organizerClient = authedApi(api, organizer.userId);

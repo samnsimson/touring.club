@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { BaseRepository, Trip, type DataSource } from '@tc/database';
+import { And, BaseRepository, DataSource, FindOptionsWhere, ILike, In, LessThanOrEqual, MoreThanOrEqual, Not, Raw, Trip } from '@tc/database';
 import type { DiscoverTripsFilters } from '../dto';
 
 @Injectable()
@@ -30,27 +30,23 @@ export class TripRepository extends BaseRepository<Trip> {
     }
 
     findPublishedPublic(filters: DiscoverTripsFilters) {
-        const query = this.createQueryBuilder('trip')
-            .where('trip.status = :status', { status: 'published' })
-            .andWhere('trip.visibility = :visibility', { visibility: 'public' })
-            .orderBy('trip.startDate', 'ASC');
+        const where: FindOptionsWhere<Trip> = { status: 'published', visibility: 'public' };
+        if (filters.destination) where.destination = ILike(`%${filters.destination}%`);
+        if (filters.startDateFrom && filters.startDateTo) {
+            const moreOrEqual = MoreThanOrEqual(new Date(filters.startDateFrom));
+            const lessOrEqual = LessThanOrEqual(new Date(filters.startDateTo));
+            where.startDate = And(moreOrEqual, lessOrEqual);
+        } else if (filters.startDateFrom) where.startDate = MoreThanOrEqual(new Date(filters.startDateFrom));
+        else if (filters.startDateTo) where.startDate = LessThanOrEqual(new Date(filters.startDateTo));
+        if (filters.category) where.categories = Raw((alias) => `:category = ANY(${alias})`, { category: filters.category });
+        if (filters.tag) where.tags = Raw((alias) => `:tag = ANY(${alias})`, { tag: filters.tag });
+        return this.find({ where, order: { startDate: 'ASC' } });
+    }
 
-        if (filters.destination) {
-            query.andWhere('trip.destination ILIKE :destination', { destination: `%${filters.destination}%` });
-        }
-        if (filters.startDateFrom) {
-            query.andWhere('trip.startDate >= :startDateFrom', { startDateFrom: new Date(filters.startDateFrom) });
-        }
-        if (filters.startDateTo) {
-            query.andWhere('trip.startDate <= :startDateTo', { startDateTo: new Date(filters.startDateTo) });
-        }
-        if (filters.category) {
-            query.andWhere(':category = ANY(trip.categories)', { category: filters.category });
-        }
-        if (filters.tag) {
-            query.andWhere(':tag = ANY(trip.tags)', { tag: filters.tag });
-        }
-
-        return query.getMany();
+    findTravelHistoryForUser(userId: string) {
+        return this.find({
+            where: [{ organizerId: userId, status: Not('draft') }, { memberships: { userId, status: In(['active', 'left']) } }],
+            order: { startDate: 'DESC' },
+        });
     }
 }

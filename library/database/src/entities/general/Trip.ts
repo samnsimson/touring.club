@@ -1,5 +1,7 @@
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, OneToMany } from 'typeorm';
 import { BaseEntity } from '../../lib/base.entity';
+import { Conversation } from './Conversation';
+import { TripMembership } from './TripMembership';
 
 export type TripVisibility = 'public' | 'private';
 export type TripStatus = 'draft' | 'published' | 'cancelled' | 'archived';
@@ -44,4 +46,10 @@ export class Trip extends BaseEntity {
 
     @Column('text', { array: true, default: () => "'{}'" })
     tags!: string[];
+
+    @OneToMany(() => TripMembership, (membership) => membership.trip)
+    memberships!: TripMembership[];
+
+    @OneToMany(() => Conversation, (conversation) => conversation.trip)
+    conversations!: Conversation[];
 }

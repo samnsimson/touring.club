@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpStatus, Param, Patch } from '@nestjs/common';
+import { Body, Controller, Get, Headers, HttpStatus, Param, Patch } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { CurrentSession } from '@tc/auth';
 import { ApiResource, ApiResourceExceptions } from '@tc/utils';
@@ -27,14 +27,14 @@ export class AppController {
     @Get('me/travel-history')
     @ApiResource({ type: TravelHistoryResponse, operationId: 'getMyTravelHistory', status: HttpStatus.OK })
     @ApiResourceExceptions(HttpStatus.UNAUTHORIZED)
-    async getMyTravelHistory(@CurrentSession('userId') userId: string) {
-        return this.appService.getTravelHistory(userId);
+    async getMyTravelHistory(@CurrentSession('userId') userId: string, @Headers('authorization') authorization: string) {
+        return this.appService.getTravelHistory(userId, authorization);
     }
 
     @Get(':userId')
     @ApiResource({ type: GetPublicProfileResponseDto, operationId: 'getPublicProfile', status: HttpStatus.OK })
     @ApiResourceExceptions(HttpStatus.NOT_FOUND, HttpStatus.UNAUTHORIZED)
-    async getPublicProfile(@Param('userId') userId: string) {
-        return this.appService.getPublicProfile(userId);
+    async getPublicProfile(@Param('userId') userId: string, @Headers('authorization') authorization: string) {
+        return this.appService.getPublicProfile(userId, authorization);
     }
 }

@@ -9,6 +9,7 @@ export const EnvSchema = z.object({
     AUTH_SERVICE_PORT: z.coerce.number().int().min(1).max(65535).default(3000),
     USERS_SERVICE_PORT: z.coerce.number().int().min(1).max(65535).default(3001),
     TRIPS_SERVICE_PORT: z.coerce.number().int().min(1).max(65535).default(3002),
+    TRIPS_SERVICE_URL: z.url().default('http://127.0.0.1:3002'),
     MESSAGING_SERVICE_PORT: z.coerce.number().int().min(1).max(65535).default(3003),
     NOTIFICATIONS_SERVICE_PORT: z.coerce.number().int().min(1).max(65535).default(3004),
     AUTH_APP_URL: z.url().default('http://localhost:3000'),
