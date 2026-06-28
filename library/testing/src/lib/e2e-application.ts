@@ -1,4 +1,5 @@
 import { ValidationPipe, VersioningType } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { Test } from '@nestjs/testing';
 import cookieParser from 'cookie-parser';
@@ -16,9 +17,12 @@ export class E2EApplication {
         if (this.app) return;
 
         const globalPrefix = this.options.globalPrefix ?? 'api';
-        const moduleRef = await Test.createTestingModule({
-            imports: [RootModule.init(this.options.rootModule)],
-        }).compile();
+        const moduleBuilder = Test.createTestingModule({
+            imports: [RootModule.init(this.options.rootModule, { globalAuth: !this.options.authGuard })],
+            providers: this.options.authGuard ? [{ provide: APP_GUARD, useClass: this.options.authGuard }] : [],
+        });
+
+        const moduleRef = await moduleBuilder.compile();
 
         this.app = moduleRef.createNestApplication<NestExpressApplication>();
         this.app.setGlobalPrefix(globalPrefix);

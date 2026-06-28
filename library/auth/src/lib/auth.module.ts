@@ -19,6 +19,7 @@ export class AuthModule implements NestModule {
             providers: [AuthService, AuthGuard, BetterAuthMiddleware, ...(options.providers ?? [])],
             imports: [
                 BetterAuthModule.forRootAsync({
+                    disableGlobalAuthGuard: true,
                     useFactory: async () => {
                         if (!dataSource.isInitialized) await dataSource.initialize();
                         return { auth: createAuth({ emailService: options.emailService }) };

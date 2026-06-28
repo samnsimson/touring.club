@@ -3,10 +3,6 @@ import type { AuthenticatedRequest } from '@tc/auth';
 import { AppController } from '../../src/app/app.controller';
 import { AppService } from '../../src/app/app.service';
 
-jest.mock('@tc/auth', () => ({
-    AuthGuard: class AuthGuard {},
-}));
-
 describe('AppController', () => {
     let controller: AppController;
     let appService: jest.Mocked<Pick<AppService, 'getProfile' | 'updateProfile' | 'getTravelHistory' | 'getPublicProfile'>>;

@@ -20,7 +20,6 @@ type AuthApiMock = {
 
 jest.mock('@thallesp/nestjs-better-auth', () => ({
     AuthService: class AuthService {},
-    AllowAnonymous: () => () => undefined,
 }));
 
 jest.mock('@tc/auth', () => ({

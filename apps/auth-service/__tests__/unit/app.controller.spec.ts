@@ -9,10 +9,11 @@ type SignInResult = Awaited<ReturnType<AppService['signIn']>>;
 jest.mock('@tc/auth', () => ({
     auth: { api: {} },
     AuthGuard: class AuthGuard {},
+    Public: () => () => undefined,
 }));
 
 jest.mock('@thallesp/nestjs-better-auth', () => ({
-    AllowAnonymous: () => () => undefined,
+    AuthService: class AuthService {},
 }));
 
 describe('AppController', () => {

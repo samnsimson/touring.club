@@ -1,4 +1,5 @@
 import type { Type } from '@nestjs/common';
+import type { CanActivate } from '@nestjs/common';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import type { Server } from 'node:http';
 import type { Application } from 'express';
@@ -14,6 +15,8 @@ export interface E2EApplicationOptions {
     rootModule: Type<unknown>;
     globalPrefix?: string;
     fixturesDir?: string;
+    /** Overrides the global AuthGuard for in-process e2e (session validation instead of remote JWKS). */
+    authGuard?: Type<CanActivate>;
     /** When set, the app listens on this URL so remote JWKS validation (AuthGuard) can reach the in-process server. */
     listenUrl?: string;
     configure?: (app: NestExpressApplication) => void | Promise<void>;

@@ -300,7 +300,8 @@ The `auth` library uses **Vitest** for adapter tests — place specs in `library
 - Use `@ApiResource()` and `@ApiResourceExceptions()` from `@tc/utils` on endpoints
 - DTOs: class-validator decorators + `@ApiProperty()` for Swagger
 - Place DTOs in `src/app/dto/`, export via `dto/index.ts`
-- Use `@AllowAnonymous()` from `@thallesp/nestjs-better-auth` for public auth routes
+- `AuthGuard` is registered globally via `RootModule` — all routes require a valid JWT access token by default
+- Use `@Public()` from `@tc/auth` on controllers or handlers to skip authentication
 
 ### Modules
 

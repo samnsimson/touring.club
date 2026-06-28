@@ -18,7 +18,7 @@ import {
     VerifyEmailDto,
     VerifyEmailResponseDto,
 } from './dto';
-import { AllowAnonymous } from '@thallesp/nestjs-better-auth';
+import { Public } from '@tc/auth';
 import { AppService } from './app.service';
 import type { Request, Response } from 'express';
 import { ApiResource, ApiResourceExceptions } from '@tc/utils';
@@ -57,7 +57,7 @@ export class AppController {
     }
 
     @Post('sign-up')
-    @AllowAnonymous()
+    @Public()
     @ApiResource({ type: SignUpResponseDto, operationId: 'signUp', status: HttpStatus.CREATED })
     @ApiResourceExceptions(HttpStatus.BAD_REQUEST, HttpStatus.CONFLICT)
     async signUp(@Body() dto: SignUpDto, @Res({ passthrough: true }) res: Response) {
@@ -68,7 +68,7 @@ export class AppController {
     }
 
     @Post('sign-in')
-    @AllowAnonymous()
+    @Public()
     @ApiResource({ type: SignInResponseDto, operationId: 'signIn', status: HttpStatus.OK })
     @ApiResourceExceptions(HttpStatus.BAD_REQUEST, HttpStatus.UNAUTHORIZED)
     async signIn(@Body() dto: SignInDto, @Res({ passthrough: true }) res: Response) {
@@ -79,7 +79,7 @@ export class AppController {
     }
 
     @Post('verify-email')
-    @AllowAnonymous()
+    @Public()
     @ApiResource({ type: VerifyEmailResponseDto, operationId: 'verifyEmail', status: HttpStatus.OK })
     @ApiResourceExceptions(HttpStatus.BAD_REQUEST)
     async verifyEmail(@Body() dto: VerifyEmailDto, @Res({ passthrough: true }) res: Response) {
@@ -89,7 +89,7 @@ export class AppController {
     }
 
     @Post('forgot-password')
-    @AllowAnonymous()
+    @Public()
     @ApiResource({ type: ForgotPasswordResponseDto, operationId: 'forgotPassword', status: HttpStatus.OK })
     @ApiResourceExceptions(HttpStatus.BAD_REQUEST)
     async forgotPassword(@Body() dto: ForgotPasswordDto) {
@@ -97,7 +97,7 @@ export class AppController {
     }
 
     @Post('reset-password')
-    @AllowAnonymous()
+    @Public()
     @ApiResource({ type: ResetPasswordResponseDto, operationId: 'resetPassword', status: HttpStatus.OK })
     @ApiResourceExceptions(HttpStatus.BAD_REQUEST)
     async resetPassword(@Body() dto: ResetPasswordDto) {

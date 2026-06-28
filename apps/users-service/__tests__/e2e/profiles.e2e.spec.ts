@@ -1,4 +1,4 @@
-import { E2EApplication, MockEmailService, type E2EApi } from '@tc/testing';
+import { E2EApplication, MockEmailService, SessionAuthGuard, type E2EApi } from '@tc/testing';
 import { authedApi, createVerifiedUser, requireDatabase } from './support/auth-scenarios';
 import { createUsersE2EAppModule } from './support/e2e-app.module';
 
@@ -6,6 +6,7 @@ const mockEmailService = new MockEmailService();
 const e2eApplication = new E2EApplication({
     rootModule: createUsersE2EAppModule(mockEmailService),
     globalPrefix: 'api',
+    authGuard: SessionAuthGuard,
 });
 
 describe('Profiles', () => {

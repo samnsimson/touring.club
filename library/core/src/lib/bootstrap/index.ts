@@ -5,7 +5,7 @@ import { createNestApplication } from './create-nest-app';
 
 export type { ApplicationBootstrapOptions, BootstrapApplicationOptions } from './contract';
 export { composeHealthRoutes } from './health.routes';
-export { RootModule } from './root.module';
+export { RootModule, type RootModuleOptions } from './root.module';
 
 export const bootstrapApplication = async ({ rootModule, port, globalPrefix = 'api', configure, swagger }: BootstrapApplicationOptions) => {
     const env = validateEnv(process.env);

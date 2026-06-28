@@ -20,7 +20,9 @@
         "@nestjs/core": "^11.0.0",
         "@nestjs/platform-express": "^11.0.0",
         "@nestjs/testing": "^11.0.0",
+        "@tc/auth": "workspace:*",
         "@tc/core": "workspace:*",
+        "@thallesp/nestjs-better-auth": "^2.6.1",
         "cookie-parser": "^1.4.7",
         "supertest": "^7.2.2"
     },

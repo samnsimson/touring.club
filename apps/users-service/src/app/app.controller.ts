@@ -1,6 +1,6 @@
-import { Body, Controller, Get, HttpStatus, Param, Patch, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Param, Patch, Req } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { AuthGuard, type AuthenticatedRequest } from '@tc/auth';
+import type { AuthenticatedRequest } from '@tc/auth';
 import { ApiResource, ApiResourceExceptions } from '@tc/utils';
 import { AppService } from './app.service';
 import { GetProfileResponseDto, GetPublicProfileResponseDto, TravelHistoryResponseDto, UpdateProfileDto, UpdateProfileResponseDto } from './dto';
@@ -8,7 +8,6 @@ import { ProfileUtils } from './profile.utils';
 
 @ApiTags('Profiles')
 @Controller('profiles')
-@UseGuards(AuthGuard)
 export class AppController {
     constructor(private readonly appService: AppService) {}
 
