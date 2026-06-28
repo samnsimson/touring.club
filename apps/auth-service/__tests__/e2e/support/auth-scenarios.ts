@@ -1,5 +1,4 @@
 import { type E2EApi, type MockEmailService } from '@tc/testing';
-
 export type VerifiedUser = {
     email: string;
     password: string;
@@ -18,13 +17,6 @@ function withAuthHeaders(api: E2EApi, accessToken: string, sessionToken: string)
         .setHeader('Authorization', `Bearer ${sessionToken}`)
         .setHeader('Cookie', `${AUTH_REFRESH_TOKEN_COOKIE}=${sessionToken}; ${AUTH_ACCESS_TOKEN_COOKIE}=${accessToken}`);
 }
-
-export function requireDatabase(testName: string): boolean {
-    if (process.env.DATABASE_URL) return true;
-    console.warn(`Skipping ${testName}: DATABASE_URL is not set`);
-    return false;
-}
-
 export function createUserCredentials(): { email: string; password: string; username: string } {
     const suffix = uniqueId();
     const [, randomPart = Math.random().toString(36).slice(2, 8)] = suffix.split('-');

@@ -1,4 +1,18 @@
 import { spawnSync } from 'node:child_process';
+import pg from 'pg';
+
+const defaultUser = require('../fixtures/users/default-user.json') as { userId: string };
+const viewerUser = require('../fixtures/users/viewer-user.json') as { userId: string };
+
+async function resetFixtureProfiles(databaseUrl: string): Promise<void> {
+    const client = new pg.Client({ connectionString: databaseUrl });
+    await client.connect();
+    try {
+        await client.query('DELETE FROM general.profiles WHERE user_id = ANY($1)', [[defaultUser.userId, viewerUser.userId]]);
+    } finally {
+        await client.end();
+    }
+}
 
 declare global {
     var __TEARDOWN_MESSAGE__: string;
@@ -14,6 +28,8 @@ module.exports = async function () {
             env: process.env,
         });
         if (result.status !== 0) throw new Error('Database migrations failed during e2e global setup');
+
+        await resetFixtureProfiles(process.env.DATABASE_URL);
     }
 
     globalThis.__TEARDOWN_MESSAGE__ = '\nTearing down users-service e2e...\n';

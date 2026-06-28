@@ -52,6 +52,11 @@ export class E2EApplication {
         return this.api;
     }
 
+    getApp(): NestExpressApplication {
+        if (!this.app) throw new Error('E2E application not initialized. Call bootstrap() before getApp().');
+        return this.app;
+    }
+
     async close(): Promise<void> {
         await this.app?.close();
         this.app = undefined;

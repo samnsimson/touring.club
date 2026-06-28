@@ -2,6 +2,7 @@ import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from
 import { Reflector } from '@nestjs/core';
 import { AuthHeaders, IS_PUBLIC_KEY } from '@tc/auth';
 
+/** E2e guard: treats `Authorization: Bearer <userId>` as an authenticated session. */
 @Injectable()
 export class FixtureAuthGuard implements CanActivate {
     constructor(private readonly reflector: Reflector) {}

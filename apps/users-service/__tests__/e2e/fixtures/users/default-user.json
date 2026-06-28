@@ -1,6 +1,6 @@
 {
+    "userId": "e2e-default-user",
     "name": "E2E User",
     "email": "e2e-user@touring.club.test",
-    "username": "e2euser",
-    "emailVerified": true
+    "username": "e2euser"
 }

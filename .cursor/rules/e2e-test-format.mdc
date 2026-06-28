@@ -21,15 +21,21 @@ Follow `apps/auth-service/__tests__/e2e/auth-password.e2e.spec.ts` when writing 
 - **No blank lines** between statements.
 - **One statement per line** — no wrapped object literals or chained calls across lines.
 - Inline request bodies on a single line, or assign to a `const` on one line first.
-- Use `if (!requireDatabase('…')) return;` for DB-gated tests.
-- Put helpers in `support/`; do not use external fixture files for request bodies.
+- Use `requireDatabase` from `@tc/testing` for DB-gated tests: `if (!requireDatabase('…')) return;`
+- Put helpers in `support/` only when the suite genuinely needs them (e.g. auth sign-up flows). Prefer `jest.mock` + fixture JSON for mocking dependencies.
+
+## Mocking (non-auth services)
+
+- Use `jest.mock` at the top of the spec for repositories or external clients.
+- Keep fixture data in `fixtures/**/*.json`; load with `require('./fixtures/...')`.
+- Use `FixtureAuthGuard` from `@tc/testing` with `Authorization: Bearer <userId>` — no DB seeding for auth users.
 
 ## Example
 
 ```typescript
 it('POST /api/v1/auth/change-password updates the password for an authenticated user', async () => {
     if (!requireDatabase('change-password')) return;
-    const user = await createVerifiedUser(api);
+    const user = await createVerifiedUser(api, mockEmailService);
     const signInRes = await signInUser(api, user);
     const client = authedApi(api, { accessToken: signInRes.body.accessToken, sessionToken: signInRes.body.sessionToken });
     const body = { currentPassword: user.password, newPassword: 'NewStr0ngPass!', revokeOtherSessions: true };

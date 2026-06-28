@@ -16,14 +16,12 @@
         "@tc/utils": "workspace:*",
         "class-transformer": "^0.5.1",
         "class-validator": "^0.15.1",
-        "pg": "^8.22.0",
         "reflect-metadata": "^0.2.0",
         "rxjs": "^7.8.0",
         "tslib": "^2.3.0"
     },
     "devDependencies": {
         "@nestjs/testing": "^11.0.0",
-        "@types/express": "^5.0.6",
-        "@types/pg": "^8.11.10"
+        "@types/express": "^5.0.6"
     }
 }

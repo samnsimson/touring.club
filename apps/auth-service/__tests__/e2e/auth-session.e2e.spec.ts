@@ -1,5 +1,5 @@
-import { E2EApplication, MockEmailService, SessionAuthGuard, type E2EApi } from '@tc/testing';
-import { authedApi, createVerifiedUser, requireDatabase, signInUser } from './support/auth-scenarios';
+import { E2EApplication, MockEmailService, requireDatabase, SessionAuthGuard, type E2EApi } from '@tc/testing';
+import { authedApi, createVerifiedUser, signInUser } from './support/auth-scenarios';
 import { createAuthE2EAppModule } from './support/e2e-app.module';
 
 const mockEmailService = new MockEmailService();
