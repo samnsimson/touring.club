@@ -99,17 +99,21 @@ touring.club/
 | DTOs, controllers, services | `apps/<service>/src/app/`                | Hand-written — domain logic stays in the service |
 | App unit tests              | `apps/<service>/__tests__/unit/`         | Hand-written Jest specs                          |
 | App e2e tests               | `apps/<service>/__tests__/e2e/`          | `@tc/testing` + Jest e2e target                  |
+| Lib unit tests              | `library/<lib>/__tests__/unit/`          | Hand-written Jest specs (Vitest for `auth` lib)  |
 | App Jest config             | `apps/<service>/jest.config.cts`         | `createAppUnitJestConfig` from `jest/`           |
 | App e2e Jest config         | `apps/<service>/jest.e2e.config.cts`     | `createAppE2eJestConfig` from `jest/`            |
+| Lib Jest config             | `library/<lib>/jest.config.cts`          | `createLibJestConfig` from `jest/`               |
 | Auth DB entities            | `library/database/src/entities/auth/`    | Better Auth generate (`auth:generate`)           |
 | Other DB entities           | `library/database/src/entities/general/` | Hand-written + TypeORM migrations                |
 | Service repositories        | `apps/<service>/src/app/repositories/`   | Extend `BaseRepository` from `@tc/database`      |
 | DB migrations               | `library/database/src/migrations/`       | `bun nx run database:migration:generate`         |
+| DB CLI scripts              | `library/database/scripts/`              | `run-migrations.ts`, `database.datasource.ts`    |
 | Env variables               | `library/config/src/lib/env.schema.ts`   | Hand-written                                     |
 | Shared utilities            | `library/utils/src/lib/`                 | Hand-written                                     |
 | Auth integration (shared)   | `library/auth/src/lib/`                  | Hand-written                                     |
+| Auth CLI scripts            | `library/auth/scripts/`                  | `auth.cli.config.ts` for `auth:generate`         |
 
-Do **not** put domain business logic in `library/` or microservice-specific code that belongs in another service's app. Libraries hold **shared infrastructure**; each microservice owns its domain controllers, services, and DTOs.
+Do **not** put domain business logic in `library/` or microservice-specific code that belongs in another service's app. Libraries hold **shared infrastructure**; each microservice owns its domain controllers, services, and DTOs. **CLI/tooling entrypoints** (migrations runner, TypeORM data source, Better Auth generate config) live under `library/<lib>/scripts/` — not in `src/`.
 
 ### Scaffold microservice
 
@@ -276,6 +280,20 @@ module.exports = createAppE2eJestConfig('my-service', __dirname);
 
 Wire the e2e target in `project.json` to `jest.e2e.config.cts` and follow `__tests__/e2e/support/` conventions (see `.cursor/rules/e2e-test-format.mdc`).
 
+### Lib Jest config
+
+Libraries use the same `__tests__/unit/` layout. New libs only need a thin wrapper:
+
+```javascript
+// library/my-lib/jest.config.cts
+const { createLibJestConfig } = require('../../jest/create-lib-jest-config.cjs');
+module.exports = createLibJestConfig('my-lib', __dirname);
+```
+
+**Never colocate specs under `src/`** — all unit and e2e tests belong under `__tests__/` (apps: `__tests__/unit/` + `__tests__/e2e/`; libraries: `__tests__/unit/`). Import source via `../../src/...` from spec files.
+
+The `auth` library uses **Vitest** for adapter tests — place specs in `library/auth/__tests__/unit/` and wire `vitest.config.ts` to that path.
+
 ### Controllers
 
 - Use `@ApiTags()` on the controller class
@@ -299,7 +317,7 @@ Wire the e2e target in `project.json` to `jest.e2e.config.cts` and follow `__tes
 5. **Minimize scope** — smallest correct diff; don't refactor unrelated code
 6. **Match existing patterns** — read surrounding files before writing; reuse existing abstractions
 7. **Comments** — only for non-obvious logic; code should be self-explanatory
-8. **Tests** — add only when they cover meaningful behavior; Jest for apps, Vitest for `auth` lib adapter tests. **App tests live under `apps/<app>/__tests__/`** — unit specs in `__tests__/unit/`, e2e suites in `__tests__/e2e/`. Use `createAppUnitJestConfig` / `createAppE2eJestConfig` from `jest/`. **E2e suite style:** follow `.cursor/rules/e2e-test-format.mdc` (reference: `apps/auth-service/__tests__/e2e/auth-password.e2e.spec.ts`) — one statement per line inside `it`, no blank lines within a test, inline request bodies.
+8. **Tests** — add only when they cover meaningful behavior. **All tests live under `__tests__/`** — never colocate `*.spec.ts` under `src/`. Apps: Jest unit specs in `apps/<app>/__tests__/unit/`, e2e in `apps/<app>/__tests__/e2e/` (`createAppUnitJestConfig` / `createAppE2eJestConfig`). Libraries: Jest in `library/<lib>/__tests__/unit/` (`createLibJestConfig`); Vitest for `auth` lib adapter tests in `library/auth/__tests__/unit/`. **E2e suite style:** follow `.cursor/rules/e2e-test-format.mdc` (reference: `apps/auth-service/__tests__/e2e/auth-password.e2e.spec.ts`) — one statement per line inside `it`, no blank lines within a test, inline request bodies.
 9. **No secrets in code** — env vars via `@tc/config`; never commit `.env`
 10. **Module boundaries** — ESLint `@nx/enforce-module-boundaries` is enabled; respect project tags
 11. **Repositories** — extend `BaseRepository` in `apps/<service>/src/app/repositories/`; inject via `@InjectDataSource()`; import `DataSource` types from `@tc/database`; never add direct `typeorm` to apps

@@ -1,4 +1,4 @@
-import { common } from './common.js';
+import { common } from '../../src/lib/common';
 
 describe('common', () => {
     it('should work', () => {

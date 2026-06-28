@@ -1,4 +1,5 @@
-import { Column, CreateDateColumn, Entity, PrimaryColumn, UpdateDateColumn } from 'typeorm';
+import { Column, Entity } from 'typeorm';
+import { BaseEntity } from '../../lib/base.entity';
 
 export type PrivacySettings = {
     showEmail: boolean;
@@ -11,8 +12,8 @@ export const defaultPrivacySettings = (): PrivacySettings => ({
 });
 
 @Entity({ schema: 'general', name: 'profiles' })
-export class Profile {
-    @PrimaryColumn('text', { name: 'user_id' })
+export class Profile extends BaseEntity {
+    @Column('text', { name: 'user_id', unique: true })
     userId!: string;
 
     @Column('text', { name: 'biography', nullable: true })
@@ -23,10 +24,4 @@ export class Profile {
 
     @Column('jsonb', { name: 'privacy_settings' })
     privacySettings!: PrivacySettings;
-
-    @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
-    createdAt!: Date;
-
-    @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
-    updatedAt!: Date;
 }

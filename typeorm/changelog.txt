@@ -1,10 +1,6 @@
-# TypeORM Schema Changes - 2026-06-27T10:22:35.597Z
+# TypeORM Schema Changes - 2026-06-28T01:03:32.605Z
 
 - Updated entity: entities/Session.ts
 
 - Updated entity: entities/Account.ts
-
-- Updated entity: entities/Verification.ts
-
-- Updated entity: entities/Jwks.ts
 

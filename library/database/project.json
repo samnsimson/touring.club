@@ -19,7 +19,7 @@
             "executor": "nx:run-commands",
             "dependsOn": ["config:build", "utils:build"],
             "options": {
-                "command": "TS_NODE_PROJECT=library/database/tsconfig.orm.json bun --bun library/database/src/run-migrations.ts",
+                "command": "bun --bun library/database/scripts/run-migrations.ts",
                 "cwd": "{workspaceRoot}"
             }
         },
@@ -27,7 +27,7 @@
             "executor": "nx:run-commands",
             "dependsOn": ["config:build", "utils:build"],
             "options": {
-                "command": "TS_NODE_PROJECT=library/database/tsconfig.orm.json bunx typeorm-ts-node-esm migration:generate library/database/src/migrations/{args.name} --dataSource=library/database/src/database.datasource.ts",
+                "command": "bun ./node_modules/typeorm/cli.js migration:generate library/database/src/migrations/{args.name} --dataSource=library/database/scripts/database.datasource.ts",
                 "cwd": "{workspaceRoot}"
             }
         },

@@ -1,4 +1,4 @@
-import { SnakeNamingStrategy } from './utils.js';
+import { SnakeNamingStrategy } from '../../src/lib/utils';
 
 describe('SnakeNamingStrategy', () => {
     const strategy = new SnakeNamingStrategy();

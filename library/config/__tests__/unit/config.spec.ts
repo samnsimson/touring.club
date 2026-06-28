@@ -1,4 +1,4 @@
-import { validateEnv } from './validate-env';
+import { validateEnv } from '../../src/lib/validate-env';
 
 describe('validateEnv', () => {
     const validEnv = {

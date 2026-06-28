@@ -48,18 +48,18 @@ bun nx show projects
 
 Then map reality:
 
-| Check               | How                                                                |
-| ------------------- | ------------------------------------------------------------------ |
-| Deployable services | `bun nx show projects` — `auth-service`, `users-service` today     |
-| Shared libs         | `config`, `core`, `database`, `auth`, `testing`, `utils`, `common` |
-| Auth endpoints      | `apps/auth-service/src/app/app.controller.ts`                      |
-| Profile endpoints   | `apps/users-service/src/app/app.controller.ts`                     |
-| Auth integration    | `library/auth/src/lib/auth.config.ts`                              |
-| Auth entities       | `library/database/src/entities/auth/`                              |
-| General entities    | `library/database/src/entities/general/` (e.g. `Profile`)          |
-| Unit tests          | `apps/<service>/__tests__/unit/`                                   |
-| E2e tests           | `apps/<service>/__tests__/e2e/*.e2e.spec.ts`                       |
-| Stale artifacts     | e.g. legacy `apps/*/specs/` not wired to Jest                      |
+| Check               | How                                                                       |
+| ------------------- | ------------------------------------------------------------------------- |
+| Deployable services | `bun nx show projects` — `auth-service`, `users-service` today            |
+| Shared libs         | `config`, `core`, `database`, `auth`, `testing`, `utils`, `common`        |
+| Auth endpoints      | `apps/auth-service/src/app/app.controller.ts`                             |
+| Profile endpoints   | `apps/users-service/src/app/app.controller.ts`                            |
+| Auth integration    | `library/auth/src/lib/auth.config.ts`                                     |
+| Auth entities       | `library/database/src/entities/auth/`                                     |
+| General entities    | `library/database/src/entities/general/` (e.g. `Profile`)                 |
+| Unit tests          | `apps/<service>/__tests__/unit/`                                          |
+| E2e tests           | `apps/<service>/__tests__/e2e/*.e2e.spec.ts`                              |
+| Test layout         | All specs under `__tests__/` — apps: `unit/` + `e2e/`; libraries: `unit/` |
 
 Optionally verify health:
 

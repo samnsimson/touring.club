@@ -27,7 +27,7 @@
             "executor": "nx:run-commands",
             "dependsOn": ["utils:build"],
             "options": {
-                "command": "bunx auth@latest generate --config library/auth/src/auth.cli.config.ts --yes",
+                "command": "bunx auth@latest generate --config library/auth/scripts/auth.cli.config.ts --yes",
                 "cwd": "{workspaceRoot}"
             }
         }

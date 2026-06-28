@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import http from 'node:http';
 import os from 'node:os';
 import path from 'node:path';
-import { E2EApi, MockEmailService, RequestFixtureLoader, SnapshotRedactor } from './testing';
+import { E2EApi, MockEmailService, RequestFixtureLoader, SnapshotRedactor } from '../../src/lib/testing';
 
 describe('RequestFixtureLoader', () => {
     it('loads a request fixture from disk', () => {

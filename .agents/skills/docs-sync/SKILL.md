@@ -28,7 +28,7 @@ Run this checklist before finishing any task that:
 | New env var / port           | `library/config/src/lib/env.schema.ts` (required first), [AGENTS.md](../../AGENTS.md) if documenting service ports                               |
 | New shared pattern           | [AGENTS.md](../../AGENTS.md), [CLAUDE.md](../../CLAUDE.md), relevant `.agents/skills/*.md`                                                       |
 | Roadmap / priority progress  | [docs/PROJECT.md](../../docs/PROJECT.md), [.agents/skills/project-status/SKILL.md](../project-status/SKILL.md)                                   |
-| E2e / test conventions       | `.cursor/rules/*.mdc`, [AGENTS.md](../../AGENTS.md) Coding Standards                                                                             |
+| E2e / test conventions       | `.cursor/rules/*.mdc`, [AGENTS.md](../../AGENTS.md) Coding Standards — all tests under `__tests__/`                                              |
 | Generator / scaffold command | [.agents/skills/nx-generate/SKILL.md](../nx-generate/SKILL.md), [AGENTS.md](../../AGENTS.md)                                                     |
 
 ## Repository pattern (reference)
