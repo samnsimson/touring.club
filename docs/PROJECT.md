@@ -2,7 +2,7 @@
 
 Product vision, domain model, and target architecture for AI agents and contributors.
 
-> **Current repo state:** The codebase is early-stage. Today it ships `auth-service`, `users-service`, and `trips-service` with Better Auth, TypeORM, and PostgreSQL. Sections below describe the **target product and architecture**. For what is implemented right now, see [AGENTS.md](../AGENTS.md).
+> **Current repo state:** The codebase is early-stage. Today it ships `auth-service`, `users-service`, `trips-service`, and `messaging-service` with Better Auth, TypeORM, and PostgreSQL. Sections below describe the **target product and architecture**. For what is implemented right now, see [AGENTS.md](../AGENTS.md).
 
 ---
 
@@ -261,7 +261,7 @@ No GraphQL.
 | `auth-service`          | Sign-up, sign-in, sessions, password, email                                                                                                                          |
 | `users-service`         | Profiles, interests, privacy, avatar URL, travel history — `GET/PATCH /api/v1/profiles/me`, `GET /api/v1/profiles/me/travel-history`, `GET /api/v1/profiles/:userId` |
 | `trips-service`         | Trip creation + discovery + membership — organizer CRUD/lifecycle; public discovery; join/leave; organizer approve/reject/remove                                     |
-| `messaging-service`     | Conversations and messages                                                                                                                                           |
+| `messaging-service`     | Direct messaging — `POST/GET /api/v1/conversations`, `POST/GET /api/v1/conversations/:id/messages`; trip group chat planned                                          |
 | `notifications-service` | Notification delivery and preferences                                                                                                                                |
 
 Services communicate over HTTP (and WebSockets where needed). Shared auth validation uses `@tc/auth` guards and JWT/bearer tokens issued by `auth-service`.

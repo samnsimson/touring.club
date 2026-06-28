@@ -1,0 +1,19 @@
+meta {
+  name: List Messages
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/v1/conversations/{{conversationId}}/messages
+  body: none
+  auth: bearer
+}
+
+headers {
+  Authorization: Bearer {{accessToken}}
+}
+
+docs {
+  List messages in a conversation.
+}

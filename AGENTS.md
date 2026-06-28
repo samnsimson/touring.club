@@ -73,8 +73,9 @@ touring.club/
 ├── apps/                    # Deployable NestJS microservices (one per domain)
 │   ├── auth-service/        # Auth API — sign-up, sign-in, verify-email, sessions
 │   ├── users-service/       # User profiles — GET/PATCH me, travel history, public profile
-│   └── trips-service/       # Trips — create, edit, publish/cancel/archive
-│   # messaging-service, notifications-service (planned)
+│   ├── trips-service/       # Trips — create, discovery, membership
+│   └── messaging-service/   # Direct messaging — conversations and messages
+│   # notifications-service (planned)
 ├── library/                 # Shared infrastructure consumed by all services
 │   ├── auth/                # Better Auth config, guards, adapter (shared auth infra)
 │   ├── config/              # Zod env schema, ConfigModule/ConfigService
@@ -227,20 +228,21 @@ Libraries must not import from apps. Avoid circular deps between libraries. `@tc
 
 ## Current Projects
 
-| Project         | Type | Purpose                                                                                        |
-| --------------- | ---- | ---------------------------------------------------------------------------------------------- |
-| `auth-service`  | app  | Auth microservice — REST API (`/api/v1/auth/*`)                                                |
-| `users-service` | app  | User profiles microservice — REST API (`/api/v1/profiles/*`)                                   |
-| `trips-service` | app  | Trips microservice — organizer CRUD/lifecycle, public discovery, join/leave/approve membership |
-| `auth`          | lib  | Shared Better Auth integration (guards, adapter)                                               |
-| `core`          | lib  | Bootstrap & Swagger                                                                            |
-| `config`        | lib  | Environment & config                                                                           |
-| `database`      | lib  | TypeORM, entities (`auth/` + `general/`), migrations                                           |
-| `testing`       | lib  | Shared e2e testing utilities                                                                   |
-| `utils`         | lib  | Shared utilities                                                                               |
-| `common`        | lib  | Shared types (minimal)                                                                         |
+| Project             | Type | Purpose                                                                                        |
+| ------------------- | ---- | ---------------------------------------------------------------------------------------------- |
+| `auth-service`      | app  | Auth microservice — REST API (`/api/v1/auth/*`)                                                |
+| `users-service`     | app  | User profiles microservice — REST API (`/api/v1/profiles/*`)                                   |
+| `trips-service`     | app  | Trips microservice — organizer CRUD/lifecycle, public discovery, join/leave/approve membership |
+| `messaging-service` | app  | Messaging microservice — direct conversations, send/list messages                              |
+| `auth`              | lib  | Shared Better Auth integration (guards, adapter)                                               |
+| `core`              | lib  | Bootstrap & Swagger                                                                            |
+| `config`            | lib  | Environment & config                                                                           |
+| `database`          | lib  | TypeORM, entities (`auth/` + `general/`), migrations                                           |
+| `testing`           | lib  | Shared e2e testing utilities                                                                   |
+| `utils`             | lib  | Shared utilities                                                                               |
+| `common`            | lib  | Shared types (minimal)                                                                         |
 
-**Planned microservices:** `messaging-service`, `notifications-service` (see `docs/PROJECT.md`).
+**Planned microservices:** `notifications-service` (see `docs/PROJECT.md`).
 
 ## Application Patterns
 

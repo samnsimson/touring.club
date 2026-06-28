@@ -32,6 +32,9 @@
         },
         {
             "path": "./apps/trips-service"
+        },
+        {
+            "path": "./apps/messaging-service"
         }
     ]
 }

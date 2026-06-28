@@ -11,6 +11,7 @@
         "start:auth": "nx serve auth-service",
         "start:users": "nx serve users-service",
         "start:trips": "nx serve trips-service",
+        "start:messaging": "nx serve messaging-service",
         "start": "nx run-many --target=serve",
         "auth:generate": "nx run auth:generate",
         "migration:run": "nx run database:migration:run",

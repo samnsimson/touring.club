@@ -1,0 +1,25 @@
+meta {
+  name: Create Direct Conversation
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/conversations
+  body: json
+  auth: bearer
+}
+
+headers {
+  Authorization: Bearer {{accessToken}}
+}
+
+body:json {
+  {
+    "participantUserId": "usr_abc123"
+  }
+}
+
+docs {
+  Start or retrieve a direct conversation with another user.
+}
