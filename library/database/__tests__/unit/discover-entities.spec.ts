@@ -79,7 +79,8 @@ describe('discoverEntities', () => {
         class CompiledEntity {}
         readdirSyncMock.mockReturnValue(['Compiled.js', 'index.js'] as unknown as ReturnType<typeof readdirSync>);
         const loadModule = jest.fn((filePath: string) => (filePath.endsWith('Compiled.js') ? { CompiledEntity } : {}));
-        const entities = discoverEntities('file:///tmp/entities/index.js', ['index.js'], loadModule);
+        const entities = discoverEntities('file:///tmp/entities/index.js', ['index.ts'], loadModule);
         expect(entities).toEqual([CompiledEntity]);
+        expect(loadModule).not.toHaveBeenCalledWith('/tmp/entities/index.js');
     });
 });

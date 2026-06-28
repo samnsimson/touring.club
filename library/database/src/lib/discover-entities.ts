@@ -13,15 +13,19 @@ export function collectEntityClasses(module: Record<string, unknown>): (new () =
 
 export type EntityModuleLoader = (filePath: string) => Record<string, unknown>;
 
+function isIgnoredFile(file: string, ignoredFiles: Iterable<string>): boolean {
+    const ignoredBasenames = new Set(Array.from(ignoredFiles, (name) => name.replace(/\.(ts|js)$/, '')));
+    return ignoredBasenames.has(file.replace(/\.(ts|js)$/, ''));
+}
+
 export function discoverEntities(moduleUrl: string, ignoredFiles: Iterable<string>, loadModule?: EntityModuleLoader): (new () => object)[] {
-    const ignored = new Set(ignoredFiles);
     const dir = dirname(fileURLToPath(moduleUrl));
     const requireModule = createRequire(moduleUrl);
     const load = loadModule ?? ((filePath: string) => requireModule(filePath));
     const entities: (new () => object)[] = [];
 
     for (const file of readdirSync(dir)) {
-        if (ignored.has(file) || (!file.endsWith('.ts') && !file.endsWith('.js'))) continue;
+        if (isIgnoredFile(file, ignoredFiles) || (!file.endsWith('.ts') && !file.endsWith('.js'))) continue;
 
         entities.push(...collectEntityClasses(load(join(dir, file))));
     }
