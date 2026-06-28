@@ -32,6 +32,8 @@ This document gives agents the full context needed to work effectively in this r
 
 **Current codebase:** Early-stage Nx monorepo with a **microservices architecture** — one NestJS service per domain. Today only `auth-service` is implemented. Shared infrastructure lives in `library/` (`@tc/*`). Treat `docs/PROJECT.md` as the product north star; follow existing repo patterns unless explicitly migrating.
 
+**Testing scope (pre-go-live):** Only unit tests are maintained right now. E2e suites, `@tc/testing`, and all e2e tooling were intentionally removed — do not add new e2e tests, configs, or an e2e library until the team explicitly resumes that work closer to go-live.
+
 **Package manager:** Bun (`bun.lock`). Always prefix Nx commands with `bun` (e.g. `bun nx serve auth-service`).
 
 ## Tech Stack
@@ -82,7 +84,6 @@ touring.club/
 │   ├── core/                # App bootstrap, Swagger, health routes
 │   ├── database/            # TypeORM module, entities, migrations
 │   ├── utils/               # Cross-cutting utilities and decorators
-│   ├── testing/             # E2E helpers (E2EApi, MockEmailService, fixtures)
 │   └── common/              # Shared types/constants (use sparingly)
 ├── .agents/skills/          # Workspace Nx skills (read before scaffolding/CI)
 ├── patches/                 # bun patch overrides (e.g. better-auth-typeorm)
@@ -100,10 +101,8 @@ touring.club/
 | New shared library          | `library/<lib-name>/`                    | `nx-generate` skill → `@nx/js:library`                                                          |
 | DTOs, controllers, services | `apps/<service>/src/app/`                | Hand-written — domain logic stays in the service                                                |
 | App unit tests              | `apps/<service>/__tests__/unit/`         | Hand-written Jest specs                                                                         |
-| App e2e tests               | `apps/<service>/__tests__/e2e/`          | `@tc/testing` + Jest e2e target                                                                 |
 | Lib unit tests              | `library/<lib>/__tests__/unit/`          | Hand-written Jest specs (Vitest for `auth` lib)                                                 |
 | App Jest config             | `apps/<service>/jest.config.cts`         | `createAppUnitJestConfig` from `jest/`                                                          |
-| App e2e Jest config         | `apps/<service>/jest.e2e.config.cts`     | `createAppE2eJestConfig` from `jest/`                                                           |
 | Lib Jest config             | `library/<lib>/jest.config.cts`          | `createLibJestConfig` from `jest/`                                                              |
 | Auth DB entities            | `library/database/src/entities/auth/`    | Better Auth generate (`auth:generate`)                                                          |
 | Other DB entities           | `library/database/src/entities/general/` | Hand-written + TypeORM migrations                                                               |
@@ -210,16 +209,6 @@ export class ProfileRepository extends BaseRepository<Profile> {
 - `isHttpError()` — type guard for HTTP error responses
 - Inject `HttpClient` in services and clients — axios is configured through `HttpModule.forRoot()`, not in `HttpClient`
 
-### `@tc/testing`
-
-- `E2EApplication` — bootstraps a Nest app in-process via `Test.createTestingModule` for e2e suites
-- `E2EApi` — supertest wrapper with fixture loading and response redaction
-- `MockEmailService` — in-memory Jest mock for OTP/reset-token e2e flows
-- `RequestFixtureLoader` — optional helper to load JSON request bodies from disk when useful
-- `SnapshotRedactor` — redact dynamic fields before snapshot assertions
-- **Use for app e2e suites** under `apps/<app>/__tests__/e2e/`
-- **Formatting:** see `.cursor/rules/e2e-test-format.mdc`
-
 ## Dependency Direction
 
 ```
@@ -244,7 +233,6 @@ Libraries must not import from apps. Avoid circular deps between libraries. `@tc
 | `core`                  | lib  | Bootstrap & Swagger                                                                                                                    |
 | `config`                | lib  | Environment & config                                                                                                                   |
 | `database`              | lib  | TypeORM, entities (`auth/` + `general/`), migrations                                                                                   |
-| `testing`               | lib  | Shared e2e testing utilities, incl. `WsTestClient` / `MockWsAuthGuard` for WebSocket gateway e2e                                       |
 | `utils`                 | lib  | Shared utilities                                                                                                                       |
 | `common`                | lib  | Shared HTTP client — `HttpModule` / `HttpClient` (NestJS axios wrapper)                                                                |
 
@@ -280,13 +268,7 @@ Shared factories live in `jest/`. New apps only need thin wrappers — no per-pr
 // apps/my-service/jest.config.cts
 const { createAppUnitJestConfig } = require('../../jest/create-app-unit-config.cjs');
 module.exports = createAppUnitJestConfig('my-service', __dirname);
-
-// apps/my-service/jest.e2e.config.cts
-const { createAppE2eJestConfig } = require('../../jest/create-app-e2e-config.cjs');
-module.exports = createAppE2eJestConfig('my-service', __dirname);
 ```
-
-Wire the e2e target in `project.json` to `jest.e2e.config.cts` and follow `__tests__/e2e/support/` conventions (see `.cursor/rules/e2e-test-format.mdc`). E2e uses `jest/.e2e.swcrc` (CommonJS + decorator metadata for Nest DI) and `jest/.e2e-database.swcrc` (no decorator metadata on `library/database/src/entities/**` only) so circular TypeORM entity imports load without changing entity relation patterns.
 
 ### Lib Jest config
 
@@ -298,7 +280,7 @@ const { createLibJestConfig } = require('../../jest/create-lib-jest-config.cjs')
 module.exports = createLibJestConfig('my-lib', __dirname);
 ```
 
-**Never colocate specs under `src/`** — all unit and e2e tests belong under `__tests__/` (apps: `__tests__/unit/` + `__tests__/e2e/`; libraries: `__tests__/unit/`). Import source via `../../src/...` from spec files.
+**Never colocate specs under `src/`** — all unit tests belong under `__tests__/unit/` (apps and libraries alike). Import source via `../../src/...` from spec files.
 
 The `auth` library uses **Vitest** for adapter tests — place specs in `library/auth/__tests__/unit/` and wire `vitest.config.ts` to that path.
 
@@ -317,7 +299,6 @@ The `auth` library uses **Vitest** for adapter tests — place specs in `library
 - Pattern: client connects, then emits a guarded "join" message (e.g. `conversations:join`, `notifications:join`) to authenticate and join its rooms; the handler returns an ack payload. See `apps/messaging-service/src/app/gateways/conversations.gateway.ts` and `apps/notifications-service/src/app/gateways/notifications.gateway.ts`.
 - Guard with `@UseGuards(WsAuthGuard)` from `@tc/auth` on the `@SubscribeMessage()` handler; it sets `client.data.userId` from the verified JWT.
 - `app.useWebSocketAdapter(new IoAdapter(app.getHttpServer()))` — pass the raw HTTP server, not the Nest app instance. Passing `app` relies on an `instanceof NestApplication` check that fails across this monorepo's separately bundled packages (webpack app bundles vs esbuild lib bundles each carry their own `@nestjs/core`).
-- e2e: use `@tc/testing`'s `WsTestClient` (real `socket.io-client` wrapper: `connect`, `emitWithAck`, `waitForEvent`) and `MockWsAuthGuard` (treats the handshake token as the userId, no JWKS round-trip) with `E2EApplication`'s `wsAuthGuard` + `listenUrl` options. Reference: `apps/messaging-service/__tests__/e2e/conversations-gateway.e2e.spec.ts`.
 
 ### Modules
 
@@ -330,11 +311,11 @@ The `auth` library uses **Vitest** for adapter tests — place specs in `library
 1. **TypeScript strict mode** — no `any` unless unavoidable; use definite assignment (`!`) on DTO fields
 2. **ESM** — libraries use `"type": "module"`; respect existing import style
 3. **NestJS conventions** — modules, controllers, services, DTOs; inject dependencies via constructor
-4. **Prefer classes over standalone functions** — use classes for reusable utilities, helpers, and service-style APIs (e.g. `E2EApplication`, `E2EApi`); reserve functions for thin factories, hooks, and one-off entrypoints
+4. **Prefer classes over standalone functions** — use classes for reusable utilities, helpers, and service-style APIs; reserve functions for thin factories, hooks, and one-off entrypoints
 5. **Minimize scope** — smallest correct diff; don't refactor unrelated code
 6. **Match existing patterns** — read surrounding files before writing; reuse existing abstractions
 7. **Comments** — only for non-obvious logic; code should be self-explanatory
-8. **Tests** — add only when they cover meaningful behavior. **All tests live under `__tests__/`** — never colocate `*.spec.ts` under `src/`. Apps: Jest unit specs in `apps/<app>/__tests__/unit/`, e2e in `apps/<app>/__tests__/e2e/` (`createAppUnitJestConfig` / `createAppE2eJestConfig`). Libraries: Jest in `library/<lib>/__tests__/unit/` (`createLibJestConfig`); Vitest for `auth` lib adapter tests in `library/auth/__tests__/unit/`. **E2e suite style:** follow `.cursor/rules/e2e-test-format.mdc` (reference: `apps/auth-service/__tests__/e2e/auth-password.e2e.spec.ts`) — one statement per line inside `it`, no blank lines within a test, inline request bodies.
+8. **Tests** — add only when they cover meaningful behavior. **All tests live under `__tests__/unit/`** — never colocate `*.spec.ts` under `src/`. Apps: Jest unit specs (`createAppUnitJestConfig`). Libraries: Jest (`createLibJestConfig`); Vitest for `auth` lib adapter tests. **E2e suites are out of scope pre-go-live** — see Testing scope note above; do not add `__tests__/e2e/`, e2e Jest configs, or `@tc/testing`-style helpers.
 9. **No secrets in code** — env vars via `@tc/config`; never commit `.env`
 10. **Module boundaries** — ESLint `@nx/enforce-module-boundaries` is enabled; respect project tags
 11. **Repositories** — extend `BaseRepository` in `apps/<service>/src/app/repositories/`; inject via `@InjectDataSource()`; import `DataSource` types from `@tc/database`; never add direct `typeorm` to apps
@@ -363,7 +344,6 @@ bun nx serve auth-service                     # Run auth service
 # Build & test
 bun nx run-many -t build                      # Build all
 bun nx run-many -t test                       # Unit tests
-bun nx run auth-service:e2e                   # Auth service e2e (requires Postgres)
 bun nx affected -t lint test build            # Only changed projects
 
 # Database

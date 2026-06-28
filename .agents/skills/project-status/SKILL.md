@@ -21,7 +21,8 @@ Read `docs/PROJECT.md` and `AGENTS.md` first. Do not guess priorities from memor
 ## Architecture assumptions
 
 - **Microservices** — one NestJS app per domain under `apps/<domain>-service/`
-- **Libraries** — shared infrastructure only (`@tc/config`, `@tc/core`, `@tc/database`, `@tc/auth`, `@tc/utils`, `@tc/testing`); no domain libs
+- **Libraries** — shared infrastructure only (`@tc/config`, `@tc/core`, `@tc/database`, `@tc/auth`, `@tc/utils`); no domain libs
+- **Testing scope** — only unit tests are maintained pre-go-live; e2e suites and `@tc/testing` were intentionally removed (see `AGENTS.md` "Testing scope") — don't recommend e2e work as a next action item unless the user explicitly asks to resume it
 - **Entities** — auth in `entities/auth/` (schema `auth`); all other domains in `entities/general/` (schema `general`)
 - **Repositories** — `BaseRepository` in `@tc/database`; each service extends it in `apps/<service>/src/app/repositories/`
 - **Docs** — update `docs/PROJECT.md`, `AGENTS.md`, and related skills in the same change as new features (see `docs-sync` skill)
@@ -48,26 +49,23 @@ bun nx show projects
 
 Then map reality:
 
-| Check               | How                                                                       |
-| ------------------- | ------------------------------------------------------------------------- |
-| Deployable services | `bun nx show projects` — `auth-service`, `users-service` today            |
-| Shared libs         | `config`, `core`, `database`, `auth`, `testing`, `utils`, `common`        |
-| Auth endpoints      | `apps/auth-service/src/app/app.controller.ts`                             |
-| Profile endpoints   | `apps/users-service/src/app/app.controller.ts`                            |
-| Auth integration    | `library/auth/src/lib/auth.config.ts`                                     |
-| Auth entities       | `library/database/src/entities/auth/`                                     |
-| General entities    | `library/database/src/entities/general/` (e.g. `Profile`)                 |
-| Unit tests          | `apps/<service>/__tests__/unit/`                                          |
-| E2e tests           | `apps/<service>/__tests__/e2e/*.e2e.spec.ts`                              |
-| Test layout         | All specs under `__tests__/` — apps: `unit/` + `e2e/`; libraries: `unit/` |
+| Check               | How                                                            |
+| ------------------- | -------------------------------------------------------------- |
+| Deployable services | `bun nx show projects` — `auth-service`, `users-service` today |
+| Shared libs         | `config`, `core`, `database`, `auth`, `utils`, `common`        |
+| Auth endpoints      | `apps/auth-service/src/app/app.controller.ts`                  |
+| Profile endpoints   | `apps/users-service/src/app/app.controller.ts`                 |
+| Auth integration    | `library/auth/src/lib/auth.config.ts`                          |
+| Auth entities       | `library/database/src/entities/auth/`                          |
+| General entities    | `library/database/src/entities/general/` (e.g. `Profile`)      |
+| Unit tests          | `apps/<service>/__tests__/unit/`                               |
+| Test layout         | All specs under `__tests__/unit/` (apps and libraries alike)   |
 
 Optionally verify health:
 
 ```bash
 bun nx affected -t lint test build
 ```
-
-Skip e2e unless the user asks — it requires PostgreSQL.
 
 ### 3. Build a priority matrix
 

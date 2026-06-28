@@ -13,16 +13,7 @@
         "emitDeclarationOnly": false,
         "noEmit": true
     },
-    "include": [
-        "jest.config.ts",
-        "jest.config.cts",
-        "jest.e2e.config.cts",
-        "__tests__/unit/**/*.spec.ts",
-        "__tests__/unit/**/*.test.ts",
-        "__tests__/e2e/**/*.e2e.spec.ts",
-        "__tests__/e2e/**/*.d.ts",
-        "src/**/*.ts"
-    ],
+    "include": ["jest.config.ts", "jest.config.cts", "__tests__/unit/**/*.spec.ts", "__tests__/unit/**/*.test.ts", "src/**/*.ts"],
     "references": [
         {
             "path": "../../library/config/tsconfig.lib.json"
@@ -32,9 +23,6 @@
         },
         {
             "path": "../../library/auth/tsconfig.lib.json"
-        },
-        {
-            "path": "../../library/testing/tsconfig.lib.json"
         }
     ]
 }

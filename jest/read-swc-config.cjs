@@ -11,12 +11,4 @@ function readSwcJestConfig(projectRoot, configFileName = '.spec.swcrc') {
     return swcJestConfig;
 }
 
-function readE2eSwcJestConfig(projectRoot) {
-    return readSwcJestConfig(projectRoot, '.e2e.swcrc');
-}
-
-function readE2eDatabaseSwcJestConfig(projectRoot) {
-    return readSwcJestConfig(projectRoot, '.e2e-database.swcrc');
-}
-
-module.exports = { readSwcJestConfig, readE2eSwcJestConfig, readE2eDatabaseSwcJestConfig };
+module.exports = { readSwcJestConfig };

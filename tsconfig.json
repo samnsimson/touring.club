@@ -25,9 +25,6 @@
             "path": "./library/common"
         },
         {
-            "path": "./library/testing"
-        },
-        {
             "path": "./apps/users-service"
         },
         {

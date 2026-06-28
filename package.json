@@ -6,7 +6,6 @@
         "format": "prettier --write \"**/*.{js,ts,json}\"",
         "lint": "nx run-many --target=lint",
         "test": "nx run-many --target=test",
-        "test:e2e": "nx run-many --target=e2e",
         "build": "nx run-many --target=build",
         "start:auth": "nx serve auth-service",
         "start:users": "nx serve users-service",
@@ -43,7 +42,6 @@
         "reflect-metadata": "^0.2.0",
         "rxjs": "^7.8.0",
         "socket.io": "^4.8.1",
-        "supertest": "^7.2.2",
         "typeorm": "^1.0.0",
         "typeorm-naming-strategy": "^2.0.19",
         "zod": "^4.4.3"

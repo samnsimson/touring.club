@@ -234,7 +234,6 @@ library/                       # Shared libraries consumed by all services
   core                         # Bootstrap, Swagger, health routes
   database                     # TypeORM module, entities, migrations
   utils                        # Cross-cutting utilities
-  testing                      # E2E helpers
   common                       # Shared types/constants (minimal)
 
 packages/                      # Client packages (future)
@@ -462,7 +461,7 @@ All architectural decisions should support both web and mobile clients.
 When generating code:
 
 - Assume Nx monorepo with **one microservice per domain** under `apps/<domain>-service/`
-- Assume shared infrastructure in `library/` (`@tc/config`, `@tc/core`, `@tc/database`, `@tc/auth`, `@tc/utils`, `@tc/testing`)
+- Assume shared infrastructure in `library/` (`@tc/config`, `@tc/core`, `@tc/database`, `@tc/auth`, `@tc/utils`)
 - Assume NestJS backend per service
 - Assume PostgreSQL with schema-separated entities (`auth` and `general`)
 - Assume REST APIs only
