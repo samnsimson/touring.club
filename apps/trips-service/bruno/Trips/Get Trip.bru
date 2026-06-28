@@ -1,0 +1,19 @@
+meta {
+  name: Get Trip
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/v1/trips/{{tripId}}
+  body: none
+  auth: bearer
+}
+
+headers {
+  Authorization: Bearer {{accessToken}}
+}
+
+docs {
+  Fetch a trip owned by the authenticated organizer.
+}

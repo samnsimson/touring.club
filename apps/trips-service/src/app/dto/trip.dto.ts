@@ -129,3 +129,86 @@ export class ListTripsResponseDto {
     @ApiProperty({ type: [TripDto] })
     trips!: TripDto[];
 }
+
+export class GetTripResponseDto {
+    @ApiProperty({ type: TripDto })
+    trip!: TripDto;
+}
+
+export class UpdateTripDto {
+    @ApiPropertyOptional({ example: 'Pacific Coast Highway' })
+    @IsOptional()
+    @IsString()
+    @MaxLength(200)
+    title?: string;
+
+    @ApiPropertyOptional({ example: 'A scenic drive from SF to LA.' })
+    @IsOptional()
+    @IsString()
+    @MaxLength(5000)
+    description?: string | null;
+
+    @ApiPropertyOptional({ example: 'California, USA' })
+    @IsOptional()
+    @IsString()
+    @MaxLength(200)
+    destination?: string;
+
+    @ApiPropertyOptional({ example: 'San Francisco, CA' })
+    @IsOptional()
+    @IsString()
+    @MaxLength(500)
+    meetingLocation?: string | null;
+
+    @ApiPropertyOptional({ example: '2026-07-01T09:00:00.000Z' })
+    @IsOptional()
+    @IsDateString()
+    startDate?: string;
+
+    @ApiPropertyOptional({ example: '2026-07-07T18:00:00.000Z' })
+    @IsOptional()
+    @IsDateString()
+    endDate?: string;
+
+    @ApiPropertyOptional({ example: 12 })
+    @IsOptional()
+    @Type(() => Number)
+    @IsInt()
+    @Min(1)
+    @Max(10_000)
+    capacity?: number;
+
+    @ApiPropertyOptional({ example: 'public', enum: ['public', 'private'] })
+    @IsOptional()
+    @IsIn(['public', 'private'])
+    visibility?: TripVisibility;
+
+    @ApiPropertyOptional({ example: ['https://cdn.touring.club/trips/cover.jpg'], type: [String] })
+    @IsOptional()
+    @IsArray()
+    @ArrayMaxSize(10)
+    @IsUrl({ require_protocol: true }, { each: true })
+    @MaxLength(2048, { each: true })
+    coverImageUrls?: string[];
+
+    @ApiPropertyOptional({ example: ['Road Trips'], type: [String] })
+    @IsOptional()
+    @IsArray()
+    @ArrayMaxSize(20)
+    @IsString({ each: true })
+    @MaxLength(64, { each: true })
+    categories?: string[];
+
+    @ApiPropertyOptional({ example: ['coastal', 'photography'], type: [String] })
+    @IsOptional()
+    @IsArray()
+    @ArrayMaxSize(20)
+    @IsString({ each: true })
+    @MaxLength(64, { each: true })
+    tags?: string[];
+}
+
+export class UpdateTripResponseDto {
+    @ApiProperty({ type: TripDto })
+    trip!: TripDto;
+}

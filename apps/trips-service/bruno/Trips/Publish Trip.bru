@@ -1,0 +1,19 @@
+meta {
+  name: Publish Trip
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/api/v1/trips/{{tripId}}/publish
+  body: none
+  auth: bearer
+}
+
+headers {
+  Authorization: Bearer {{accessToken}}
+}
+
+docs {
+  Publish a draft trip.
+}

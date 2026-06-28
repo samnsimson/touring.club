@@ -1,0 +1,19 @@
+meta {
+  name: Cancel Trip
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/api/v1/trips/{{tripId}}/cancel
+  body: none
+  auth: bearer
+}
+
+headers {
+  Authorization: Bearer {{accessToken}}
+}
+
+docs {
+  Cancel a draft or published trip.
+}

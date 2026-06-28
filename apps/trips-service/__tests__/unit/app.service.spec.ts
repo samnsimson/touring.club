@@ -1,23 +1,40 @@
 import { Test } from '@nestjs/testing';
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Trip } from '@tc/database';
 import { AppService } from '../../src/app/app.service';
 import { TripRepository } from '../../src/app/repositories';
 
 describe('AppService', () => {
     let service: AppService;
-    let trips: jest.Mocked<Pick<TripRepository, 'create' | 'save' | 'findByOrganizerId'>>;
+    let trips: jest.Mocked<Pick<TripRepository, 'create' | 'save' | 'findByOrganizerId' | 'findByIdForOrganizer' | 'update'>>;
+
+    const baseTrip: Trip = {
+        id: 'trip-1',
+        organizerId: 'organizer-1',
+        title: 'Pacific Coast Highway',
+        description: null,
+        destination: 'California, USA',
+        meetingLocation: null,
+        startDate: new Date('2026-07-01T09:00:00.000Z'),
+        endDate: new Date('2026-07-07T18:00:00.000Z'),
+        capacity: 12,
+        visibility: 'public',
+        status: 'draft',
+        coverImageUrls: [],
+        categories: [],
+        tags: [],
+        createdAt: new Date('2026-01-01T00:00:00.000Z'),
+        updatedAt: new Date('2026-01-02T00:00:00.000Z'),
+        deletedAt: null,
+    };
 
     beforeAll(async () => {
         trips = {
             create: jest.fn((data) => data as Trip),
-            save: jest.fn(async (trip) => ({
-                ...trip,
-                id: 'trip-1',
-                createdAt: new Date('2026-01-01T00:00:00.000Z'),
-                updatedAt: new Date('2026-01-02T00:00:00.000Z'),
-            })),
+            save: jest.fn(async (trip) => ({ ...baseTrip, ...trip, id: 'trip-1' })),
             findByOrganizerId: jest.fn(),
+            findByIdForOrganizer: jest.fn(),
+            update: jest.fn(async () => ({ affected: 1, raw: [], generatedMaps: [] })),
         };
 
         const app = await Test.createTestingModule({
@@ -29,6 +46,7 @@ describe('AppService', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
+        trips.findByIdForOrganizer.mockResolvedValue({ ...baseTrip });
     });
 
     describe('createTrip', () => {
@@ -64,31 +82,63 @@ describe('AppService', () => {
 
     describe('listMyTrips', () => {
         it('returns trips for the organizer', async () => {
-            trips.findByOrganizerId.mockResolvedValue([
-                {
-                    id: 'trip-1',
-                    organizerId: 'organizer-1',
-                    title: 'Desert Loop',
-                    description: null,
-                    destination: 'Arizona, USA',
-                    meetingLocation: null,
-                    startDate: new Date('2026-08-01T09:00:00.000Z'),
-                    endDate: new Date('2026-08-05T18:00:00.000Z'),
-                    capacity: 8,
-                    visibility: 'private',
-                    status: 'draft',
-                    coverImageUrls: [],
-                    categories: [],
-                    tags: [],
-                    createdAt: new Date('2026-01-01T00:00:00.000Z'),
-                    updatedAt: new Date('2026-01-02T00:00:00.000Z'),
-                    deletedAt: null,
-                },
-            ]);
+            trips.findByOrganizerId.mockResolvedValue([{ ...baseTrip, title: 'Desert Loop', destination: 'Arizona, USA' }]);
             const result = await service.listMyTrips('organizer-1');
             expect(trips.findByOrganizerId).toHaveBeenCalledWith('organizer-1');
             expect(result.trips).toHaveLength(1);
             expect(result.trips[0].title).toBe('Desert Loop');
+        });
+    });
+
+    describe('getTrip', () => {
+        it('returns an owned trip', async () => {
+            const result = await service.getTrip('organizer-1', 'trip-1');
+            expect(trips.findByIdForOrganizer).toHaveBeenCalledWith('trip-1', 'organizer-1');
+            expect(result.trip.id).toBe('trip-1');
+        });
+
+        it('throws when the trip is not found', async () => {
+            trips.findByIdForOrganizer.mockResolvedValue(null);
+            await expect(service.getTrip('organizer-1', 'missing')).rejects.toBeInstanceOf(NotFoundException);
+        });
+    });
+
+    describe('updateTrip', () => {
+        it('updates editable trip fields', async () => {
+            trips.findByIdForOrganizer.mockResolvedValueOnce({ ...baseTrip }).mockResolvedValueOnce({ ...baseTrip, title: 'Updated Title' });
+            const result = await service.updateTrip('organizer-1', 'trip-1', { title: 'Updated Title' });
+            expect(trips.update).toHaveBeenCalledWith({ id: 'trip-1', organizerId: 'organizer-1' }, { title: 'Updated Title' });
+            expect(result.trip.title).toBe('Updated Title');
+        });
+
+        it('rejects updates to cancelled trips', async () => {
+            trips.findByIdForOrganizer.mockResolvedValue({ ...baseTrip, status: 'cancelled' });
+            await expect(service.updateTrip('organizer-1', 'trip-1', { title: 'Nope' })).rejects.toBeInstanceOf(BadRequestException);
+        });
+    });
+
+    describe('publishTrip', () => {
+        it('transitions a draft trip to published', async () => {
+            trips.findByIdForOrganizer.mockResolvedValueOnce({ ...baseTrip }).mockResolvedValueOnce({ ...baseTrip, status: 'published' });
+            const result = await service.publishTrip('organizer-1', 'trip-1');
+            expect(trips.update).toHaveBeenCalledWith({ id: 'trip-1', organizerId: 'organizer-1' }, { status: 'published' });
+            expect(result.trip.status).toBe('published');
+        });
+    });
+
+    describe('cancelTrip', () => {
+        it('transitions a published trip to cancelled', async () => {
+            trips.findByIdForOrganizer.mockResolvedValueOnce({ ...baseTrip, status: 'published' }).mockResolvedValueOnce({ ...baseTrip, status: 'cancelled' });
+            const result = await service.cancelTrip('organizer-1', 'trip-1');
+            expect(result.trip.status).toBe('cancelled');
+        });
+    });
+
+    describe('archiveTrip', () => {
+        it('transitions a cancelled trip to archived', async () => {
+            trips.findByIdForOrganizer.mockResolvedValueOnce({ ...baseTrip, status: 'cancelled' }).mockResolvedValueOnce({ ...baseTrip, status: 'archived' });
+            const result = await service.archiveTrip('organizer-1', 'trip-1');
+            expect(result.trip.status).toBe('archived');
         });
     });
 });

@@ -11,4 +11,8 @@ export class TripRepository extends BaseRepository<Trip> {
     findByOrganizerId(organizerId: string) {
         return this.find({ where: { organizerId }, order: { startDate: 'ASC' } });
     }
+
+    findByIdForOrganizer(tripId: string, organizerId: string) {
+        return this.findOne({ where: { id: tripId, organizerId } });
+    }
 }

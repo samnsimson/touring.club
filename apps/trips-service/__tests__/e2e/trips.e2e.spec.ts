@@ -77,4 +77,87 @@ describe('Trips', () => {
         const response = await api.get('/api/v1/trips', {});
         expect(response.status).toBe(401);
     });
+
+    it('GET /api/v1/trips/:tripId returns an owned trip', async () => {
+        if (!requireDatabase('get trip')) return;
+        const client = authedApi(api, organizer.userId);
+        const createRes = await client.post('/api/v1/trips', {
+            title: 'Coastal Drive',
+            destination: 'California, USA',
+            startDate: '2026-07-01T09:00:00.000Z',
+            endDate: '2026-07-07T18:00:00.000Z',
+            capacity: 12,
+            visibility: 'public',
+        });
+        const response = await client.get(`/api/v1/trips/${createRes.body.trip.id}`);
+        expect(response.status).toBe(200);
+        expect(response.body.trip.title).toBe('Coastal Drive');
+    });
+
+    it('PATCH /api/v1/trips/:tripId updates an owned trip', async () => {
+        if (!requireDatabase('update trip')) return;
+        const client = authedApi(api, organizer.userId);
+        const createRes = await client.post('/api/v1/trips', {
+            title: 'Coastal Drive',
+            destination: 'California, USA',
+            startDate: '2026-07-01T09:00:00.000Z',
+            endDate: '2026-07-07T18:00:00.000Z',
+            capacity: 12,
+            visibility: 'public',
+        });
+        const response = await client.patch(`/api/v1/trips/${createRes.body.trip.id}`, { title: 'Updated Coastal Drive' });
+        expect(response.status).toBe(200);
+        expect(response.body.trip.title).toBe('Updated Coastal Drive');
+    });
+
+    it('POST /api/v1/trips/:tripId/publish publishes a draft trip', async () => {
+        if (!requireDatabase('publish trip')) return;
+        const client = authedApi(api, organizer.userId);
+        const createRes = await client.post('/api/v1/trips', {
+            title: 'Coastal Drive',
+            destination: 'California, USA',
+            startDate: '2026-07-01T09:00:00.000Z',
+            endDate: '2026-07-07T18:00:00.000Z',
+            capacity: 12,
+            visibility: 'public',
+        });
+        const response = await client.post(`/api/v1/trips/${createRes.body.trip.id}/publish`);
+        expect(response.status).toBe(200);
+        expect(response.body.trip.status).toBe('published');
+    });
+
+    it('POST /api/v1/trips/:tripId/cancel cancels a published trip', async () => {
+        if (!requireDatabase('cancel trip')) return;
+        const client = authedApi(api, organizer.userId);
+        const createRes = await client.post('/api/v1/trips', {
+            title: 'Coastal Drive',
+            destination: 'California, USA',
+            startDate: '2026-07-01T09:00:00.000Z',
+            endDate: '2026-07-07T18:00:00.000Z',
+            capacity: 12,
+            visibility: 'public',
+        });
+        await client.post(`/api/v1/trips/${createRes.body.trip.id}/publish`);
+        const response = await client.post(`/api/v1/trips/${createRes.body.trip.id}/cancel`);
+        expect(response.status).toBe(200);
+        expect(response.body.trip.status).toBe('cancelled');
+    });
+
+    it('POST /api/v1/trips/:tripId/archive archives a cancelled trip', async () => {
+        if (!requireDatabase('archive trip')) return;
+        const client = authedApi(api, organizer.userId);
+        const createRes = await client.post('/api/v1/trips', {
+            title: 'Coastal Drive',
+            destination: 'California, USA',
+            startDate: '2026-07-01T09:00:00.000Z',
+            endDate: '2026-07-07T18:00:00.000Z',
+            capacity: 12,
+            visibility: 'public',
+        });
+        await client.post(`/api/v1/trips/${createRes.body.trip.id}/publish`);
+        await client.post(`/api/v1/trips/${createRes.body.trip.id}/cancel`);
+        const response = await client.post(`/api/v1/trips/${createRes.body.trip.id}/archive`);
+        expect(response.status).toBe(200);
+        expect(response.body.trip.status).toBe('archived');
+    });
 });

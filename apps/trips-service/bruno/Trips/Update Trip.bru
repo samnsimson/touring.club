@@ -1,0 +1,26 @@
+meta {
+  name: Update Trip
+  type: http
+  seq: 4
+}
+
+patch {
+  url: {{baseUrl}}/api/v1/trips/{{tripId}}
+  body: json
+  auth: bearer
+}
+
+headers {
+  Authorization: Bearer {{accessToken}}
+}
+
+body:json {
+  {
+    "title": "Pacific Coast Highway (Updated)",
+    "description": "Updated scenic drive itinerary."
+  }
+}
+
+docs {
+  Update an editable trip owned by the authenticated organizer.
+}
