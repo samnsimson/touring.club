@@ -35,6 +35,9 @@
         },
         {
             "path": "./apps/messaging-service"
+        },
+        {
+            "path": "./apps/notifications-service"
         }
     ]
 }

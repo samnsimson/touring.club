@@ -7,6 +7,7 @@ export * from './entities/general/TripMembership';
 export * from './entities/general/Conversation';
 export * from './entities/general/ConversationParticipant';
 export * from './entities/general/Message';
+export * from './entities/general/Notification';
 export { User } from './entities/auth/User';
 export { ENTITIES } from './entities';
 export * from './repository';

@@ -13,7 +13,15 @@ describe('entity directory discovery', () => {
     it('discovers general entity classes from entities/general', () => {
         const indexUrl = pathToFileURL(join(__dirname, '../../src/entities/general/index.ts')).href;
         const entities = discoverEntities(indexUrl, ['base.entity.ts', 'index.ts']);
-        expect(entities.map((entity) => entity.name)).toEqual(['Conversation', 'ConversationParticipant', 'Message', 'Profile', 'Trip', 'TripMembership']);
+        expect(entities.map((entity) => entity.name)).toEqual([
+            'Conversation',
+            'ConversationParticipant',
+            'Message',
+            'Notification',
+            'Profile',
+            'Trip',
+            'TripMembership',
+        ]);
     });
 
     it('ENTITIES registry includes all discovered entity classes', () => {
