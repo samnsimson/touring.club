@@ -1,7 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import type { AuthenticatedRequest } from '@tc/auth';
 import { AppController } from '../../src/app/app.controller';
 import { AppService } from '../../src/app/app.service';
+
+jest.mock('@tc/auth', () => ({
+    CurrentSession: () => () => undefined,
+}));
 
 describe('AppController', () => {
     let controller: AppController;
@@ -27,6 +30,7 @@ describe('AppController', () => {
         jest.clearAllMocks();
     });
 
+    const userId = 'user-1';
     const profileResponse = {
         profile: {
             userId: 'user-1',
@@ -41,9 +45,8 @@ describe('AppController', () => {
 
     describe('getMyProfile', () => {
         it('delegates to AppService with the authenticated user id', async () => {
-            const req = { session: { userId: 'user-1' } } as AuthenticatedRequest;
             appService.getProfile.mockResolvedValue(profileResponse);
-            const result = await controller.getMyProfile(req);
+            const result = await controller.getMyProfile(userId);
             expect(appService.getProfile).toHaveBeenCalledWith('user-1');
             expect(result).toEqual(profileResponse);
         });
@@ -51,10 +54,9 @@ describe('AppController', () => {
 
     describe('updateMyProfile', () => {
         it('delegates to AppService with the authenticated user id and dto', async () => {
-            const req = { session: { userId: 'user-1' } } as AuthenticatedRequest;
             const dto = { biography: 'Updated bio' };
             appService.updateProfile.mockResolvedValue(profileResponse);
-            const result = await controller.updateMyProfile(req, dto);
+            const result = await controller.updateMyProfile(userId, dto);
             expect(appService.updateProfile).toHaveBeenCalledWith('user-1', dto);
             expect(result).toEqual(profileResponse);
         });
@@ -62,9 +64,8 @@ describe('AppController', () => {
 
     describe('getMyTravelHistory', () => {
         it('delegates to AppService with the authenticated user id', async () => {
-            const req = { session: { userId: 'user-1' } } as AuthenticatedRequest;
             appService.getTravelHistory.mockResolvedValue({ trips: [] });
-            const result = await controller.getMyTravelHistory(req);
+            const result = await controller.getMyTravelHistory(userId);
             expect(appService.getTravelHistory).toHaveBeenCalledWith('user-1');
             expect(result).toEqual({ trips: [] });
         });

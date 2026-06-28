@@ -1,6 +1,6 @@
-import { Body, Controller, Get, HttpStatus, Param, Post, Req } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Param, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import type { AuthenticatedRequest } from '@tc/auth';
+import { CurrentSession } from '@tc/auth';
 import { ApiResource, ApiResourceExceptions } from '@tc/utils';
 import { AppService } from './app.service';
 import {
@@ -11,7 +11,6 @@ import {
     SendMessageDto,
     SendMessageResponseDto,
 } from './dto';
-import { MessagingUtils } from './messaging.utils';
 
 @ApiTags('Conversations')
 @Controller('conversations')
@@ -21,28 +20,28 @@ export class AppController {
     @Post()
     @ApiResource({ type: CreateConversationResponseDto, operationId: 'createDirectConversation', status: HttpStatus.CREATED })
     @ApiResourceExceptions(HttpStatus.BAD_REQUEST, HttpStatus.UNAUTHORIZED)
-    async createDirectConversation(@Req() req: AuthenticatedRequest, @Body() dto: CreateDirectConversationDto) {
-        return this.appService.createDirectConversation(MessagingUtils.getUserId(req), dto);
+    async createDirectConversation(@CurrentSession('userId') userId: string, @Body() dto: CreateDirectConversationDto) {
+        return this.appService.createDirectConversation(userId, dto);
     }
 
     @Get()
     @ApiResource({ type: ListConversationsResponseDto, operationId: 'listConversations', status: HttpStatus.OK })
     @ApiResourceExceptions(HttpStatus.UNAUTHORIZED)
-    async listConversations(@Req() req: AuthenticatedRequest) {
-        return this.appService.listConversations(MessagingUtils.getUserId(req));
+    async listConversations(@CurrentSession('userId') userId: string) {
+        return this.appService.listConversations(userId);
     }
 
     @Get(':conversationId/messages')
     @ApiResource({ type: ListMessagesResponseDto, operationId: 'listMessages', status: HttpStatus.OK })
     @ApiResourceExceptions(HttpStatus.NOT_FOUND, HttpStatus.UNAUTHORIZED)
-    async listMessages(@Req() req: AuthenticatedRequest, @Param('conversationId') conversationId: string) {
-        return this.appService.listMessages(MessagingUtils.getUserId(req), conversationId);
+    async listMessages(@CurrentSession('userId') userId: string, @Param('conversationId') conversationId: string) {
+        return this.appService.listMessages(userId, conversationId);
     }
 
     @Post(':conversationId/messages')
     @ApiResource({ type: SendMessageResponseDto, operationId: 'sendMessage', status: HttpStatus.CREATED })
     @ApiResourceExceptions(HttpStatus.BAD_REQUEST, HttpStatus.NOT_FOUND, HttpStatus.UNAUTHORIZED)
-    async sendMessage(@Req() req: AuthenticatedRequest, @Param('conversationId') conversationId: string, @Body() dto: SendMessageDto) {
-        return this.appService.sendMessage(MessagingUtils.getUserId(req), conversationId, dto);
+    async sendMessage(@CurrentSession('userId') userId: string, @Param('conversationId') conversationId: string, @Body() dto: SendMessageDto) {
+        return this.appService.sendMessage(userId, conversationId, dto);
     }
 }

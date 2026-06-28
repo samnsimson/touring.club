@@ -1,10 +1,9 @@
-import { Body, Controller, Get, HttpStatus, Param, Patch, Req } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Param, Patch } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import type { AuthenticatedRequest } from '@tc/auth';
+import { CurrentSession } from '@tc/auth';
 import { ApiResource, ApiResourceExceptions } from '@tc/utils';
 import { AppService } from './app.service';
 import { GetProfileResponseDto, GetPublicProfileResponseDto, TravelHistoryResponseDto, UpdateProfileDto, UpdateProfileResponseDto } from './dto';
-import { ProfileUtils } from './profile.utils';
 
 @ApiTags('Profiles')
 @Controller('profiles')
@@ -14,22 +13,22 @@ export class AppController {
     @Get('me')
     @ApiResource({ type: GetProfileResponseDto, operationId: 'getMyProfile', status: HttpStatus.OK })
     @ApiResourceExceptions(HttpStatus.UNAUTHORIZED)
-    async getMyProfile(@Req() req: AuthenticatedRequest) {
-        return this.appService.getProfile(ProfileUtils.getUserId(req));
+    async getMyProfile(@CurrentSession('userId') userId: string) {
+        return this.appService.getProfile(userId);
     }
 
     @Patch('me')
     @ApiResource({ type: UpdateProfileResponseDto, operationId: 'updateMyProfile', status: HttpStatus.OK })
     @ApiResourceExceptions(HttpStatus.BAD_REQUEST, HttpStatus.UNAUTHORIZED)
-    async updateMyProfile(@Req() req: AuthenticatedRequest, @Body() dto: UpdateProfileDto) {
-        return this.appService.updateProfile(ProfileUtils.getUserId(req), dto);
+    async updateMyProfile(@CurrentSession('userId') userId: string, @Body() dto: UpdateProfileDto) {
+        return this.appService.updateProfile(userId, dto);
     }
 
     @Get('me/travel-history')
     @ApiResource({ type: TravelHistoryResponseDto, operationId: 'getMyTravelHistory', status: HttpStatus.OK })
     @ApiResourceExceptions(HttpStatus.UNAUTHORIZED)
-    async getMyTravelHistory(@Req() req: AuthenticatedRequest) {
-        return this.appService.getTravelHistory(ProfileUtils.getUserId(req));
+    async getMyTravelHistory(@CurrentSession('userId') userId: string) {
+        return this.appService.getTravelHistory(userId);
     }
 
     @Get(':userId')

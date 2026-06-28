@@ -4,7 +4,7 @@ import { createRemoteJWKSet, jwtVerify } from 'jose';
 import { AuthHeaders } from '../auth.headers';
 import { getAuthAudience, getAuthIssuer, getAuthJwksUrl } from '../auth.constants';
 import type { AuthenticatedRequest, AuthJwtPayload } from './auth.request';
-import { IS_PUBLIC_KEY } from './public.decorator';
+import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 
 @Injectable()
 export class AuthGuard implements CanActivate {

@@ -1,7 +1,6 @@
-import { Body, Controller, Delete, Get, HttpStatus, Param, Patch, Post, Query, Req } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpStatus, Param, Patch, Post, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import type { AuthenticatedRequest } from '@tc/auth';
-import { Public } from '@tc/auth';
+import { CurrentSession, Public } from '@tc/auth';
 import { ApiResource, ApiResourceExceptions } from '@tc/utils';
 import { AppService } from './app.service';
 import {
@@ -18,7 +17,6 @@ import {
     UpdateTripDto,
     UpdateTripResponseDto,
 } from './dto';
-import { TripUtils } from './trip.utils';
 
 @ApiTags('Trips')
 @Controller('trips')
@@ -28,15 +26,15 @@ export class AppController {
     @Post()
     @ApiResource({ type: CreateTripResponseDto, operationId: 'createTrip', status: HttpStatus.CREATED })
     @ApiResourceExceptions(HttpStatus.BAD_REQUEST, HttpStatus.UNAUTHORIZED)
-    async createTrip(@Req() req: AuthenticatedRequest, @Body() dto: CreateTripDto) {
-        return this.appService.createTrip(TripUtils.getUserId(req), dto);
+    async createTrip(@CurrentSession('userId') userId: string, @Body() dto: CreateTripDto) {
+        return this.appService.createTrip(userId, dto);
     }
 
     @Get()
     @ApiResource({ type: ListTripsResponseDto, operationId: 'listMyTrips', status: HttpStatus.OK })
     @ApiResourceExceptions(HttpStatus.UNAUTHORIZED)
-    async listMyTrips(@Req() req: AuthenticatedRequest) {
-        return this.appService.listMyTrips(TripUtils.getUserId(req));
+    async listMyTrips(@CurrentSession('userId') userId: string) {
+        return this.appService.listMyTrips(userId);
     }
 
     @Public()
@@ -58,77 +56,77 @@ export class AppController {
     @Post(':tripId/publish')
     @ApiResource({ type: GetTripResponseDto, operationId: 'publishTrip', status: HttpStatus.OK })
     @ApiResourceExceptions(HttpStatus.BAD_REQUEST, HttpStatus.NOT_FOUND, HttpStatus.UNAUTHORIZED)
-    async publishTrip(@Req() req: AuthenticatedRequest, @Param('tripId') tripId: string) {
-        return this.appService.publishTrip(TripUtils.getUserId(req), tripId);
+    async publishTrip(@CurrentSession('userId') userId: string, @Param('tripId') tripId: string) {
+        return this.appService.publishTrip(userId, tripId);
     }
 
     @Post(':tripId/cancel')
     @ApiResource({ type: GetTripResponseDto, operationId: 'cancelTrip', status: HttpStatus.OK })
     @ApiResourceExceptions(HttpStatus.BAD_REQUEST, HttpStatus.NOT_FOUND, HttpStatus.UNAUTHORIZED)
-    async cancelTrip(@Req() req: AuthenticatedRequest, @Param('tripId') tripId: string) {
-        return this.appService.cancelTrip(TripUtils.getUserId(req), tripId);
+    async cancelTrip(@CurrentSession('userId') userId: string, @Param('tripId') tripId: string) {
+        return this.appService.cancelTrip(userId, tripId);
     }
 
     @Post(':tripId/archive')
     @ApiResource({ type: GetTripResponseDto, operationId: 'archiveTrip', status: HttpStatus.OK })
     @ApiResourceExceptions(HttpStatus.BAD_REQUEST, HttpStatus.NOT_FOUND, HttpStatus.UNAUTHORIZED)
-    async archiveTrip(@Req() req: AuthenticatedRequest, @Param('tripId') tripId: string) {
-        return this.appService.archiveTrip(TripUtils.getUserId(req), tripId);
+    async archiveTrip(@CurrentSession('userId') userId: string, @Param('tripId') tripId: string) {
+        return this.appService.archiveTrip(userId, tripId);
     }
 
     @Post(':tripId/join')
     @ApiResource({ type: JoinTripResponseDto, operationId: 'joinTrip', status: HttpStatus.OK })
     @ApiResourceExceptions(HttpStatus.BAD_REQUEST, HttpStatus.CONFLICT, HttpStatus.NOT_FOUND, HttpStatus.UNAUTHORIZED)
-    async joinTrip(@Req() req: AuthenticatedRequest, @Param('tripId') tripId: string) {
-        return this.appService.joinTrip(TripUtils.getUserId(req), tripId);
+    async joinTrip(@CurrentSession('userId') userId: string, @Param('tripId') tripId: string) {
+        return this.appService.joinTrip(userId, tripId);
     }
 
     @Post(':tripId/leave')
     @ApiResource({ type: LeaveTripResponseDto, operationId: 'leaveTrip', status: HttpStatus.OK })
     @ApiResourceExceptions(HttpStatus.NOT_FOUND, HttpStatus.UNAUTHORIZED)
-    async leaveTrip(@Req() req: AuthenticatedRequest, @Param('tripId') tripId: string) {
-        return this.appService.leaveTrip(TripUtils.getUserId(req), tripId);
+    async leaveTrip(@CurrentSession('userId') userId: string, @Param('tripId') tripId: string) {
+        return this.appService.leaveTrip(userId, tripId);
     }
 
     @Get(':tripId/members')
     @ApiResource({ type: ListTripMembersResponseDto, operationId: 'listTripMembers', status: HttpStatus.OK })
     @ApiResourceExceptions(HttpStatus.NOT_FOUND, HttpStatus.UNAUTHORIZED)
-    async listTripMembers(@Req() req: AuthenticatedRequest, @Param('tripId') tripId: string) {
-        return this.appService.listTripMembers(TripUtils.getUserId(req), tripId);
+    async listTripMembers(@CurrentSession('userId') userId: string, @Param('tripId') tripId: string) {
+        return this.appService.listTripMembers(userId, tripId);
     }
 
     @Post(':tripId/members/:membershipId/approve')
     @ApiResource({ type: TripMembershipActionResponseDto, operationId: 'approveMembership', status: HttpStatus.OK })
     @ApiResourceExceptions(HttpStatus.BAD_REQUEST, HttpStatus.NOT_FOUND, HttpStatus.UNAUTHORIZED)
-    async approveMembership(@Req() req: AuthenticatedRequest, @Param('tripId') tripId: string, @Param('membershipId') membershipId: string) {
-        return this.appService.approveMembership(TripUtils.getUserId(req), tripId, membershipId);
+    async approveMembership(@CurrentSession('userId') userId: string, @Param('tripId') tripId: string, @Param('membershipId') membershipId: string) {
+        return this.appService.approveMembership(userId, tripId, membershipId);
     }
 
     @Post(':tripId/members/:membershipId/reject')
     @ApiResource({ type: TripMembershipActionResponseDto, operationId: 'rejectMembership', status: HttpStatus.OK })
     @ApiResourceExceptions(HttpStatus.BAD_REQUEST, HttpStatus.NOT_FOUND, HttpStatus.UNAUTHORIZED)
-    async rejectMembership(@Req() req: AuthenticatedRequest, @Param('tripId') tripId: string, @Param('membershipId') membershipId: string) {
-        return this.appService.rejectMembership(TripUtils.getUserId(req), tripId, membershipId);
+    async rejectMembership(@CurrentSession('userId') userId: string, @Param('tripId') tripId: string, @Param('membershipId') membershipId: string) {
+        return this.appService.rejectMembership(userId, tripId, membershipId);
     }
 
     @Delete(':tripId/members/:membershipId')
     @ApiResource({ type: TripMembershipActionResponseDto, operationId: 'removeMembership', status: HttpStatus.OK })
     @ApiResourceExceptions(HttpStatus.BAD_REQUEST, HttpStatus.NOT_FOUND, HttpStatus.UNAUTHORIZED)
-    async removeMembership(@Req() req: AuthenticatedRequest, @Param('tripId') tripId: string, @Param('membershipId') membershipId: string) {
-        return this.appService.removeMembership(TripUtils.getUserId(req), tripId, membershipId);
+    async removeMembership(@CurrentSession('userId') userId: string, @Param('tripId') tripId: string, @Param('membershipId') membershipId: string) {
+        return this.appService.removeMembership(userId, tripId, membershipId);
     }
 
     @Get(':tripId')
     @ApiResource({ type: GetTripResponseDto, operationId: 'getTrip', status: HttpStatus.OK })
     @ApiResourceExceptions(HttpStatus.NOT_FOUND, HttpStatus.UNAUTHORIZED)
-    async getTrip(@Req() req: AuthenticatedRequest, @Param('tripId') tripId: string) {
-        return this.appService.getTrip(TripUtils.getUserId(req), tripId);
+    async getTrip(@CurrentSession('userId') userId: string, @Param('tripId') tripId: string) {
+        return this.appService.getTrip(userId, tripId);
     }
 
     @Patch(':tripId')
     @ApiResource({ type: UpdateTripResponseDto, operationId: 'updateTrip', status: HttpStatus.OK })
     @ApiResourceExceptions(HttpStatus.BAD_REQUEST, HttpStatus.NOT_FOUND, HttpStatus.UNAUTHORIZED)
-    async updateTrip(@Req() req: AuthenticatedRequest, @Param('tripId') tripId: string, @Body() dto: UpdateTripDto) {
-        return this.appService.updateTrip(TripUtils.getUserId(req), tripId, dto);
+    async updateTrip(@CurrentSession('userId') userId: string, @Param('tripId') tripId: string, @Body() dto: UpdateTripDto) {
+        return this.appService.updateTrip(userId, tripId, dto);
     }
 }

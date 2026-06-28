@@ -4,6 +4,7 @@ import { AppService } from '../../src/app/app.service';
 
 jest.mock('@tc/auth', () => ({
     Public: () => () => undefined,
+    CurrentSession: () => () => undefined,
 }));
 
 describe('AppController', () => {
@@ -60,8 +61,8 @@ describe('AppController', () => {
         jest.clearAllMocks();
     });
 
-    const req = { session: { userId: 'organizer-1', sub: 'organizer-1' } } as never;
-    const participantReq = { session: { userId: 'participant-1', sub: 'participant-1' } } as never;
+    const organizerId = 'organizer-1';
+    const participantId = 'participant-1';
     const tripResponse = { trip: { id: 'trip-1', organizerId: 'organizer-1', status: 'draft' } };
     const membershipResponse = { membership: { id: 'membership-1', tripId: 'trip-1', userId: 'participant-1', status: 'active' } };
 
@@ -75,31 +76,31 @@ describe('AppController', () => {
             visibility: 'public' as const,
         };
         appService.createTrip.mockResolvedValue(tripResponse as never);
-        await expect(controller.createTrip(req, dto)).resolves.toEqual(tripResponse);
+        await expect(controller.createTrip(organizerId, dto)).resolves.toEqual(tripResponse);
         expect(appService.createTrip).toHaveBeenCalledWith('organizer-1', dto);
     });
 
     it('listMyTrips delegates to AppService', async () => {
         appService.listMyTrips.mockResolvedValue({ trips: [] });
-        await expect(controller.listMyTrips(req)).resolves.toEqual({ trips: [] });
+        await expect(controller.listMyTrips(organizerId)).resolves.toEqual({ trips: [] });
         expect(appService.listMyTrips).toHaveBeenCalledWith('organizer-1');
     });
 
     it('getTrip delegates to AppService', async () => {
         appService.getTrip.mockResolvedValue(tripResponse as never);
-        await expect(controller.getTrip(req, 'trip-1')).resolves.toEqual(tripResponse);
+        await expect(controller.getTrip(organizerId, 'trip-1')).resolves.toEqual(tripResponse);
         expect(appService.getTrip).toHaveBeenCalledWith('organizer-1', 'trip-1');
     });
 
     it('updateTrip delegates to AppService', async () => {
         appService.updateTrip.mockResolvedValue(tripResponse as never);
-        await expect(controller.updateTrip(req, 'trip-1', { title: 'Updated' })).resolves.toEqual(tripResponse);
+        await expect(controller.updateTrip(organizerId, 'trip-1', { title: 'Updated' })).resolves.toEqual(tripResponse);
         expect(appService.updateTrip).toHaveBeenCalledWith('organizer-1', 'trip-1', { title: 'Updated' });
     });
 
     it('publishTrip delegates to AppService', async () => {
         appService.publishTrip.mockResolvedValue({ trip: { ...tripResponse.trip, status: 'published' } } as never);
-        await expect(controller.publishTrip(req, 'trip-1')).resolves.toMatchObject({ trip: { status: 'published' } });
+        await expect(controller.publishTrip(organizerId, 'trip-1')).resolves.toMatchObject({ trip: { status: 'published' } });
         expect(appService.publishTrip).toHaveBeenCalledWith('organizer-1', 'trip-1');
     });
 
@@ -117,13 +118,13 @@ describe('AppController', () => {
 
     it('joinTrip delegates to AppService', async () => {
         appService.joinTrip.mockResolvedValue(membershipResponse as never);
-        await expect(controller.joinTrip(participantReq, 'trip-1')).resolves.toEqual(membershipResponse);
+        await expect(controller.joinTrip(participantId, 'trip-1')).resolves.toEqual(membershipResponse);
         expect(appService.joinTrip).toHaveBeenCalledWith('participant-1', 'trip-1');
     });
 
     it('listTripMembers delegates to AppService', async () => {
         appService.listTripMembers.mockResolvedValue({ members: [] });
-        await expect(controller.listTripMembers(req, 'trip-1')).resolves.toEqual({ members: [] });
+        await expect(controller.listTripMembers(organizerId, 'trip-1')).resolves.toEqual({ members: [] });
         expect(appService.listTripMembers).toHaveBeenCalledWith('organizer-1', 'trip-1');
     });
 });

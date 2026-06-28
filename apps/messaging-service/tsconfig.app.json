@@ -2,10 +2,7 @@
     "extends": "../../tsconfig.base.json",
     "compilerOptions": {
         "outDir": "dist",
-        "module": "nodenext",
         "types": ["node"],
-        "rootDir": "src",
-        "moduleResolution": "nodenext",
         "tsBuildInfoFile": "dist/tsconfig.app.tsbuildinfo",
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
@@ -22,5 +19,25 @@
         "eslint.config.js",
         "eslint.config.cjs",
         "eslint.config.mjs"
+    ],
+    "references": [
+        {
+            "path": "../../library/utils/tsconfig.lib.json"
+        },
+        {
+            "path": "../../library/core/tsconfig.lib.json"
+        },
+        {
+            "path": "../../library/config/tsconfig.lib.json"
+        },
+        {
+            "path": "../../library/database/tsconfig.lib.json"
+        },
+        {
+            "path": "../../library/auth/tsconfig.lib.json"
+        },
+        {
+            "path": "../../library/testing/tsconfig.lib.json"
+        }
     ]
 }
