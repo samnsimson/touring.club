@@ -4,6 +4,7 @@ import { AppService } from '../../src/app/app.service';
 
 jest.mock('@tc/auth', () => ({
     CurrentSession: () => () => undefined,
+    Public: () => () => undefined,
 }));
 
 describe('AppController', () => {
@@ -11,7 +12,14 @@ describe('AppController', () => {
     let appService: jest.Mocked<
         Pick<
             AppService,
-            'createDirectConversation' | 'listConversations' | 'getTripConversation' | 'listTripMessages' | 'sendTripMessage' | 'listMessages' | 'sendMessage'
+            | 'createDirectConversation'
+            | 'listConversations'
+            | 'getTripConversation'
+            | 'listTripMessages'
+            | 'sendTripMessage'
+            | 'postTripSystemEvent'
+            | 'listMessages'
+            | 'sendMessage'
         >
     >;
 
@@ -22,6 +30,7 @@ describe('AppController', () => {
             getTripConversation: jest.fn(),
             listTripMessages: jest.fn(),
             sendTripMessage: jest.fn(),
+            postTripSystemEvent: jest.fn(),
             listMessages: jest.fn(),
             sendMessage: jest.fn(),
         };
@@ -69,6 +78,13 @@ describe('AppController', () => {
         appService.sendTripMessage.mockResolvedValue({ message: { id: 'message-1', body: 'Hello trip' } } as never);
         await expect(controller.sendTripMessage(userId, 'trip-1', { body: 'Hello trip' })).resolves.toMatchObject({ message: { body: 'Hello trip' } });
         expect(appService.sendTripMessage).toHaveBeenCalledWith('user-a', 'trip-1', { body: 'Hello trip' });
+    });
+
+    it('postTripSystemEvent delegates to AppService', async () => {
+        appService.postTripSystemEvent.mockResolvedValue({ message: { id: 'message-1', messageType: 'system' } } as never);
+        const dto = { event: 'member_joined' as const, actorUserId: 'user-a', subjectUserId: 'user-b' };
+        await expect(controller.postTripSystemEvent('trip-1', dto)).resolves.toMatchObject({ message: { messageType: 'system' } });
+        expect(appService.postTripSystemEvent).toHaveBeenCalledWith('trip-1', dto);
     });
 
     it('listMessages delegates to AppService', async () => {

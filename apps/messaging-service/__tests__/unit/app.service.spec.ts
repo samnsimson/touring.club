@@ -268,4 +268,30 @@ describe('AppService', () => {
             await expect(service.sendMessage('user-a', 'conversation-1', { body: 'Hello there!' })).rejects.toBeInstanceOf(NotFoundException);
         });
     });
+
+    describe('postTripSystemEvent', () => {
+        it('stores a system message in the trip conversation and syncs participants', async () => {
+            const result = await service.postTripSystemEvent('trip-1', {
+                event: 'member_joined',
+                actorUserId: 'participant-1',
+                subjectUserId: 'participant-1',
+            });
+            expect(conversations.save).toHaveBeenCalledWith(expect.objectContaining({ type: 'trip', trip: { id: 'trip-1' } }));
+            expect(messages.save).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    messageType: 'system',
+                    senderId: 'participant-1',
+                    body: JSON.stringify({ event: 'member_joined', userId: 'participant-1' }),
+                }),
+            );
+            expect(result.message.messageType).toBe('system');
+        });
+
+        it('throws when the trip does not exist', async () => {
+            trips.findById.mockResolvedValue(null);
+            await expect(
+                service.postTripSystemEvent('trip-1', { event: 'member_left', actorUserId: 'participant-1', subjectUserId: 'participant-1' }),
+            ).rejects.toBeInstanceOf(NotFoundException);
+        });
+    });
 });

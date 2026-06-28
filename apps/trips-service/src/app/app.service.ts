@@ -2,6 +2,7 @@ import { BadRequestException, ConflictException, Injectable, NotFoundException }
 import { Trip, type TripMembershipStatus } from '@tc/database';
 import { CreateTripDto, DiscoverTripsQueryDto, TravelHistoryResponseDto, TripMembershipResponse, TripResponse, UpdateTripDto } from './dto';
 import { TripMembershipRepository, TripRepository } from './repositories';
+import { MessagingClient, type TripSystemEventType } from './clients';
 import { TripStatusUtils } from './trip.status';
 
 const OPEN_MEMBERSHIP_STATUSES: TripMembershipStatus[] = ['pending', 'active'];
@@ -11,6 +12,7 @@ export class AppService {
     constructor(
         private readonly trips: TripRepository,
         private readonly memberships: TripMembershipRepository,
+        private readonly messaging: MessagingClient,
     ) {}
 
     async createTrip(organizerId: string, dto: CreateTripDto) {
@@ -114,10 +116,12 @@ export class AppService {
             if (OPEN_MEMBERSHIP_STATUSES.includes(existing.status)) throw new ConflictException('Already a member of this trip');
             await this.memberships.update({ id: existing.id }, { status });
             const membership = await this.memberships.findByTripAndUser(tripId, userId);
+            await this.emitMembershipSystemEvent(tripId, status === 'active' ? 'member_joined' : 'join_requested', userId, userId);
             return { membership: membership ? TripMembershipResponse.from(membership) : null };
         }
 
         const membership = await this.memberships.save(this.memberships.create({ trip: { id: tripId } as Trip, userId, status }));
+        await this.emitMembershipSystemEvent(tripId, status === 'active' ? 'member_joined' : 'join_requested', userId, userId);
         return { membership: TripMembershipResponse.from(membership) };
     }
 
@@ -125,6 +129,7 @@ export class AppService {
         const membership = await this.requireOpenMembership(tripId, userId);
         await this.memberships.update({ id: membership.id }, { status: 'left' });
         const updated = await this.memberships.findByTripAndUser(tripId, userId);
+        await this.emitMembershipSystemEvent(tripId, 'member_left', userId, userId);
         return { membership: updated ? TripMembershipResponse.from(updated) : null };
     }
 
@@ -141,6 +146,7 @@ export class AppService {
         await this.assertTripHasCapacity(tripId, trip.capacity);
         await this.memberships.update({ id: membershipId }, { status: 'active' });
         const updated = await this.memberships.findByIdForTrip(membershipId, tripId);
+        await this.emitMembershipSystemEvent(tripId, 'member_approved', organizerId, membership.userId);
         return { membership: updated ? TripMembershipResponse.from(updated) : null };
     }
 
@@ -159,6 +165,7 @@ export class AppService {
         if (membership.status !== 'active') throw new BadRequestException('Only active members can be removed');
         await this.memberships.update({ id: membershipId }, { status: 'removed' });
         const updated = await this.memberships.findByIdForTrip(membershipId, tripId);
+        await this.emitMembershipSystemEvent(tripId, 'member_removed', organizerId, membership.userId);
         return { membership: updated ? TripMembershipResponse.from(updated) : null };
     }
 
@@ -200,5 +207,9 @@ export class AppService {
 
     private assertValidDateRange(startDate: Date, endDate: Date) {
         if (endDate <= startDate) throw new BadRequestException('End date must be after start date');
+    }
+
+    private async emitMembershipSystemEvent(tripId: string, event: TripSystemEventType, actorUserId: string, subjectUserId: string) {
+        await this.messaging.postTripSystemEvent(tripId, { event, actorUserId, subjectUserId });
     }
 }

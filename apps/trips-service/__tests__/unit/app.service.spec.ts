@@ -2,6 +2,7 @@ import { Test } from '@nestjs/testing';
 import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
 import { Trip, TripMembership } from '@tc/database';
 import { AppService } from '../../src/app/app.service';
+import { MessagingClient } from '../../src/app/clients';
 import { TripMembershipRepository, TripRepository } from '../../src/app/repositories';
 
 describe('AppService', () => {
@@ -23,6 +24,7 @@ describe('AppService', () => {
     let memberships: jest.Mocked<
         Pick<TripMembershipRepository, 'create' | 'save' | 'findByTripId' | 'findByTripAndUser' | 'findByIdForTrip' | 'countActiveMembers' | 'update'>
     >;
+    let messaging: jest.Mocked<Pick<MessagingClient, 'postTripSystemEvent'>>;
 
     const baseTrip: Trip = {
         id: 'trip-1',
@@ -75,9 +77,15 @@ describe('AppService', () => {
             countActiveMembers: jest.fn(),
             update: jest.fn(async () => ({ affected: 1, raw: [], generatedMaps: [] })),
         };
+        messaging = { postTripSystemEvent: jest.fn(async () => undefined) };
 
         const app = await Test.createTestingModule({
-            providers: [AppService, { provide: TripRepository, useValue: trips }, { provide: TripMembershipRepository, useValue: memberships }],
+            providers: [
+                AppService,
+                { provide: TripRepository, useValue: trips },
+                { provide: TripMembershipRepository, useValue: memberships },
+                { provide: MessagingClient, useValue: messaging },
+            ],
         }).compile();
 
         service = app.get<AppService>(AppService);
@@ -306,6 +314,11 @@ describe('AppService', () => {
             memberships.countActiveMembers.mockResolvedValue(0);
             const result = await service.joinTrip('participant-1', 'trip-1');
             expect(memberships.create).toHaveBeenCalledWith(expect.objectContaining({ trip: { id: 'trip-1' }, userId: 'participant-1', status: 'active' }));
+            expect(messaging.postTripSystemEvent).toHaveBeenCalledWith('trip-1', {
+                event: 'member_joined',
+                actorUserId: 'participant-1',
+                subjectUserId: 'participant-1',
+            });
             expect(result.membership.status).toBe('active');
         });
 
@@ -314,6 +327,11 @@ describe('AppService', () => {
             memberships.findByTripAndUser.mockResolvedValue(null);
             const result = await service.joinTrip('participant-1', 'trip-1');
             expect(memberships.create).toHaveBeenCalledWith(expect.objectContaining({ status: 'pending' }));
+            expect(messaging.postTripSystemEvent).toHaveBeenCalledWith('trip-1', {
+                event: 'join_requested',
+                actorUserId: 'participant-1',
+                subjectUserId: 'participant-1',
+            });
             expect(result.membership.status).toBe('pending');
         });
 
@@ -360,6 +378,11 @@ describe('AppService', () => {
                 .mockResolvedValueOnce({ ...baseMembership, status: 'left' });
             const result = await service.leaveTrip('participant-1', 'trip-1');
             expect(memberships.update).toHaveBeenCalledWith({ id: 'membership-1' }, { status: 'left' });
+            expect(messaging.postTripSystemEvent).toHaveBeenCalledWith('trip-1', {
+                event: 'member_left',
+                actorUserId: 'participant-1',
+                subjectUserId: 'participant-1',
+            });
             expect(result.membership.status).toBe('left');
         });
 
@@ -392,6 +415,11 @@ describe('AppService', () => {
                 .mockResolvedValueOnce({ ...baseMembership, status: 'active' });
             memberships.countActiveMembers.mockResolvedValue(0);
             const result = await service.approveMembership('organizer-1', 'trip-1', 'membership-1');
+            expect(messaging.postTripSystemEvent).toHaveBeenCalledWith('trip-1', {
+                event: 'member_approved',
+                actorUserId: 'organizer-1',
+                subjectUserId: 'participant-1',
+            });
             expect(result.membership.status).toBe('active');
         });
 
@@ -437,6 +465,11 @@ describe('AppService', () => {
                 .mockResolvedValueOnce({ ...baseMembership, status: 'removed' });
             const result = await service.removeMembership('organizer-1', 'trip-1', 'membership-1');
             expect(memberships.update).toHaveBeenCalledWith({ id: 'membership-1' }, { status: 'removed' });
+            expect(messaging.postTripSystemEvent).toHaveBeenCalledWith('trip-1', {
+                event: 'member_removed',
+                actorUserId: 'organizer-1',
+                subjectUserId: 'participant-1',
+            });
             expect(result.membership.status).toBe('removed');
         });
 

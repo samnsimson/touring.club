@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { Conversation, Trip } from '@tc/database';
-import { ConversationResponse, CreateDirectConversationDto, MessageResponse, SendMessageDto } from './dto';
+import { ConversationResponse, CreateDirectConversationDto, MessageResponse, PostTripSystemEventDto, SendMessageDto } from './dto';
 import { ConversationParticipantRepository, ConversationRepository, MessageRepository, TripMembershipRepository, TripRepository } from './repositories';
 
 @Injectable()
@@ -67,6 +67,33 @@ export class AppService {
         );
         await this.conversations.update({ id: conversationId }, { updatedAt: new Date() });
         return { message: MessageResponse.from(message) };
+    }
+
+    async postTripSystemEvent(tripId: string, dto: PostTripSystemEventDto) {
+        const conversation = await this.ensureTripConversationForSystemEvent(tripId);
+        const message = await this.messages.save(
+            this.messages.create({
+                conversation: { id: conversation.id } as Conversation,
+                senderId: dto.actorUserId,
+                messageType: 'system',
+                body: JSON.stringify({ event: dto.event, userId: dto.subjectUserId }),
+            }),
+        );
+        await this.conversations.update({ id: conversation.id }, { updatedAt: new Date() });
+        return { message: MessageResponse.from(message) };
+    }
+
+    private async ensureTripConversationForSystemEvent(tripId: string) {
+        const trip = await this.trips.findById(tripId);
+        if (!trip) throw new NotFoundException('Trip not found');
+
+        let conversation = await this.conversations.findByTripId(tripId);
+        if (!conversation) {
+            conversation = await this.conversations.save(this.conversations.create({ type: 'trip', trip: { id: tripId } as Trip }));
+        }
+
+        await this.syncTripParticipants(conversation.id, trip);
+        return conversation;
     }
 
     private async ensureTripConversation(tripId: string, userId: string) {

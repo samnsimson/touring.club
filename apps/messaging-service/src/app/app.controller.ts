@@ -1,6 +1,6 @@
 import { Body, Controller, Get, HttpStatus, Param, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { CurrentSession } from '@tc/auth';
+import { CurrentSession, Public } from '@tc/auth';
 import { ApiResource, ApiResourceExceptions } from '@tc/utils';
 import { AppService } from './app.service';
 import {
@@ -8,6 +8,8 @@ import {
     CreateDirectConversationDto,
     ListConversationsResponseDto,
     ListMessagesResponseDto,
+    PostTripSystemEventDto,
+    PostTripSystemEventResponseDto,
     SendMessageDto,
     SendMessageResponseDto,
 } from './dto';
@@ -50,6 +52,14 @@ export class AppController {
     @ApiResourceExceptions(HttpStatus.BAD_REQUEST, HttpStatus.NOT_FOUND, HttpStatus.UNAUTHORIZED)
     async sendTripMessage(@CurrentSession('userId') userId: string, @Param('tripId') tripId: string, @Body() dto: SendMessageDto) {
         return this.appService.sendTripMessage(userId, tripId, dto);
+    }
+
+    @Public()
+    @Post('internal/trips/:tripId/system-events')
+    @ApiResource({ type: PostTripSystemEventResponseDto, operationId: 'postTripSystemEvent', status: HttpStatus.CREATED })
+    @ApiResourceExceptions(HttpStatus.BAD_REQUEST, HttpStatus.NOT_FOUND)
+    async postTripSystemEvent(@Param('tripId') tripId: string, @Body() dto: PostTripSystemEventDto) {
+        return this.appService.postTripSystemEvent(tripId, dto);
     }
 
     @Get(':conversationId/messages')
