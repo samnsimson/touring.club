@@ -16,6 +16,7 @@ describe('AppController', () => {
             | 'listMyTrips'
             | 'getTrip'
             | 'updateTrip'
+            | 'uploadCoverImage'
             | 'publishTrip'
             | 'cancelTrip'
             | 'archiveTrip'
@@ -37,6 +38,7 @@ describe('AppController', () => {
             listMyTrips: jest.fn(),
             getTrip: jest.fn(),
             updateTrip: jest.fn(),
+            uploadCoverImage: jest.fn(),
             publishTrip: jest.fn(),
             cancelTrip: jest.fn(),
             archiveTrip: jest.fn(),
@@ -98,6 +100,13 @@ describe('AppController', () => {
         appService.updateTrip.mockResolvedValue(tripResponse as never);
         await expect(controller.updateTrip(organizerId, 'trip-1', { title: 'Updated' })).resolves.toEqual(tripResponse);
         expect(appService.updateTrip).toHaveBeenCalledWith('organizer-1', 'trip-1', { title: 'Updated' });
+    });
+
+    it('uploadTripCoverImage delegates to AppService', async () => {
+        const file = { buffer: Buffer.from('img'), mimetype: 'image/png', originalname: 'cover.png' } as Express.Multer.File;
+        appService.uploadCoverImage.mockResolvedValue(tripResponse as never);
+        await expect(controller.uploadTripCoverImage(organizerId, 'trip-1', file)).resolves.toEqual(tripResponse);
+        expect(appService.uploadCoverImage).toHaveBeenCalledWith('organizer-1', 'trip-1', file);
     });
 
     it('publishTrip delegates to AppService', async () => {

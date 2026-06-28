@@ -1,4 +1,6 @@
-import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException, UnsupportedMediaTypeException } from '@nestjs/common';
+import { randomUUID } from 'node:crypto';
+import { StorageService } from '@tc/common';
 import { Trip, type TripMembershipStatus } from '@tc/database';
 import { CreateTripDto, DiscoverTripsQueryDto, TravelHistoryResponseDto, TripMembershipResponse, TripResponse, UpdateTripDto } from './dto';
 import { TripMembershipRepository, TripRepository } from './repositories';
@@ -6,6 +8,8 @@ import { MessagingClient, NotificationsClient, type TripSystemEventType } from '
 import { TripStatusUtils } from './trip.status';
 
 const OPEN_MEMBERSHIP_STATUSES: TripMembershipStatus[] = ['pending', 'active'];
+const ALLOWED_COVER_IMAGE_MIME_TYPES = new Set(['image/png', 'image/jpeg', 'image/webp']);
+const MAX_COVER_IMAGES = 10;
 
 @Injectable()
 export class AppService {
@@ -14,6 +18,7 @@ export class AppService {
         private readonly memberships: TripMembershipRepository,
         private readonly messaging: MessagingClient,
         private readonly notifications: NotificationsClient,
+        private readonly storage: StorageService,
     ) {}
 
     async createTrip(organizerId: string, dto: CreateTripDto) {
@@ -79,6 +84,27 @@ export class AppService {
         if (dto.tags !== undefined) updates.tags = dto.tags;
 
         if (Object.keys(updates).length > 0) await this.trips.update({ id: tripId, organizerId }, updates);
+        return this.getTrip(organizerId, tripId);
+    }
+
+    async uploadCoverImage(organizerId: string, tripId: string, file: { buffer: Buffer; mimetype: string; originalname: string } | undefined) {
+        if (!file) throw new BadRequestException('Cover image file is required');
+        if (!ALLOWED_COVER_IMAGE_MIME_TYPES.has(file.mimetype)) {
+            throw new UnsupportedMediaTypeException('Cover image must be a PNG, JPEG, or WebP image');
+        }
+
+        const trip = await this.requireOwnedTrip(organizerId, tripId);
+        TripStatusUtils.assertEditable(trip.status);
+        if (trip.coverImageUrls.length >= MAX_COVER_IMAGES) throw new BadRequestException(`A trip can have at most ${MAX_COVER_IMAGES} cover images`);
+
+        const extension = file.originalname.split('.').pop() ?? 'png';
+        const { url } = await this.storage.upload({
+            key: `trips/${tripId}/covers/${randomUUID()}.${extension}`,
+            body: file.buffer,
+            contentType: file.mimetype,
+        });
+
+        await this.trips.update({ id: tripId, organizerId }, { coverImageUrls: [...trip.coverImageUrls, url] });
         return this.getTrip(organizerId, tripId);
     }
 

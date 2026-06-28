@@ -1,5 +1,6 @@
-import { Body, Controller, Get, HttpStatus, Param, Post } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, HttpStatus, Param, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { CurrentSession, Public } from '@tc/auth';
 import { ApiResource, ApiResourceExceptions } from '@tc/utils';
 import { AppService } from './app.service';
@@ -12,7 +13,9 @@ import {
     PostTripSystemEventResponseDto,
     SendMessageDto,
     SendMessageResponseDto,
+    UploadMessageAttachmentResponseDto,
 } from './dto';
+import type { Express } from 'express';
 
 @ApiTags('Conversations')
 @Controller('conversations')
@@ -54,6 +57,15 @@ export class AppController {
         return this.appService.sendTripMessage(userId, tripId, dto);
     }
 
+    @Post('trips/:tripId/messages/attachment')
+    @ApiConsumes('multipart/form-data')
+    @UseInterceptors(FileInterceptor('file'))
+    @ApiResource({ type: UploadMessageAttachmentResponseDto, operationId: 'uploadTripMessageAttachment', status: HttpStatus.CREATED })
+    @ApiResourceExceptions(HttpStatus.BAD_REQUEST, HttpStatus.NOT_FOUND, HttpStatus.UNAUTHORIZED, HttpStatus.UNSUPPORTED_MEDIA_TYPE)
+    async uploadTripMessageAttachment(@CurrentSession('userId') userId: string, @Param('tripId') tripId: string, @UploadedFile() file: Express.Multer.File) {
+        return this.appService.uploadTripMessageAttachment(userId, tripId, file);
+    }
+
     @Public()
     @Post('internal/trips/:tripId/system-events')
     @ApiResource({ type: PostTripSystemEventResponseDto, operationId: 'postTripSystemEvent', status: HttpStatus.CREATED })
@@ -74,5 +86,18 @@ export class AppController {
     @ApiResourceExceptions(HttpStatus.BAD_REQUEST, HttpStatus.NOT_FOUND, HttpStatus.UNAUTHORIZED)
     async sendMessage(@CurrentSession('userId') userId: string, @Param('conversationId') conversationId: string, @Body() dto: SendMessageDto) {
         return this.appService.sendMessage(userId, conversationId, dto);
+    }
+
+    @Post(':conversationId/messages/attachment')
+    @ApiConsumes('multipart/form-data')
+    @UseInterceptors(FileInterceptor('file'))
+    @ApiResource({ type: UploadMessageAttachmentResponseDto, operationId: 'uploadMessageAttachment', status: HttpStatus.CREATED })
+    @ApiResourceExceptions(HttpStatus.BAD_REQUEST, HttpStatus.NOT_FOUND, HttpStatus.UNAUTHORIZED, HttpStatus.UNSUPPORTED_MEDIA_TYPE)
+    async uploadMessageAttachment(
+        @CurrentSession('userId') userId: string,
+        @Param('conversationId') conversationId: string,
+        @UploadedFile() file: Express.Multer.File,
+    ) {
+        return this.appService.uploadMessageAttachment(userId, conversationId, file);
     }
 }

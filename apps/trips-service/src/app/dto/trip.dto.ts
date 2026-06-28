@@ -258,6 +258,11 @@ export class UpdateTripResponseDto {
     trip!: TripResponse;
 }
 
+export class UploadTripCoverImageResponseDto {
+    @ApiProperty({ type: TripResponse })
+    trip!: TripResponse;
+}
+
 export type DiscoverTripsFilters = {
     destination?: string;
     startDateFrom?: string;

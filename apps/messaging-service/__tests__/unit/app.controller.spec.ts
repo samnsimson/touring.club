@@ -18,9 +18,11 @@ describe('AppController', () => {
             | 'getTripConversation'
             | 'listTripMessages'
             | 'sendTripMessage'
+            | 'uploadTripMessageAttachment'
             | 'postTripSystemEvent'
             | 'listMessages'
             | 'sendMessage'
+            | 'uploadMessageAttachment'
         >
     >;
 
@@ -31,9 +33,11 @@ describe('AppController', () => {
             getTripConversation: jest.fn(),
             listTripMessages: jest.fn(),
             sendTripMessage: jest.fn(),
+            uploadTripMessageAttachment: jest.fn(),
             postTripSystemEvent: jest.fn(),
             listMessages: jest.fn(),
             sendMessage: jest.fn(),
+            uploadMessageAttachment: jest.fn(),
         };
 
         const app = await Test.createTestingModule({
@@ -81,6 +85,13 @@ describe('AppController', () => {
         expect(appService.sendTripMessage).toHaveBeenCalledWith('user-a', 'trip-1', { body: 'Hello trip' });
     });
 
+    it('uploadTripMessageAttachment delegates to AppService', async () => {
+        const file = { buffer: Buffer.from('img'), mimetype: 'image/png', originalname: 'photo.png' } as Express.Multer.File;
+        appService.uploadTripMessageAttachment.mockResolvedValue({ message: { id: 'message-1', messageType: 'image' } } as never);
+        await expect(controller.uploadTripMessageAttachment(userId, 'trip-1', file)).resolves.toMatchObject({ message: { messageType: 'image' } });
+        expect(appService.uploadTripMessageAttachment).toHaveBeenCalledWith('user-a', 'trip-1', file);
+    });
+
     it('postTripSystemEvent delegates to AppService', async () => {
         appService.postTripSystemEvent.mockResolvedValue({ message: { id: 'message-1', messageType: 'system' } } as never);
         const dto = { event: 'member_joined' as const, actorUserId: 'user-a', subjectUserId: 'user-b' };
@@ -98,5 +109,12 @@ describe('AppController', () => {
         appService.sendMessage.mockResolvedValue({ message: { id: 'message-1', body: 'Hello' } } as never);
         await expect(controller.sendMessage(userId, 'conversation-1', { body: 'Hello' })).resolves.toMatchObject({ message: { body: 'Hello' } });
         expect(appService.sendMessage).toHaveBeenCalledWith('user-a', 'conversation-1', { body: 'Hello' });
+    });
+
+    it('uploadMessageAttachment delegates to AppService', async () => {
+        const file = { buffer: Buffer.from('img'), mimetype: 'image/png', originalname: 'photo.png' } as Express.Multer.File;
+        appService.uploadMessageAttachment.mockResolvedValue({ message: { id: 'message-1', messageType: 'image' } } as never);
+        await expect(controller.uploadMessageAttachment(userId, 'conversation-1', file)).resolves.toMatchObject({ message: { messageType: 'image' } });
+        expect(appService.uploadMessageAttachment).toHaveBeenCalledWith('user-a', 'conversation-1', file);
     });
 });

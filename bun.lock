@@ -130,6 +130,7 @@
       "devDependencies": {
         "@nestjs/testing": "^11.0.0",
         "@types/express": "^5.0.6",
+        "@types/multer": "^2.1.0",
       },
     },
     "apps/notifications-service": {
@@ -184,6 +185,7 @@
       "devDependencies": {
         "@nestjs/testing": "^11.0.0",
         "@types/express": "^5.0.6",
+        "@types/multer": "^2.1.0",
       },
     },
     "apps/users-service": {

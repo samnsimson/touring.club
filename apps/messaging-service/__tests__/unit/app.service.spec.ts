@@ -1,5 +1,6 @@
 import { Test } from '@nestjs/testing';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, NotFoundException, UnsupportedMediaTypeException } from '@nestjs/common';
+import { StorageService } from '@tc/common';
 import { Conversation, Message, Trip, TripMembership } from '@tc/database';
 import { AppService } from '../../src/app/app.service';
 import {
@@ -25,6 +26,7 @@ describe('AppService', () => {
     let memberships: jest.Mocked<Pick<TripMembershipRepository, 'findByTripAndUser' | 'findActiveByTripId'>>;
     let gateway: jest.Mocked<Pick<ConversationsGateway, 'emitNewMessage'>>;
     let notifications: jest.Mocked<Pick<NotificationsClient, 'createNotification'>>;
+    let storage: jest.Mocked<Pick<StorageService, 'upload'>>;
 
     const baseConversation: Conversation = {
         id: 'conversation-1',
@@ -98,6 +100,7 @@ describe('AppService', () => {
         memberships = { findByTripAndUser: jest.fn(), findActiveByTripId: jest.fn() };
         gateway = { emitNewMessage: jest.fn() };
         notifications = { createNotification: jest.fn(async () => undefined) };
+        storage = { upload: jest.fn() };
 
         const app = await Test.createTestingModule({
             providers: [
@@ -109,6 +112,7 @@ describe('AppService', () => {
                 { provide: TripMembershipRepository, useValue: memberships },
                 { provide: ConversationsGateway, useValue: gateway },
                 { provide: NotificationsClient, useValue: notifications },
+                { provide: StorageService, useValue: storage },
             ],
         }).compile();
 
@@ -252,6 +256,23 @@ describe('AppService', () => {
         });
     });
 
+    describe('uploadTripMessageAttachment', () => {
+        it('uploads an image attachment and broadcasts it in the trip conversation', async () => {
+            conversations.findByTripId.mockResolvedValue(tripConversation);
+            storage.upload.mockResolvedValue({ key: 'k', url: 'https://cdn.touring.club/conversations/conversation-trip-1/attachments/abc.png' });
+            const result = await service.uploadTripMessageAttachment('organizer-1', 'trip-1', {
+                buffer: Buffer.from('img'),
+                mimetype: 'image/png',
+                originalname: 'photo.png',
+            });
+            expect(messages.save).toHaveBeenCalledWith(
+                expect.objectContaining({ messageType: 'image', body: 'https://cdn.touring.club/conversations/conversation-trip-1/attachments/abc.png' }),
+            );
+            expect(gateway.emitNewMessage).toHaveBeenCalled();
+            expect(result.message.messageType).toBe('image');
+        });
+    });
+
     describe('listMessages', () => {
         it('returns messages for a participant', async () => {
             messages.findByConversationId.mockResolvedValue([baseMessage]);
@@ -291,6 +312,51 @@ describe('AppService', () => {
         it('throws when the user is not a participant', async () => {
             participants.findByConversationAndUser.mockResolvedValue(null);
             await expect(service.sendMessage('user-a', 'conversation-1', { body: 'Hello there!' })).rejects.toBeInstanceOf(NotFoundException);
+        });
+    });
+
+    describe('uploadMessageAttachment', () => {
+        it('throws when no file is provided', async () => {
+            await expect(service.uploadMessageAttachment('user-a', 'conversation-1', undefined)).rejects.toBeInstanceOf(BadRequestException);
+        });
+
+        it('throws when the file type is not allowed', async () => {
+            await expect(
+                service.uploadMessageAttachment('user-a', 'conversation-1', { buffer: Buffer.from('x'), mimetype: 'application/zip', originalname: 'a.zip' }),
+            ).rejects.toBeInstanceOf(UnsupportedMediaTypeException);
+            expect(storage.upload).not.toHaveBeenCalled();
+        });
+
+        it('throws when the user is not a participant', async () => {
+            participants.findByConversationAndUser.mockResolvedValue(null);
+            await expect(
+                service.uploadMessageAttachment('user-a', 'conversation-1', { buffer: Buffer.from('img'), mimetype: 'image/png', originalname: 'a.png' }),
+            ).rejects.toBeInstanceOf(NotFoundException);
+        });
+
+        it('uploads an image attachment and stores it as an image message', async () => {
+            storage.upload.mockResolvedValue({ key: 'k', url: 'https://cdn.touring.club/conversations/conversation-1/attachments/abc.png' });
+            const result = await service.uploadMessageAttachment('user-a', 'conversation-1', {
+                buffer: Buffer.from('img'),
+                mimetype: 'image/png',
+                originalname: 'photo.png',
+            });
+            expect(storage.upload).toHaveBeenCalledWith(expect.objectContaining({ contentType: 'image/png' }));
+            expect(messages.save).toHaveBeenCalledWith(
+                expect.objectContaining({ messageType: 'image', body: 'https://cdn.touring.club/conversations/conversation-1/attachments/abc.png' }),
+            );
+            expect(result.message.messageType).toBe('image');
+        });
+
+        it('uploads a document attachment and stores it as a file message', async () => {
+            storage.upload.mockResolvedValue({ key: 'k', url: 'https://cdn.touring.club/conversations/conversation-1/attachments/abc.pdf' });
+            const result = await service.uploadMessageAttachment('user-a', 'conversation-1', {
+                buffer: Buffer.from('doc'),
+                mimetype: 'application/pdf',
+                originalname: 'itinerary.pdf',
+            });
+            expect(messages.save).toHaveBeenCalledWith(expect.objectContaining({ messageType: 'file' }));
+            expect(result.message.messageType).toBe('file');
         });
     });
 

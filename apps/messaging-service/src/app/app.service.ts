@@ -1,9 +1,14 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { Conversation, Trip } from '@tc/database';
+import { BadRequestException, Injectable, NotFoundException, UnsupportedMediaTypeException } from '@nestjs/common';
+import { randomUUID } from 'node:crypto';
+import { StorageService } from '@tc/common';
+import { Conversation, type MessageType, Trip } from '@tc/database';
 import { ConversationResponse, CreateDirectConversationDto, MessageResponse, PostTripSystemEventDto, SendMessageDto } from './dto';
 import { ConversationParticipantRepository, ConversationRepository, MessageRepository, TripMembershipRepository, TripRepository } from './repositories';
 import { ConversationsGateway } from './gateways';
 import { NotificationsClient } from './clients';
+
+const ALLOWED_IMAGE_MIME_TYPES = new Set(['image/png', 'image/jpeg', 'image/webp']);
+const ALLOWED_FILE_MIME_TYPES = new Set(['application/pdf', 'text/plain']);
 
 @Injectable()
 export class AppService {
@@ -15,6 +20,7 @@ export class AppService {
         private readonly memberships: TripMembershipRepository,
         private readonly gateway: ConversationsGateway,
         private readonly notifications: NotificationsClient,
+        private readonly storage: StorageService,
     ) {}
 
     async createDirectConversation(userId: string, dto: CreateDirectConversationDto) {
@@ -61,18 +67,54 @@ export class AppService {
 
     async sendMessage(userId: string, conversationId: string, dto: SendMessageDto) {
         await this.requireParticipant(conversationId, userId);
+        return this.persistAndBroadcastMessage(conversationId, userId, 'text', dto.body);
+    }
+
+    async uploadMessageAttachment(userId: string, conversationId: string, file: { buffer: Buffer; mimetype: string; originalname: string } | undefined) {
+        await this.requireParticipant(conversationId, userId);
+        const { messageType, url } = await this.uploadAttachment(conversationId, file);
+        return this.persistAndBroadcastMessage(conversationId, userId, messageType, url);
+    }
+
+    async uploadTripMessageAttachment(userId: string, tripId: string, file: { buffer: Buffer; mimetype: string; originalname: string } | undefined) {
+        const conversation = await this.ensureTripConversation(tripId, userId);
+        const { messageType, url } = await this.uploadAttachment(conversation.id, file);
+        return this.persistAndBroadcastMessage(conversation.id, userId, messageType, url);
+    }
+
+    private async uploadAttachment(conversationId: string, file: { buffer: Buffer; mimetype: string; originalname: string } | undefined) {
+        if (!file) throw new BadRequestException('Attachment file is required');
+
+        const messageType: MessageType | null = ALLOWED_IMAGE_MIME_TYPES.has(file.mimetype)
+            ? 'image'
+            : ALLOWED_FILE_MIME_TYPES.has(file.mimetype)
+              ? 'file'
+              : null;
+        if (!messageType) throw new UnsupportedMediaTypeException('Attachment must be a PNG, JPEG, WebP, PDF, or plain text file');
+
+        const extension = file.originalname.split('.').pop() ?? 'bin';
+        const { url } = await this.storage.upload({
+            key: `conversations/${conversationId}/attachments/${randomUUID()}.${extension}`,
+            body: file.buffer,
+            contentType: file.mimetype,
+        });
+
+        return { messageType, url };
+    }
+
+    private async persistAndBroadcastMessage(conversationId: string, senderId: string, messageType: MessageType, body: string) {
         const message = await this.messages.save(
             this.messages.create({
                 conversation: { id: conversationId } as Conversation,
-                senderId: userId,
-                messageType: 'text',
-                body: dto.body,
+                senderId,
+                messageType,
+                body,
             }),
         );
         await this.conversations.update({ id: conversationId }, { updatedAt: new Date() });
         const response = MessageResponse.from(message);
         this.gateway.emitNewMessage(conversationId, response);
-        await this.notifyRecipients(conversationId, userId, dto.body);
+        await this.notifyRecipients(conversationId, senderId, body);
         return { message: response };
     }
 

@@ -60,3 +60,8 @@ export class ListMessagesResponseDto {
     @ApiProperty({ type: [MessageResponse] })
     messages!: MessageResponse[];
 }
+
+export class UploadMessageAttachmentResponseDto {
+    @ApiProperty({ type: MessageResponse })
+    message!: MessageResponse;
+}

@@ -208,7 +208,7 @@ export class ProfileRepository extends BaseRepository<Profile> {
 - Inject `HttpClient` in services and clients — axios is configured through `HttpModule.forRoot()`, not in `HttpClient`
 - `StorageModule.forRoot(options?)` — registers an AWS SDK `S3Client` (`@aws-sdk/client-s3`); registered globally via `@tc/core` `RootModule`
 - `StorageService.upload({ key, body, contentType })` / `.delete(key)` / `.getPublicUrl(key)` — use for **all object storage** (profile photos, trip cover images, chat attachments) instead of calling the AWS SDK directly; bucket/region/credentials come from `@tc/config` (`AWS_S3_BUCKET`, `AWS_REGION`, `AWS_S3_ENDPOINT`, `AWS_S3_PUBLIC_URL`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`)
-- Reference: `apps/users-service/src/app/app.service.ts` `uploadAvatar()` + `POST /api/v1/profiles/me/avatar` (multipart, `FileInterceptor('file')` from `@nestjs/platform-express`)
+- Reference: `apps/users-service/src/app/app.service.ts` `uploadAvatar()` + `POST /api/v1/profiles/me/avatar`; `apps/trips-service/src/app/app.service.ts` `uploadCoverImage()` + `POST /api/v1/trips/:tripId/cover-image`; `apps/messaging-service/src/app/app.service.ts` `uploadMessageAttachment()`/`uploadTripMessageAttachment()` + `POST .../messages/attachment` (all multipart, `FileInterceptor('file')` from `@nestjs/platform-express`)
 
 ## Dependency Direction
 
@@ -223,19 +223,19 @@ Libraries must not import from apps. Avoid circular deps between libraries. `@tc
 
 ## Current Projects
 
-| Project                 | Type | Purpose                                                                                                                                               |
-| ----------------------- | ---- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `auth-service`          | app  | Auth microservice — REST API (`/api/v1/auth/*`)                                                                                                       |
-| `users-service`         | app  | User profiles microservice — REST API (`/api/v1/profiles/*`), incl. `POST /api/v1/profiles/me/avatar` avatar upload via `@tc/common` `StorageService` |
-| `trips-service`         | app  | Trips microservice — organizer CRUD/lifecycle, public discovery, join/leave/approve membership                                                        |
-| `messaging-service`     | app  | Messaging microservice — direct conversations, trip group chat, send/list messages, `/conversations` WebSocket gateway (`message:new`)                |
-| `notifications-service` | app  | Notifications microservice — list/create/mark-read notifications, `/notifications` WebSocket gateway (`notification:created`)                         |
-| `auth`                  | lib  | Shared Better Auth integration (guards, adapter), shared JWT verification (`verifyAuthToken`) and WebSocket auth guard (`WsAuthGuard`)                |
-| `core`                  | lib  | Bootstrap & Swagger                                                                                                                                   |
-| `config`                | lib  | Environment & config                                                                                                                                  |
-| `database`              | lib  | TypeORM, entities (`auth/` + `general/`), migrations                                                                                                  |
-| `utils`                 | lib  | Shared utilities                                                                                                                                      |
-| `common`                | lib  | Shared HTTP client (`HttpModule`/`HttpClient`) and S3 object storage (`StorageModule`/`StorageService`, AWS SDK)                                      |
+| Project                 | Type | Purpose                                                                                                                                                                                                                      |
+| ----------------------- | ---- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auth-service`          | app  | Auth microservice — REST API (`/api/v1/auth/*`)                                                                                                                                                                              |
+| `users-service`         | app  | User profiles microservice — REST API (`/api/v1/profiles/*`), incl. `POST /api/v1/profiles/me/avatar` avatar upload via `@tc/common` `StorageService`                                                                        |
+| `trips-service`         | app  | Trips microservice — organizer CRUD/lifecycle, public discovery, join/leave/approve membership, `POST /api/v1/trips/:tripId/cover-image` cover image upload via `@tc/common` `StorageService`                                |
+| `messaging-service`     | app  | Messaging microservice — direct conversations, trip group chat, send/list messages, attachment upload (`POST .../messages/attachment`) via `@tc/common` `StorageService`, `/conversations` WebSocket gateway (`message:new`) |
+| `notifications-service` | app  | Notifications microservice — list/create/mark-read notifications, `/notifications` WebSocket gateway (`notification:created`)                                                                                                |
+| `auth`                  | lib  | Shared Better Auth integration (guards, adapter), shared JWT verification (`verifyAuthToken`) and WebSocket auth guard (`WsAuthGuard`)                                                                                       |
+| `core`                  | lib  | Bootstrap & Swagger                                                                                                                                                                                                          |
+| `config`                | lib  | Environment & config                                                                                                                                                                                                         |
+| `database`              | lib  | TypeORM, entities (`auth/` + `general/`), migrations                                                                                                                                                                         |
+| `utils`                 | lib  | Shared utilities                                                                                                                                                                                                             |
+| `common`                | lib  | Shared HTTP client (`HttpModule`/`HttpClient`) and S3 object storage (`StorageModule`/`StorageService`, AWS SDK)                                                                                                             |
 
 ## Application Patterns
 

@@ -1,5 +1,6 @@
-import { Body, Controller, Delete, Get, HttpStatus, Param, Patch, Post, Query } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Delete, Get, HttpStatus, Param, Patch, Post, Query, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { CurrentSession, Public } from '@tc/auth';
 import { ApiResource, ApiResourceExceptions } from '@tc/utils';
 import { AppService } from './app.service';
@@ -17,7 +18,9 @@ import {
     TripMembershipActionResponseDto,
     UpdateTripDto,
     UpdateTripResponseDto,
+    UploadTripCoverImageResponseDto,
 } from './dto';
+import type { Express } from 'express';
 
 @ApiTags('Trips')
 @Controller('trips')
@@ -80,6 +83,15 @@ export class AppController {
     @ApiResourceExceptions(HttpStatus.BAD_REQUEST, HttpStatus.NOT_FOUND, HttpStatus.UNAUTHORIZED)
     async archiveTrip(@CurrentSession('userId') userId: string, @Param('tripId') tripId: string) {
         return this.appService.archiveTrip(userId, tripId);
+    }
+
+    @Post(':tripId/cover-image')
+    @ApiConsumes('multipart/form-data')
+    @UseInterceptors(FileInterceptor('file'))
+    @ApiResource({ type: UploadTripCoverImageResponseDto, operationId: 'uploadTripCoverImage', status: HttpStatus.OK })
+    @ApiResourceExceptions(HttpStatus.BAD_REQUEST, HttpStatus.NOT_FOUND, HttpStatus.UNAUTHORIZED, HttpStatus.UNSUPPORTED_MEDIA_TYPE)
+    async uploadTripCoverImage(@CurrentSession('userId') userId: string, @Param('tripId') tripId: string, @UploadedFile() file: Express.Multer.File) {
+        return this.appService.uploadCoverImage(userId, tripId, file);
     }
 
     @Post(':tripId/join')

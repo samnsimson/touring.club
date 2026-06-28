@@ -1,5 +1,6 @@
 import { Test } from '@nestjs/testing';
-import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, NotFoundException, UnsupportedMediaTypeException } from '@nestjs/common';
+import { StorageService } from '@tc/common';
 import { Trip, TripMembership } from '@tc/database';
 import { AppService } from '../../src/app/app.service';
 import { MessagingClient, NotificationsClient } from '../../src/app/clients';
@@ -26,6 +27,7 @@ describe('AppService', () => {
     >;
     let messaging: jest.Mocked<Pick<MessagingClient, 'postTripSystemEvent'>>;
     let notifications: jest.Mocked<Pick<NotificationsClient, 'createNotification'>>;
+    let storage: jest.Mocked<Pick<StorageService, 'upload'>>;
 
     const baseTrip: Trip = {
         id: 'trip-1',
@@ -80,6 +82,7 @@ describe('AppService', () => {
         };
         messaging = { postTripSystemEvent: jest.fn(async () => undefined) };
         notifications = { createNotification: jest.fn(async () => undefined) };
+        storage = { upload: jest.fn() };
 
         const app = await Test.createTestingModule({
             providers: [
@@ -88,6 +91,7 @@ describe('AppService', () => {
                 { provide: TripMembershipRepository, useValue: memberships },
                 { provide: MessagingClient, useValue: messaging },
                 { provide: NotificationsClient, useValue: notifications },
+                { provide: StorageService, useValue: storage },
             ],
         }).compile();
 
@@ -259,6 +263,56 @@ describe('AppService', () => {
                     endDate: '2026-07-01T09:00:00.000Z',
                 }),
             ).rejects.toBeInstanceOf(BadRequestException);
+        });
+    });
+
+    describe('uploadCoverImage', () => {
+        it('throws when no file is provided', async () => {
+            await expect(service.uploadCoverImage('organizer-1', 'trip-1', undefined)).rejects.toBeInstanceOf(BadRequestException);
+        });
+
+        it('throws when the file type is not allowed', async () => {
+            await expect(
+                service.uploadCoverImage('organizer-1', 'trip-1', { buffer: Buffer.from('x'), mimetype: 'application/pdf', originalname: 'cover.pdf' }),
+            ).rejects.toBeInstanceOf(UnsupportedMediaTypeException);
+            expect(storage.upload).not.toHaveBeenCalled();
+        });
+
+        it('rejects uploads to non-editable trips', async () => {
+            trips.findByIdForOrganizer.mockResolvedValue({ ...baseTrip, status: 'archived' });
+            await expect(
+                service.uploadCoverImage('organizer-1', 'trip-1', { buffer: Buffer.from('img'), mimetype: 'image/png', originalname: 'cover.png' }),
+            ).rejects.toBeInstanceOf(BadRequestException);
+        });
+
+        it('rejects uploads once the cover image limit is reached', async () => {
+            trips.findByIdForOrganizer.mockResolvedValue({ ...baseTrip, coverImageUrls: Array.from({ length: 10 }, (_, i) => `url-${i}`) });
+            await expect(
+                service.uploadCoverImage('organizer-1', 'trip-1', { buffer: Buffer.from('img'), mimetype: 'image/png', originalname: 'cover.png' }),
+            ).rejects.toBeInstanceOf(BadRequestException);
+        });
+
+        it('uploads the cover image and appends it to the trip', async () => {
+            trips.findByIdForOrganizer
+                .mockResolvedValueOnce({ ...baseTrip, coverImageUrls: ['https://cdn.touring.club/trips/existing.png'] })
+                .mockResolvedValueOnce({
+                    ...baseTrip,
+                    coverImageUrls: ['https://cdn.touring.club/trips/existing.png', 'https://cdn.touring.club/trips/new.png'],
+                });
+            storage.upload.mockResolvedValue({ key: 'trips/trip-1/covers/abc.png', url: 'https://cdn.touring.club/trips/new.png' });
+
+            const result = await service.uploadCoverImage('organizer-1', 'trip-1', {
+                buffer: Buffer.from('img'),
+                mimetype: 'image/png',
+                originalname: 'cover.png',
+            });
+
+            expect(storage.upload).toHaveBeenCalledWith(expect.objectContaining({ contentType: 'image/png', body: Buffer.from('img') }));
+            expect(trips.update).toHaveBeenCalledWith(
+                { id: 'trip-1', organizerId: 'organizer-1' },
+                { coverImageUrls: ['https://cdn.touring.club/trips/existing.png', 'https://cdn.touring.club/trips/new.png'] },
+            );
+            expect(result.trip.coverImageUrls).toContain('https://cdn.touring.club/trips/new.png');
         });
     });
 
