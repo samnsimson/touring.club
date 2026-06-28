@@ -1,4 +1,5 @@
 import { Injectable, ServiceUnavailableException } from '@nestjs/common';
+import { HttpClient, isHttpError } from '@tc/common';
 import { ConfigService } from '@tc/config';
 
 type TravelHistoryTripSummary = {
@@ -15,18 +16,24 @@ type TravelHistoryApiResponse = {
 
 @Injectable()
 export class TripsClient {
-    constructor(private readonly config: ConfigService) {}
+    constructor(
+        private readonly config: ConfigService,
+        private readonly http: HttpClient,
+    ) {}
 
     async getTravelHistory(userId: string, authorization: string): Promise<TravelHistoryApiResponse> {
         const baseUrl = this.config.get('TRIPS_SERVICE_URL');
-        const response = await fetch(`${baseUrl}/api/v1/trips/users/${encodeURIComponent(userId)}/travel-history`, {
-            headers: { Authorization: authorization },
-        });
 
-        if (!response.ok) {
-            throw new ServiceUnavailableException('Unable to load travel history');
+        try {
+            const response = await this.http.get<TravelHistoryApiResponse>(`${baseUrl}/api/v1/trips/users/${encodeURIComponent(userId)}/travel-history`, {
+                headers: { Authorization: authorization },
+            });
+            return response.data;
+        } catch (error) {
+            if (isHttpError(error) && error.response) {
+                throw new ServiceUnavailableException('Unable to load travel history');
+            }
+            throw error;
         }
-
-        return (await response.json()) as TravelHistoryApiResponse;
     }
 }

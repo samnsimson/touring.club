@@ -19,6 +19,7 @@
         "@hedystia/better-auth-typeorm": "^1.0.1",
         "@nestjs/common": "^11.0.0",
         "@nestjs/core": "^11.0.0",
+        "@tc/common": "workspace:*",
         "@tc/config": "workspace:*",
         "@tc/utils": "workspace:*",
         "@thallesp/nestjs-better-auth": "^2.6.1",

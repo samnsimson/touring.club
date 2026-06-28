@@ -15,6 +15,14 @@
                 "format": ["esm"],
                 "declarationRootDir": "library/common/src"
             }
+        },
+        "test": {
+            "executor": "@nx/jest:jest",
+            "cwd": "{workspaceRoot}",
+            "options": {
+                "jestConfig": "library/common/jest.config.cts",
+                "passWithNoTests": true
+            }
         }
     }
 }

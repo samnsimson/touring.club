@@ -203,7 +203,10 @@ export class ProfileRepository extends BaseRepository<Profile> {
 
 ### `@tc/common`
 
-- Reserved for shared types/constants across services. Currently minimal — prefer a focused library over dumping into `common`.
+- `HttpModule.forRoot(options?)` — registers NestJS `@nestjs/axios` with optional axios config (`timeout`, `httpAgent`, `baseURL`, etc.); registered globally via `@tc/core` `RootModule`
+- `HttpClient.get/post/put/patch/delete/head/request` — use for **all internal and external HTTP calls** instead of `fetch` or direct `axios`
+- `isHttpError()` — type guard for HTTP error responses
+- Inject `HttpClient` in services and clients — axios is configured through `HttpModule.forRoot()`, not in `HttpClient`
 
 ### `@tc/testing`
 
@@ -218,10 +221,10 @@ export class ProfileRepository extends BaseRepository<Profile> {
 ## Dependency Direction
 
 ```
-apps/*  →  @tc/core, @tc/auth, @tc/config, @tc/utils, …
-@tc/core  →  @tc/config, @tc/database
+apps/*  →  @tc/core, @tc/auth, @tc/config, @tc/common, @tc/utils, …
+@tc/core  →  @tc/config, @tc/common, @tc/database
 @tc/database  →  @tc/config, @tc/utils
-@tc/auth  →  @tc/config, @tc/utils
+@tc/auth  →  @tc/common, @tc/config, @tc/utils
 ```
 
 Libraries must not import from apps. Avoid circular deps between libraries. `@tc/config` and `@tc/utils` should stay at the bottom of the graph.
@@ -241,7 +244,7 @@ Libraries must not import from apps. Avoid circular deps between libraries. `@tc
 | `database`              | lib  | TypeORM, entities (`auth/` + `general/`), migrations                                           |
 | `testing`               | lib  | Shared e2e testing utilities                                                                   |
 | `utils`                 | lib  | Shared utilities                                                                               |
-| `common`                | lib  | Shared types (minimal)                                                                         |
+| `common`                | lib  | Shared HTTP client — `HttpModule` / `HttpClient` (NestJS axios wrapper)                        |
 
 ## Application Patterns
 

@@ -1,9 +1,11 @@
 import { DynamicModule, MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
 import { AuthModule as BetterAuthModule, AuthService } from '@thallesp/nestjs-better-auth';
+import { HttpClient } from '@tc/common';
 import { BetterAuthMiddleware } from './middleware/better-auth.middleware';
 import { AuthModuleOptions } from './auth.contracts';
 import { createAuth } from './auth.config';
-import { dataSource } from './auth.datasource';
+import { dataSource, env } from './auth.datasource';
+import { EmailService } from './email';
 import { AuthGuard } from './guard/auth.guard';
 
 @Module({})
@@ -20,9 +22,10 @@ export class AuthModule implements NestModule {
             imports: [
                 BetterAuthModule.forRootAsync({
                     disableGlobalAuthGuard: true,
-                    useFactory: async () => {
+                    inject: [HttpClient],
+                    useFactory: async (http: HttpClient) => {
                         if (!dataSource.isInitialized) await dataSource.initialize();
-                        return { auth: createAuth({ emailService: options.emailService }) };
+                        return { auth: createAuth({ emailService: options.emailService ?? new EmailService(env, http) }) };
                     },
                 }),
                 ...(options.imports ?? []),
