@@ -27,7 +27,7 @@ bun nx show projects --withTarget test --json
 | ------ | -------------------------------------------------------------------------------------- |
 | `test` | All 5 `*-service` apps + libs: `auth`, `common`, `config`, `core`, `database`, `utils` |
 
-`auth` lib uses **Vitest** (`vitest run --config library/auth/vitest.config.ts`); everything else uses **Jest**.
+`auth` lib uses **Vitest** (`vitest run --config library/backend/auth/vitest.config.ts`); everything else uses **Jest**.
 
 Use `nx show project <name> --json` for resolved targets — do not rely on `project.json` alone.
 
@@ -102,7 +102,7 @@ Must exit 0 with no coverage threshold failures.
 ## Fix discipline
 
 - **Smallest correct diff** — fix the root cause; don’t disable tests or skip assertions
-- **Match repo patterns** — repositories in `apps/<service>/src/app/repositories/`, specs in `__tests__/unit/`
+- **Match repo patterns** — repositories in `apps/backend/<service>/src/app/repositories/`, specs in `__tests__/unit/`
 - **No direct `typeorm` in apps** — import from `@tc/database`
 - **New tests** must cover real behavior, not implementation trivia
 - After adding endpoints/features via fixes, invoke `docs-sync` only if behavior changed (not for test-only changes)

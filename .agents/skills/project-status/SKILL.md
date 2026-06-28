@@ -20,11 +20,11 @@ Read `docs/PROJECT.md` and `AGENTS.md` first. Do not guess priorities from memor
 
 ## Architecture assumptions
 
-- **Microservices** — one NestJS app per domain under `apps/<domain>-service/`
+- **Microservices** — one NestJS app per domain under `apps/backend/<domain>-service/`
 - **Libraries** — shared infrastructure only (`@tc/config`, `@tc/core`, `@tc/database`, `@tc/auth`, `@tc/utils`); no domain libs
 - **Testing scope** — only unit tests are maintained pre-go-live; e2e suites and `@tc/testing` were intentionally removed (see `AGENTS.md` "Testing scope") — don't recommend e2e work as a next action item unless the user explicitly asks to resume it
 - **Entities** — auth in `entities/auth/` (schema `auth`); all other domains in `entities/general/` (schema `general`)
-- **Repositories** — `BaseRepository` in `@tc/database`; each service extends it in `apps/<service>/src/app/repositories/`
+- **Repositories** — `BaseRepository` in `@tc/database`; each service extends it in `apps/backend/<service>/src/app/repositories/`
 - **Docs** — update `docs/PROJECT.md`, `AGENTS.md`, and related skills in the same change as new features (see `docs-sync` skill)
 
 ## Workflow
@@ -49,17 +49,17 @@ bun nx show projects
 
 Then map reality:
 
-| Check               | How                                                            |
-| ------------------- | -------------------------------------------------------------- |
-| Deployable services | `bun nx show projects` — `auth-service`, `users-service` today |
-| Shared libs         | `config`, `core`, `database`, `auth`, `utils`, `common`        |
-| Auth endpoints      | `apps/auth-service/src/app/app.controller.ts`                  |
-| Profile endpoints   | `apps/users-service/src/app/app.controller.ts`                 |
-| Auth integration    | `library/auth/src/lib/auth.config.ts`                          |
-| Auth entities       | `library/database/src/entities/auth/`                          |
-| General entities    | `library/database/src/entities/general/` (e.g. `Profile`)      |
-| Unit tests          | `apps/<service>/__tests__/unit/`                               |
-| Test layout         | All specs under `__tests__/unit/` (apps and libraries alike)   |
+| Check               | How                                                               |
+| ------------------- | ----------------------------------------------------------------- |
+| Deployable services | `bun nx show projects` — `auth-service`, `users-service` today    |
+| Shared libs         | `config`, `core`, `database`, `auth`, `utils`, `common`           |
+| Auth endpoints      | `apps/backend/auth-service/src/app/app.controller.ts`             |
+| Profile endpoints   | `apps/backend/users-service/src/app/app.controller.ts`            |
+| Auth integration    | `library/backend/auth/src/lib/auth.config.ts`                     |
+| Auth entities       | `library/backend/database/src/entities/auth/`                     |
+| General entities    | `library/backend/database/src/entities/general/` (e.g. `Profile`) |
+| Unit tests          | `apps/backend/<service>/__tests__/unit/`                          |
+| Test layout         | All specs under `__tests__/unit/` (apps and libraries alike)      |
 
 Optionally verify health:
 
@@ -122,7 +122,7 @@ Use this template:
 > **[One imperative sentence]**
 
 **Why now:** [1–2 sentences]
-**Suggested commands:** [optional — use the `nx-generate` skill; microservices: `bun nx generate @nx/nest:application --directory=apps/<domain>-service --linter=eslint --name=<domain>-service --tags=<domain>-service --unitTestRunner=jest --useProjectJson=true --no-interactive`]
+**Suggested commands:** [optional — use the `nx-generate` skill; microservices: `bun nx generate @nx/nest:application --directory=apps/backend/<domain>-service --linter=eslint --name=<domain>-service --tags=<domain>-service --unitTestRunner=jest --useProjectJson=true --no-interactive`]
 ```
 
 Keep the brief under ~40 lines unless the user asks for depth.
