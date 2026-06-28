@@ -2,6 +2,7 @@ import { betterAuth } from 'better-auth';
 import { usernameValidator } from '@tc/utils';
 import { typeormAdapter } from '@hedystia/better-auth-typeorm';
 import { AUTH_BASE_PATH, AUTH_BASE_URL } from './auth.constants';
+import { AUTH_TYPEORM_ADAPTER_OPTIONS } from './auth.adapter.options';
 import { dataSource, env } from './auth.datasource';
 import { EmailService } from './email';
 import { admin, bearer, emailOTP, openAPI, username, jwt } from 'better-auth/plugins';
@@ -18,12 +19,7 @@ export function createAuth(options: CreateAuthOptions = {}) {
         baseURL: AUTH_BASE_URL,
         basePath: AUTH_BASE_PATH,
         secret: env.BETTER_AUTH_SECRET,
-        database: typeormAdapter(dataSource, {
-            outputDir: 'library/database/src',
-            entitiesDir: 'library/database/src/entities/auth',
-            migrationsDir: 'library/database/src/migrations',
-            usePlural: true,
-        }),
+        database: typeormAdapter(dataSource, AUTH_TYPEORM_ADAPTER_OPTIONS),
         onAPIError: { throw: true, onError: (error) => console.error(error) },
         emailVerification: { autoSignInAfterVerification: true },
         emailAndPassword: {

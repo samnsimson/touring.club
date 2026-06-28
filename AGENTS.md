@@ -152,10 +152,10 @@ Libraries export through `src/index.ts`. Add new public APIs there; keep interna
 - `DatabaseModule.forRootAsync()` — global TypeORM setup (auto-loaded entities, snake_case naming)
 - `BaseRepository<Entity>` — abstract TypeORM `Repository` wrapper for NestJS DI; **extend in each service**, do not put domain repositories in `library/`
 - Entities in `src/entities/`, migrations in `src/migrations/`
-- **Auth entities** — PostgreSQL schema `auth`, path `entities/auth/`; generated/managed by Better Auth adapter
+- **Auth entities** — PostgreSQL schema `auth`, path `entities/auth/`; regenerated via `auth:generate` (entities only — no migration files)
 - **All other domain entities** — PostgreSQL schema `general`, path `entities/general/` (profiles, trips, messages, etc.)
 - Use `@Entity({ schema: 'general', name: 'table_name' })` for non-auth entities
-- Run migrations: `bun run migration:run` (root) or `bun nx run database:migration:run`
+- **All schema migrations** (auth and general) — TypeORM only: `bun run migration:generate --name=...` then `bun run migration:run`
 - Re-exported types (`DataSource`, `EntityTarget`, `ObjectLiteral`) — import from `@tc/database`; **do not add a direct `typeorm` dependency to apps** (avoids version conflicts)
 
 #### Repository pattern (required for DB access in services)
@@ -184,7 +184,8 @@ export class ProfileRepository extends BaseRepository<Profile> {
 
 - Shared **auth infrastructure** consumed by all microservices — Better Auth instance (`auth.config.ts`), `AuthModule.forRoot()`, guards, middleware
 - Custom TypeORM adapter for Better Auth (with patched `@hedystia/better-auth-typeorm`)
-- Generate auth schema: `bun run auth:generate` or `bun nx run auth:generate`
+- Adapter options in `auth.adapter.options.ts` — `generateMigrations: false` so `auth:generate` writes **entity files only**
+- After Better Auth plugin/config changes: `bun run auth:generate` → review entities → `bun run migration:generate --name=...` → `bun run migration:run`
 - **Not a domain service** — the auth microservice is `apps/auth-service/`; `@tc/auth` provides integration other services import for token validation and guards
 
 ### `@tc/utils`
@@ -334,8 +335,8 @@ bun nx affected -t lint test build            # Only changed projects
 bun run migration:run                         # Apply migrations
 bun run migration:generate                  # Generate migration (pass --name=...)
 
-# Auth
-bun run auth:generate                         # Regenerate Better Auth schema/entities
+# Auth (entities only — then use migration:generate for schema)
+bun run auth:generate                         # Regenerate auth TypeORM entities in entities/auth/
 
 # Workspace
 bun nx show projects                          # List projects
@@ -400,11 +401,11 @@ Invoke the `docs-sync` skill for the checklist. At minimum, consider:
 
 Do not leave `AGENTS.md` or `docs/PROJECT.md` stale after shipping code.
 
-For auth-related work, always check `library/auth/src/lib/auth.config.ts` and the Better Auth plugin setup before changing behavior. For DB changes, use migrations — not manual entity edits without generating a migration.
+For auth-related work, always check `library/auth/src/lib/auth.config.ts` and the Better Auth plugin setup before changing behavior. After `auth:generate`, always follow with TypeORM `migration:generate` / `migration:run` — never rely on the adapter to write migration files.
 
 ## Patches & Special Notes
 
-- `@hedystia/better-auth-typeorm@1.0.1` is patched via `patches/` (bun `patchedDependencies`)
+- `@hedystia/better-auth-typeorm@1.0.1` is patched via `patches/` (bun `patchedDependencies`) — schema-aware entity generation, PostgreSQL `auth` schema, and `generateMigrations: false` (entities only)
 - Auth entities: `library/database/src/entities/auth/` (PostgreSQL schema `auth`)
 - Non-auth entities: `library/database/src/entities/general/` (PostgreSQL schema `general`)
 - `auth` lib tests use Vitest; most other projects use Jest

@@ -442,3 +442,70 @@ index 1899a53e47833fd7ec30d0da2b6b9991f7a96187..e02b68aeee3e35fa377461dbedbc852b
  								const migrationPath = path.join(migrationsDir, migrationFileName);
  								fs.writeFileSync(migrationPath, migrationCode);
  								fs.writeFileSync(entityPath, entityCode);
+diff --git a/dist/index.mjs b/dist/index.mjs
+index 1899a53..e02b68a 100644
+--- a/dist/index.mjs
++++ b/dist/index.mjs
+@@ -818,11 +818,12 @@
+ 				}
+ 				try {
+ 					const timestamp = Date.now();
++					const generateMigrations = options?.generateMigrations === true;
+ 					const typeormDir = path.resolve(options?.outputDir ?? "./typeorm");
+-					const migrationsDir = path.resolve(options?.migrationsDir ?? `${options?.outputDir ?? "./typeorm"}/migrations`);
++					const migrationsDir = generateMigrations ? path.resolve(options?.migrationsDir ?? `${options?.outputDir ?? "./typeorm"}/migrations`) : null;
+ 					const entitiesDir = path.resolve(options?.entitiesDir ?? `${options?.outputDir ?? "./typeorm"}/entities`);
+ 					if (!fs.existsSync(typeormDir)) fs.mkdirSync(typeormDir, { recursive: true });
+-					if (!fs.existsSync(migrationsDir)) fs.mkdirSync(migrationsDir, { recursive: true });
++					if (migrationsDir && !fs.existsSync(migrationsDir)) fs.mkdirSync(migrationsDir, { recursive: true });
+ 					if (!fs.existsSync(entitiesDir)) fs.mkdirSync(entitiesDir, { recursive: true });
+ 					const queryRunner = schemaDataSource.createQueryRunner();
+ 					await queryRunner.connect();
+@@ -838,12 +839,14 @@
+ 						const entityCode = generateEntity(dataSource, modelName, modelSchema, getModelName);
+ 						const entityPath = path.join(entitiesDir, `${modelName.charAt(0).toUpperCase() + modelName.slice(1)}.ts`);
+ 						if (!tableExists) {
+-							const migrationFileName = `${timestamp}-create-${modelName}.ts`;
+-							const migrationCode = generateMigration(dataSource, modelName, modelSchema, timestamp, "create", void 0, getModelName);
+-							const migrationPath = path.join(migrationsDir, migrationFileName);
+-							fs.writeFileSync(migrationPath, migrationCode);
+ 							fs.writeFileSync(entityPath, entityCode);
+-							changelogContent += `- CREATE Migration: migrations/${migrationFileName}\n`;
++							if (generateMigrations) {
++								const migrationFileName = `${timestamp}-create-${modelName}.ts`;
++								const migrationCode = generateMigration(dataSource, modelName, modelSchema, timestamp, "create", void 0, getModelName);
++								const migrationPath = path.join(migrationsDir, migrationFileName);
++								fs.writeFileSync(migrationPath, migrationCode);
++								changelogContent += `- CREATE Migration: migrations/${migrationFileName}\n`;
++							} else changelogContent += `- Entity only (migrations disabled — run \`bun run migration:generate\` after entity changes)\n`;
+ 							changelogContent += `- Entity: entities/${modelName.charAt(0).toUpperCase() + modelName.slice(1)}.ts\n\n`;
+ 							hasChanges = true;
+ 						} else {
+@@ -865,16 +868,18 @@
+ 								if (!Object.entries(expectedFields).some(([fieldName, field]) => resolveColumnName(dataSource, fieldName, field.fieldName) === existingCol)) dropColumns.push(existingCol);
+ 							}
+ 							if (addColumns.length > 0 || dropColumns.length > 0) {
+-								const migrationFileName = `${timestamp}-alter-${modelName}.ts`;
+-								const migrationCode = generateMigration(dataSource, modelName, modelSchema, timestamp, "alter", {
+-									addColumns,
+-									dropColumns,
+-									modifyColumns: []
+-								}, getModelName);
+-								const migrationPath = path.join(migrationsDir, migrationFileName);
+-								fs.writeFileSync(migrationPath, migrationCode);
+ 								fs.writeFileSync(entityPath, entityCode);
+-								changelogContent += `- ALTER Migration: migrations/${migrationFileName}\n`;
++								if (generateMigrations) {
++									const migrationFileName = `${timestamp}-alter-${modelName}.ts`;
++									const migrationCode = generateMigration(dataSource, modelName, modelSchema, timestamp, "alter", {
++										addColumns,
++										dropColumns,
++										modifyColumns: []
++									}, getModelName);
++									const migrationPath = path.join(migrationsDir, migrationFileName);
++									fs.writeFileSync(migrationPath, migrationCode);
++									changelogContent += `- ALTER Migration: migrations/${migrationFileName}\n`;
++								} else changelogContent += `- Entity updated (migrations disabled — run \`bun run migration:generate\` for schema drift)\n`;
+ 								changelogContent += `- Updated Entity: entities/${modelName.charAt(0).toUpperCase() + modelName.slice(1)}.ts\n`;
+ 								if (addColumns.length > 0) changelogContent += `  - Added columns: ${addColumns.map((col) => col.field.fieldName || col.name).join(", ")}\n`;
+ 								if (dropColumns.length > 0) changelogContent += `  - Removed columns: ${dropColumns.join(", ")}\n`;
