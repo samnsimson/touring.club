@@ -23,6 +23,8 @@ Read `docs/PROJECT.md` and `AGENTS.md` first. Do not guess priorities from memor
 - **Microservices** — one NestJS app per domain under `apps/<domain>-service/`
 - **Libraries** — shared infrastructure only (`@tc/config`, `@tc/core`, `@tc/database`, `@tc/auth`, `@tc/utils`, `@tc/testing`); no domain libs
 - **Entities** — auth in `entities/auth/` (schema `auth`); all other domains in `entities/general/` (schema `general`)
+- **Repositories** — `BaseRepository` in `@tc/database`; each service extends it in `apps/<service>/src/app/repositories/`
+- **Docs** — update `docs/PROJECT.md`, `AGENTS.md`, and related skills in the same change as new features (see `docs-sync` skill)
 
 ## Workflow
 
@@ -48,12 +50,13 @@ Then map reality:
 
 | Check               | How                                                                |
 | ------------------- | ------------------------------------------------------------------ |
-| Deployable services | `bun nx show projects` — expect `auth-service` only today          |
+| Deployable services | `bun nx show projects` — `auth-service`, `users-service` today     |
 | Shared libs         | `config`, `core`, `database`, `auth`, `testing`, `utils`, `common` |
 | Auth endpoints      | `apps/auth-service/src/app/app.controller.ts`                      |
+| Profile endpoints   | `apps/users-service/src/app/app.controller.ts`                     |
 | Auth integration    | `library/auth/src/lib/auth.config.ts`                              |
 | Auth entities       | `library/database/src/entities/auth/`                              |
-| General entities    | `library/database/src/entities/general/` (may not exist yet)       |
+| General entities    | `library/database/src/entities/general/` (e.g. `Profile`)          |
 | Unit tests          | `apps/<service>/__tests__/unit/`                                   |
 | E2e tests           | `apps/<service>/__tests__/e2e/*.e2e.spec.ts`                       |
 | Stale artifacts     | e.g. legacy `apps/*/specs/` not wired to Jest                      |
@@ -86,7 +89,7 @@ Pick **one** actionable task using these rules:
 1. **Work in priority order** — finish or explicitly close Priority N before starting Priority N+1, unless Priority N is Done.
 2. **Finish in-flight work first** — uncommitted changes, failing tests, duplicate/stale files beat new features.
 3. **Prefer vertical slices** — scaffold **service** + entity in `entities/general/` + migration + API + test.
-4. **Match repo patterns** — scaffold with the canonical NestJS app command (see `nx-generate` skill); entities in `@tc/database` under `entities/general/`.
+4. **Match repo patterns** — scaffold with the canonical NestJS app command (see `nx-generate` skill); entities in `@tc/database`; repositories extend `BaseRepository`; run `docs-sync` after implementing features.
 5. **Be specific** — weak: "Start user profiles"; strong: "Scaffold `users-service` with Profile entity in `entities/general/`, migration, and GET/PATCH `/api/v1/profiles/me`".
 
 If multiple items tie, prefer the one that unblocks the next priority.

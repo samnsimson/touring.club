@@ -71,8 +71,9 @@ Reference implementation: `apps/auth-service/` + `@tc/auth` (shared Better Auth 
 ```
 touring.club/
 ├── apps/                    # Deployable NestJS microservices (one per domain)
-│   └── auth-service/        # Auth API — sign-up, sign-in, verify-email, sessions
-│   # users-service, trips-service, messaging-service, notifications-service (planned)
+│   ├── auth-service/        # Auth API — sign-up, sign-in, verify-email, sessions
+│   └── users-service/       # User profiles — GET/PATCH /api/v1/profiles/me
+│   # trips-service, messaging-service, notifications-service (planned)
 ├── library/                 # Shared infrastructure consumed by all services
 │   ├── auth/                # Better Auth config, guards, adapter (shared auth infra)
 │   ├── config/              # Zod env schema, ConfigModule/ConfigService
@@ -102,6 +103,7 @@ touring.club/
 | App e2e Jest config         | `apps/<service>/jest.e2e.config.cts`     | `createAppE2eJestConfig` from `jest/`            |
 | Auth DB entities            | `library/database/src/entities/auth/`    | Better Auth generate (`auth:generate`)           |
 | Other DB entities           | `library/database/src/entities/general/` | Hand-written + TypeORM migrations                |
+| Service repositories        | `apps/<service>/src/app/repositories/`   | Extend `BaseRepository` from `@tc/database`      |
 | DB migrations               | `library/database/src/migrations/`       | `bun nx run database:migration:generate`         |
 | Env variables               | `library/config/src/lib/env.schema.ts`   | Hand-written                                     |
 | Shared utilities            | `library/utils/src/lib/`                 | Hand-written                                     |
@@ -148,11 +150,35 @@ Libraries export through `src/index.ts`. Add new public APIs there; keep interna
 ### `@tc/database`
 
 - `DatabaseModule.forRootAsync()` — global TypeORM setup (auto-loaded entities, snake_case naming)
+- `BaseRepository<Entity>` — abstract TypeORM `Repository` wrapper for NestJS DI; **extend in each service**, do not put domain repositories in `library/`
 - Entities in `src/entities/`, migrations in `src/migrations/`
 - **Auth entities** — PostgreSQL schema `auth`, path `entities/auth/`; generated/managed by Better Auth adapter
 - **All other domain entities** — PostgreSQL schema `general`, path `entities/general/` (profiles, trips, messages, etc.)
 - Use `@Entity({ schema: 'general', name: 'table_name' })` for non-auth entities
 - Run migrations: `bun run migration:run` (root) or `bun nx run database:migration:run`
+- Re-exported types (`DataSource`, `EntityTarget`, `ObjectLiteral`) — import from `@tc/database`; **do not add a direct `typeorm` dependency to apps** (avoids version conflicts)
+
+#### Repository pattern (required for DB access in services)
+
+Each microservice defines its own repositories under `apps/<service>/src/app/repositories/`. Reference: `apps/users-service/src/app/repositories/profile.repository.ts`.
+
+```typescript
+import { Injectable } from '@nestjs/common';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { BaseRepository, Profile, type DataSource } from '@tc/database';
+
+@Injectable()
+export class ProfileRepository extends BaseRepository<Profile> {
+    constructor(@InjectDataSource() dataSource: DataSource) {
+        super(Profile, dataSource);
+    }
+    // domain query methods here
+}
+```
+
+- Register each repository in the service module `providers`
+- Inject the repository into services — not `@InjectRepository()` directly
+- Put entity-specific queries on the repository, not scattered in services
 
 ### `@tc/auth`
 
@@ -195,18 +221,19 @@ Libraries must not import from apps. Avoid circular deps between libraries. `@tc
 
 ## Current Projects
 
-| Project        | Type | Purpose                                              |
-| -------------- | ---- | ---------------------------------------------------- |
-| `auth-service` | app  | Auth microservice — REST API (`/api/v1/auth/*`)      |
-| `auth`         | lib  | Shared Better Auth integration (guards, adapter)     |
-| `core`         | lib  | Bootstrap & Swagger                                  |
-| `config`       | lib  | Environment & config                                 |
-| `database`     | lib  | TypeORM, entities (`auth/` + `general/`), migrations |
-| `testing`      | lib  | Shared e2e testing utilities                         |
-| `utils`        | lib  | Shared utilities                                     |
-| `common`       | lib  | Shared types (minimal)                               |
+| Project         | Type | Purpose                                                      |
+| --------------- | ---- | ------------------------------------------------------------ |
+| `auth-service`  | app  | Auth microservice — REST API (`/api/v1/auth/*`)              |
+| `users-service` | app  | User profiles microservice — REST API (`/api/v1/profiles/*`) |
+| `auth`          | lib  | Shared Better Auth integration (guards, adapter)             |
+| `core`          | lib  | Bootstrap & Swagger                                          |
+| `config`        | lib  | Environment & config                                         |
+| `database`      | lib  | TypeORM, entities (`auth/` + `general/`), migrations         |
+| `testing`       | lib  | Shared e2e testing utilities                                 |
+| `utils`         | lib  | Shared utilities                                             |
+| `common`        | lib  | Shared types (minimal)                                       |
 
-**Planned microservices:** `users-service`, `trips-service`, `messaging-service`, `notifications-service` (see `docs/PROJECT.md`).
+**Planned microservices:** `trips-service`, `messaging-service`, `notifications-service` (see `docs/PROJECT.md`).
 
 ## Application Patterns
 
@@ -274,6 +301,8 @@ Wire the e2e target in `project.json` to `jest.e2e.config.cts` and follow `__tes
 8. **Tests** — add only when they cover meaningful behavior; Jest for apps, Vitest for `auth` lib adapter tests. **App tests live under `apps/<app>/__tests__/`** — unit specs in `__tests__/unit/`, e2e suites in `__tests__/e2e/`. Use `createAppUnitJestConfig` / `createAppE2eJestConfig` from `jest/`. **E2e suite style:** follow `.cursor/rules/e2e-test-format.mdc` (reference: `apps/auth-service/__tests__/e2e/auth-password.e2e.spec.ts`) — one statement per line inside `it`, no blank lines within a test, inline request bodies.
 9. **No secrets in code** — env vars via `@tc/config`; never commit `.env`
 10. **Module boundaries** — ESLint `@nx/enforce-module-boundaries` is enabled; respect project tags
+11. **Repositories** — extend `BaseRepository` in `apps/<service>/src/app/repositories/`; inject via `@InjectDataSource()`; import `DataSource` types from `@tc/database`; never add direct `typeorm` to apps
+12. **Keep docs in sync** — when adding features, endpoints, services, entities, env vars, or patterns, update related markdown in the same change (see **Documentation sync** below)
 
 ## Formatting Preferences
 
@@ -334,7 +363,8 @@ bun nx graph                                  # Dependency graph
 | `nx-run-tasks`            | Running build/test/lint/serve targets                          |
 | `link-workspace-packages` | Adding `@tc/*` deps, fixing "cannot find module"               |
 | `monitor-ci`              | User asks to watch/monitor CI                                  |
-| `nx-plugins`              | Adding Nx plugin support                                       |
+| `project-status`          | What to work on next, roadmap vs repo state                    |
+| `docs-sync`               | After implementing features — which docs to update             |
 
 Workspace skills live in `.agents/skills/`. Read the relevant skill file before acting — don't improvise Nx commands when a skill exists.
 
@@ -348,9 +378,27 @@ When given a task:
 4. **Read existing code** in that area before writing
 5. **Scaffold if needed** — `nx-generate` skill for new services
 6. **Wire dependencies** — `link-workspace-packages` skill
-7. **Implement minimally** — match patterns in `auth-service` and sibling shared libs
-8. **Verify** — `bun nx affected -t lint test build` on touched projects
-9. **Don't commit unless asked** — user controls git operations
+7. **Implement minimally** — match patterns in `auth-service`, `users-service`, and sibling shared libs
+8. **Update documentation** — invoke `docs-sync` skill; update `docs/PROJECT.md`, `AGENTS.md`, and any affected skills/rules in the **same change** as new features or patterns
+9. **Verify** — `bun nx affected -t lint test build` on touched projects
+10. **Don't commit unless asked** — user controls git operations
+
+## Documentation sync
+
+**Required:** When you implement a new feature, endpoint, service, entity, env var, architectural pattern, or change user-visible behavior, update the related markdown in the **same PR/change** — not as a follow-up.
+
+Invoke the `docs-sync` skill for the checklist. At minimum, consider:
+
+| Change type                            | Update                                                                                       |
+| -------------------------------------- | -------------------------------------------------------------------------------------------- |
+| New microservice                       | `AGENTS.md` (Current Projects, layout), `docs/PROJECT.md` (architecture/services)            |
+| New API endpoints                      | `docs/PROJECT.md` (feature status if applicable), Bruno collections if the service uses them |
+| New entity / migration                 | `AGENTS.md` / `docs/PROJECT.md` (entity layout), `docs/PROJECT.md` database section          |
+| New env var                            | `library/config/src/lib/env.schema.ts` + mention in `AGENTS.md` if service-specific port     |
+| New shared pattern (e.g. repositories) | `AGENTS.md`, `CLAUDE.md`, relevant `.agents/skills/`                                         |
+| Priority / roadmap shift               | `docs/PROJECT.md`, `.agents/skills/project-status/SKILL.md`                                  |
+
+Do not leave `AGENTS.md` or `docs/PROJECT.md` stale after shipping code.
 
 For auth-related work, always check `library/auth/src/lib/auth.config.ts` and the Better Auth plugin setup before changing behavior. For DB changes, use migrations — not manual entity edits without generating a migration.
 

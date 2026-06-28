@@ -133,7 +133,7 @@ Example (users domain):
 bun nx generate @nx/nest:application --directory=apps/users-service --linter=eslint --name=users-service --tags=users-service --unitTestRunner=jest --useProjectJson=true --no-interactive
 ```
 
-Do **not** improvise different flags for `@nx/nest:application` unless the user explicitly asks. After generation, wire workspace deps via `link-workspace-packages`, add env vars to `@tc/config`, and follow `auth-service` patterns (Jest config from `jest/`, e2e under `__tests__/e2e/`).
+Do **not** improvise different flags for `@nx/nest:application` unless the user explicitly asks. After generation, wire workspace deps via `link-workspace-packages`, add env vars to `@tc/config`, follow `auth-service` / `users-service` patterns (Jest config from `jest/`, repositories under `src/app/repositories/`, e2e under `__tests__/e2e/`), and run `docs-sync` to update markdown.
 
 ### 6. Dry-Run to Verify File Placement
 

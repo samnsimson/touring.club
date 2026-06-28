@@ -221,7 +221,7 @@ The project uses an **Nx monorepo** with a **microservices backend**: one deploy
 ```
 apps/                          # One NestJS microservice per domain
   auth-service                 # Authentication (implemented)
-  users-service                # User profiles
+  users-service                # User profiles (implemented — MVP)
   trips-service                # Trip creation, discovery, membership
   messaging-service            # Direct and trip group chat
   notifications-service        # In-app and push notifications
@@ -256,13 +256,13 @@ Do **not** create domain libraries (e.g. `library/users`, `library/trips`). Each
 
 No GraphQL.
 
-| Service                 | Domain responsibility                        |
-| ----------------------- | -------------------------------------------- |
-| `auth-service`          | Sign-up, sign-in, sessions, password, email  |
-| `users-service`         | Profiles, interests, privacy, travel history |
-| `trips-service`         | Trip CRUD, discovery, membership             |
-| `messaging-service`     | Conversations and messages                   |
-| `notifications-service` | Notification delivery and preferences        |
+| Service                 | Domain responsibility                                                |
+| ----------------------- | -------------------------------------------------------------------- |
+| `auth-service`          | Sign-up, sign-in, sessions, password, email                          |
+| `users-service`         | Profiles, interests, privacy — `GET/PATCH /api/v1/profiles/me` (MVP) |
+| `trips-service`         | Trip CRUD, discovery, membership                                     |
+| `messaging-service`     | Conversations and messages                                           |
+| `notifications-service` | Notification delivery and preferences                                |
 
 Services communicate over HTTP (and WebSockets where needed). Shared auth validation uses `@tc/auth` guards and JWT/bearer tokens issued by `auth-service`.
 
@@ -307,6 +307,15 @@ export class Profile {
 ```
 
 Migrations live in `library/database/src/migrations/` and are shared across all services.
+
+#### Repository pattern
+
+- **`BaseRepository<Entity>`** in `@tc/database` — abstract TypeORM `Repository` wrapper for NestJS DI
+- **Service repositories** in `apps/<service>/src/app/repositories/` — extend `BaseRepository`, add domain queries
+- Inject via `@InjectDataSource()`; import `DataSource` types from `@tc/database` (apps must not depend on `typeorm` directly)
+- Register repositories in the service module; services inject repositories, not `@InjectRepository()`
+
+Reference: `apps/users-service/src/app/repositories/profile.repository.ts`
 
 ### File Storage
 
@@ -422,6 +431,7 @@ Supports:
 - Prefer normalized schemas
 - Auth tables in PostgreSQL schema `auth`; all other domain tables in schema `general`
 - Entity files mirror schema: `entities/auth/` and `entities/general/`
+- Domain data access uses `BaseRepository` subclasses in each microservice (see Repository pattern above)
 
 ### API Standards
 
@@ -459,6 +469,8 @@ When generating code:
 - Assume Next.js web frontend and React Native mobile frontend (when building clients)
 - Do not introduce GraphQL
 - Do not create domain libraries — new domains get a new **service**, not `library/<domain>`
+- Use `BaseRepository` in each service for database access; see Database → Repository pattern
+- **Keep documentation in sync** — when implementing features, endpoints, services, entities, env vars, or patterns, update `docs/PROJECT.md`, `AGENTS.md`, and related skills in the **same change** (invoke `docs-sync` skill)
 - Prefer maintainability over optimization
 - Keep service boundaries clear; do not put one domain's business logic in another service's app
 - Reuse shared libraries for cross-cutting concerns only
