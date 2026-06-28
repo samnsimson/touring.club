@@ -18,6 +18,12 @@ export const EnvSchema = z.object({
     EMAIL_PROVIDER: z.enum(['console', 'resend']).default('console'),
     EMAIL_FROM: z.string().min(1).default('Touring Club <noreply@touring.club>'),
     RESEND_API_KEY: z.string().min(1).optional(),
+    AWS_REGION: z.string().min(1).default('us-east-1'),
+    AWS_S3_BUCKET: z.string().min(1).default('touring-club-media'),
+    AWS_S3_ENDPOINT: z.url().optional(),
+    AWS_S3_PUBLIC_URL: z.url().optional(),
+    AWS_ACCESS_KEY_ID: z.string().min(1).optional(),
+    AWS_SECRET_ACCESS_KEY: z.string().min(1).optional(),
 });
 
 export type Env = z.infer<typeof EnvSchema>;

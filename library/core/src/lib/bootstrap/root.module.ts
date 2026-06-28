@@ -1,6 +1,6 @@
 import { DynamicModule, Type } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
-import { HttpModule } from '@tc/common';
+import { HttpModule, StorageModule } from '@tc/common';
 import { ConfigModule } from '@tc/config';
 import { AuthGuard } from '@tc/auth';
 import { DatabaseModule } from '@tc/database';
@@ -16,7 +16,7 @@ export class RootModule {
 
         return {
             module: RootModule,
-            imports: [ConfigModule.forRoot({ isGlobal: true }), DatabaseModule.forRootAsync(), HttpModule.forRoot(), rootModule],
+            imports: [ConfigModule.forRoot({ isGlobal: true }), DatabaseModule.forRootAsync(), HttpModule.forRoot(), StorageModule.forRoot(), rootModule],
             providers: [...(globalAuth ? [{ provide: APP_GUARD, useClass: AuthGuard }] : [])],
             exports: [rootModule],
         };

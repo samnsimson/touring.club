@@ -1,5 +1,6 @@
 import { Test } from '@nestjs/testing';
-import { NotFoundException } from '@nestjs/common';
+import { BadRequestException, NotFoundException, UnsupportedMediaTypeException } from '@nestjs/common';
+import { StorageService } from '@tc/common';
 import { defaultPrivacySettings, Profile } from '@tc/database';
 import { AppService } from '../../src/app/app.service';
 import { TripsClient } from '../../src/app/clients';
@@ -10,6 +11,7 @@ describe('AppService', () => {
     let profiles: jest.Mocked<Pick<ProfileRepository, 'findOrCreateByUserId' | 'findByUserId' | 'update'>>;
     let users: jest.Mocked<Pick<UserRepository, 'findById'>>;
     let tripsClient: jest.Mocked<Pick<TripsClient, 'getTravelHistory'>>;
+    let storage: jest.Mocked<Pick<StorageService, 'upload'>>;
 
     beforeAll(async () => {
         profiles = {
@@ -23,6 +25,9 @@ describe('AppService', () => {
         tripsClient = {
             getTravelHistory: jest.fn(),
         };
+        storage = {
+            upload: jest.fn(),
+        };
 
         const app = await Test.createTestingModule({
             providers: [
@@ -30,6 +35,7 @@ describe('AppService', () => {
                 { provide: ProfileRepository, useValue: profiles },
                 { provide: UserRepository, useValue: users },
                 { provide: TripsClient, useValue: tripsClient },
+                { provide: StorageService, useValue: storage },
             ],
         }).compile();
 
@@ -102,6 +108,30 @@ describe('AppService', () => {
                 },
             );
             expect(result.profile.biography).toBe('Updated');
+        });
+    });
+
+    describe('uploadAvatar', () => {
+        it('throws when no file is provided', async () => {
+            await expect(service.uploadAvatar('user-1', undefined)).rejects.toBeInstanceOf(BadRequestException);
+        });
+
+        it('throws when the file type is not allowed', async () => {
+            await expect(
+                service.uploadAvatar('user-1', { buffer: Buffer.from('x'), mimetype: 'application/pdf', originalname: 'avatar.pdf' }),
+            ).rejects.toBeInstanceOf(UnsupportedMediaTypeException);
+            expect(storage.upload).not.toHaveBeenCalled();
+        });
+
+        it('uploads the avatar and updates the profile', async () => {
+            profiles.findOrCreateByUserId.mockResolvedValue(storedProfile);
+            storage.upload.mockResolvedValue({ key: 'avatars/user-1/abc.png', url: 'https://cdn.touring.club/avatars/user-1/abc.png' });
+
+            const result = await service.uploadAvatar('user-1', { buffer: Buffer.from('img'), mimetype: 'image/png', originalname: 'avatar.png' });
+
+            expect(storage.upload).toHaveBeenCalledWith(expect.objectContaining({ contentType: 'image/png', body: Buffer.from('img') }));
+            expect(profiles.update).toHaveBeenCalledWith({ userId: 'user-1' }, { avatarUrl: 'https://cdn.touring.club/avatars/user-1/abc.png' });
+            expect(result.profile.userId).toBe('user-1');
         });
     });
 

@@ -234,7 +234,7 @@ library/                       # Shared libraries consumed by all services
   core                         # Bootstrap, Swagger, health routes
   database                     # TypeORM module, entities, migrations
   utils                        # Cross-cutting utilities
-  common                       # Shared types/constants (minimal)
+  common                       # HTTP client (axios) and S3 object storage (StorageModule/StorageService)
 
 packages/                      # Client packages (future)
   ui
@@ -259,7 +259,7 @@ No GraphQL.
 | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `auth-service`          | Sign-up, sign-in, sessions, password, email                                                                                                                                                                                                                                                                                                                                  |
 | `trips-service`         | Trip creation + discovery + membership — organizer CRUD/lifecycle; public discovery; join/leave; organizer approve/reject/remove; `GET /api/v1/trips/users/:userId/travel-history` for profile travel history                                                                                                                                                                |
-| `users-service`         | Profiles, interests, privacy, avatar URL, travel history — `GET/PATCH /api/v1/profiles/me`, `GET /api/v1/profiles/me/travel-history` (via `trips-service`), `GET /api/v1/profiles/:userId`                                                                                                                                                                                   |
+| `users-service`         | Profiles, interests, privacy, avatar URL, travel history — `GET/PATCH /api/v1/profiles/me`, `POST /api/v1/profiles/me/avatar` (multipart upload to S3 via `@tc/common` `StorageService`), `GET /api/v1/profiles/me/travel-history` (via `trips-service`), `GET /api/v1/profiles/:userId`                                                                                     |
 | `messaging-service`     | Direct and trip group chat — `POST/GET /api/v1/conversations`, `POST/GET /api/v1/conversations/:id/messages`, `GET /api/v1/conversations/trips/:tripId`, `GET/POST /api/v1/conversations/trips/:tripId/messages`; live delivery via `/conversations` WebSocket namespace — client emits `conversations:join` to authenticate and join its rooms, then receives `message:new` |
 | `notifications-service` | In-app notifications — `GET /api/v1/notifications`, `PATCH /api/v1/notifications/:id/read`, internal `POST /api/v1/notifications/internal` (called by `trips-service` and `messaging-service`); live delivery via `/notifications` WebSocket namespace — client emits `notifications:join`, then receives `notification:created`; push delivery planned                      |
 
@@ -318,11 +318,11 @@ Reference: `apps/users-service/src/app/repositories/profile.repository.ts`
 
 ### File Storage
 
-Object storage for media (e.g. AWS S3, Cloudflare R2):
+Object storage for media via AWS S3 (`@aws-sdk/client-s3`), wrapped by `StorageModule`/`StorageService` in `@tc/common` and registered globally through `@tc/core`'s `RootModule` (same pattern as `HttpModule`). S3-compatible providers (e.g. Cloudflare R2) are supported via `AWS_S3_ENDPOINT`.
 
-- Profile photos
-- Trip photos
-- Chat attachments
+- Profile photos — implemented: `POST /api/v1/profiles/me/avatar` (`users-service`) uploads via `StorageService.upload()` and stores the resulting URL on `Profile.avatarUrl`
+- Trip cover photos — not yet implemented (`trips-service`)
+- Chat attachments — not yet implemented (`messaging-service`)
 
 Only metadata and URLs are stored in PostgreSQL.
 

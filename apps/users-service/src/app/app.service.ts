@@ -1,9 +1,13 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, UnsupportedMediaTypeException } from '@nestjs/common';
+import { randomUUID } from 'node:crypto';
+import { StorageService } from '@tc/common';
 import { defaultPrivacySettings } from '@tc/database';
 import { ProfileResponse, PublicProfileResponse, TravelHistoryResponse, UpdateProfileDto } from './dto';
 import { TripsClient } from './clients';
 import { ProfileRepository, UserRepository } from './repositories';
 import type { Profile } from '@tc/database';
+
+const ALLOWED_AVATAR_MIME_TYPES = new Set(['image/png', 'image/jpeg', 'image/webp']);
 
 @Injectable()
 export class AppService {
@@ -11,6 +15,7 @@ export class AppService {
         private readonly profiles: ProfileRepository,
         private readonly users: UserRepository,
         private readonly tripsClient: TripsClient,
+        private readonly storage: StorageService,
     ) {}
 
     async getProfile(userId: string) {
@@ -34,6 +39,24 @@ export class AppService {
             await this.profiles.update({ userId }, updates);
         }
 
+        return this.getProfile(userId);
+    }
+
+    async uploadAvatar(userId: string, file: { buffer: Buffer; mimetype: string; originalname: string } | undefined) {
+        if (!file) throw new BadRequestException('Avatar file is required');
+        if (!ALLOWED_AVATAR_MIME_TYPES.has(file.mimetype)) {
+            throw new UnsupportedMediaTypeException('Avatar must be a PNG, JPEG, or WebP image');
+        }
+
+        await this.profiles.findOrCreateByUserId(userId);
+        const extension = file.originalname.split('.').pop() ?? 'png';
+        const { url } = await this.storage.upload({
+            key: `avatars/${userId}/${randomUUID()}.${extension}`,
+            body: file.buffer,
+            contentType: file.mimetype,
+        });
+
+        await this.profiles.update({ userId }, { avatarUrl: url });
         return this.getProfile(userId);
     }
 

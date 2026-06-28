@@ -117,6 +117,11 @@ export class UpdateProfileResponseDto {
     profile!: ProfileResponse;
 }
 
+export class UploadAvatarResponseDto {
+    @ApiProperty({ type: ProfileResponse })
+    profile!: ProfileResponse;
+}
+
 export type TravelHistoryTripSummaryResponseInit = Pick<TravelHistoryTripSummaryResponse, 'id' | 'title' | 'destination' | 'startDate' | 'endDate'>;
 
 export class TravelHistoryTripSummaryResponse {

@@ -16,8 +16,10 @@
         }
     },
     "dependencies": {
+        "@aws-sdk/client-s3": "^3.1075.0",
         "@nestjs/axios": "^4.0.1",
         "@nestjs/common": "^11.1.27",
+        "@tc/config": "workspace:*",
         "rxjs": "^7.8.2"
     }
 }

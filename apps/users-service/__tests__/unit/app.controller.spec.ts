@@ -8,12 +8,13 @@ jest.mock('@tc/auth', () => ({
 
 describe('AppController', () => {
     let controller: AppController;
-    let appService: jest.Mocked<Pick<AppService, 'getProfile' | 'updateProfile' | 'getTravelHistory' | 'getPublicProfile'>>;
+    let appService: jest.Mocked<Pick<AppService, 'getProfile' | 'updateProfile' | 'uploadAvatar' | 'getTravelHistory' | 'getPublicProfile'>>;
 
     beforeAll(async () => {
         appService = {
             getProfile: jest.fn(),
             updateProfile: jest.fn(),
+            uploadAvatar: jest.fn(),
             getTravelHistory: jest.fn(),
             getPublicProfile: jest.fn(),
         };
@@ -58,6 +59,16 @@ describe('AppController', () => {
             appService.updateProfile.mockResolvedValue(profileResponse);
             const result = await controller.updateMyProfile(userId, dto);
             expect(appService.updateProfile).toHaveBeenCalledWith('user-1', dto);
+            expect(result).toEqual(profileResponse);
+        });
+    });
+
+    describe('uploadMyAvatar', () => {
+        it('delegates to AppService with the authenticated user id and uploaded file', async () => {
+            const file = { buffer: Buffer.from('img'), mimetype: 'image/png', originalname: 'avatar.png' } as Express.Multer.File;
+            appService.uploadAvatar.mockResolvedValue(profileResponse);
+            const result = await controller.uploadMyAvatar(userId, file);
+            expect(appService.uploadAvatar).toHaveBeenCalledWith('user-1', file);
             expect(result).toEqual(profileResponse);
         });
     });

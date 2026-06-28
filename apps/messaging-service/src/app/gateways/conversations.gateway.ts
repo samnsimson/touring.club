@@ -9,10 +9,10 @@ import { ConversationParticipantRepository } from '../repositories';
 @Injectable()
 @WebSocketGateway({ namespace: '/conversations' })
 export class ConversationsGateway {
-    constructor(private readonly participants: ConversationParticipantRepository) {}
-
     @WebSocketServer()
     private readonly server!: Server;
+
+    constructor(private readonly participants: ConversationParticipantRepository) {}
 
     @UseGuards(WsAuthGuard)
     @SubscribeMessage('conversations:join')
