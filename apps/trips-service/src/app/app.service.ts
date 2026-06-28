@@ -75,10 +75,7 @@ export class AppService {
         if (dto.categories !== undefined) updates.categories = dto.categories;
         if (dto.tags !== undefined) updates.tags = dto.tags;
 
-        if (Object.keys(updates).length > 0) {
-            await this.trips.update({ id: tripId, organizerId }, updates);
-        }
-
+        if (Object.keys(updates).length > 0) await this.trips.update({ id: tripId, organizerId }, updates);
         return this.getTrip(organizerId, tripId);
     }
 
@@ -114,9 +111,7 @@ export class AppService {
 
         const existing = await this.memberships.findByTripAndUser(tripId, userId);
         if (existing) {
-            if (OPEN_MEMBERSHIP_STATUSES.includes(existing.status)) {
-                throw new ConflictException('Already a member of this trip');
-            }
+            if (OPEN_MEMBERSHIP_STATUSES.includes(existing.status)) throw new ConflictException('Already a member of this trip');
             await this.memberships.update({ id: existing.id }, { status });
             const membership = await this.memberships.findByTripAndUser(tripId, userId);
             return { membership: membership ? TripMembershipResponse.from(membership) : null };
@@ -188,9 +183,7 @@ export class AppService {
 
     private async requireOpenMembership(tripId: string, userId: string) {
         const membership = await this.memberships.findByTripAndUser(tripId, userId);
-        if (!membership || !OPEN_MEMBERSHIP_STATUSES.includes(membership.status)) {
-            throw new NotFoundException('Membership not found');
-        }
+        if (!membership || !OPEN_MEMBERSHIP_STATUSES.includes(membership.status)) throw new NotFoundException('Membership not found');
         return membership;
     }
 
