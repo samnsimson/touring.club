@@ -16,11 +16,8 @@ export const createNestApplication = async ({ rootModule, globalPrefix = 'api', 
     app.setGlobalPrefix(globalPrefix);
     app.enableVersioning({ type: VersioningType.URI, defaultVersion: '1', prefix: 'v' });
     app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }));
-    app.use(cookieParser());
-    // Pass the raw http.Server, not `app` - IoAdapter's `instanceof NestApplication` check fails across
-    // separately bundled packages (webpack app bundle vs esbuild lib bundles each carry their own @nestjs/core),
-    // causing it to treat the whole app object as the http server.
     app.useWebSocketAdapter(new IoAdapter(app.getHttpServer()));
+    app.use(cookieParser());
 
     composeHealthRoutes(app, globalPrefix);
 
