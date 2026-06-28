@@ -26,6 +26,9 @@
         },
         {
             "path": "./library/testing"
+        },
+        {
+            "path": "./apps/users-service"
         }
     ]
 }
