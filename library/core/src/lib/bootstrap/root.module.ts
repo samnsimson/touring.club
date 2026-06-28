@@ -16,14 +16,7 @@ export class RootModule {
         return {
             module: RootModule,
             imports: [ConfigModule.forRoot({ isGlobal: true }), DatabaseModule.forRootAsync(), rootModule],
-            providers: globalAuth
-                ? [
-                      {
-                          provide: APP_GUARD,
-                          useClass: AuthGuard,
-                      },
-                  ]
-                : [],
+            providers: [...(globalAuth ? [{ provide: APP_GUARD, useClass: AuthGuard }] : [])],
             exports: [rootModule],
         };
     }
