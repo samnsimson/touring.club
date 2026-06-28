@@ -51,6 +51,21 @@ describe('AppService', () => {
     });
 
     describe('updateProfile', () => {
+        it('skips update when dto has no fields', async () => {
+            profiles.findOrCreateByUserId.mockResolvedValue(storedProfile);
+            profiles.findByUserId.mockResolvedValue(storedProfile);
+            const result = await service.updateProfile('user-1', {});
+            expect(profiles.update).not.toHaveBeenCalled();
+            expect(result.profile.userId).toBe('user-1');
+        });
+
+        it('ignores privacy settings when no stored profile exists', async () => {
+            profiles.findOrCreateByUserId.mockResolvedValue(storedProfile);
+            profiles.findByUserId.mockResolvedValue(null);
+            await service.updateProfile('user-1', { privacySettings: { showEmail: true } });
+            expect(profiles.update).not.toHaveBeenCalled();
+        });
+
         it('updates profile fields', async () => {
             const updatedProfile = {
                 ...storedProfile,
@@ -108,6 +123,38 @@ describe('AppService', () => {
         it('throws when the user does not exist', async () => {
             users.findById.mockResolvedValue(null);
             await expect(service.getPublicProfile('missing')).rejects.toBeInstanceOf(NotFoundException);
+        });
+
+        it('uses default privacy settings and user image when no stored profile exists', async () => {
+            users.findById.mockResolvedValue({
+                id: 'user-1',
+                name: 'Jane Doe',
+                email: 'jane@touring.club.test',
+                username: 'janedoe',
+                image: 'https://cdn.touring.club/avatars/user-1.png',
+            } as never);
+            profiles.findByUserId.mockResolvedValue(null);
+            const result = await service.getPublicProfile('user-1');
+            expect(result.profile.avatarUrl).toBe('https://cdn.touring.club/avatars/user-1.png');
+            expect(result.profile.email).toBeUndefined();
+            expect(result.profile.travelHistory).toEqual({ trips: [] });
+        });
+
+        it('omits email and travel history when privacy settings hide them', async () => {
+            users.findById.mockResolvedValue({
+                id: 'user-1',
+                name: 'Jane Doe',
+                email: 'jane@touring.club.test',
+                username: 'janedoe',
+                image: null,
+            } as never);
+            profiles.findByUserId.mockResolvedValue({
+                ...storedProfile,
+                privacySettings: { showEmail: false, showTravelHistory: false },
+            });
+            const result = await service.getPublicProfile('user-1');
+            expect(result.profile.email).toBeUndefined();
+            expect(result.profile.travelHistory).toBeUndefined();
         });
     });
 });

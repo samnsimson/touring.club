@@ -1,9 +1,14 @@
-import { defaultPrivacySettings, Profile } from '@tc/database';
+import { defaultPrivacySettings, Profile, type DataSource } from '@tc/database';
 import { ProfileRepository } from '../../src/app/repositories/profile.repository';
 
 describe('ProfileRepository', () => {
     let repository: jest.Mocked<Pick<ProfileRepository, 'findOne' | 'create' | 'save'>>;
     let profileRepository: ProfileRepository;
+
+    it('extends BaseRepository with Profile entity', () => {
+        const dataSource = { manager: {} } as DataSource;
+        expect(new ProfileRepository(dataSource)).toBeInstanceOf(ProfileRepository);
+    });
 
     beforeEach(() => {
         repository = {

@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { defaultPrivacySettings } from '@tc/database';
-import { ProfileResponse, TravelHistoryResponse, UpdateProfileDto } from './dto';
+import { ProfileResponse, PublicProfileResponse, TravelHistoryResponse, UpdateProfileDto } from './dto';
 import { ProfileRepository, UserRepository } from './repositories';
 import type { Profile } from '@tc/database';
 

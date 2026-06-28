@@ -94,10 +94,36 @@ describe('AppService', () => {
         });
     });
 
+    describe('listConversations', () => {
+        it('returns conversations for the user', async () => {
+            conversations.findForUser.mockResolvedValue([baseConversation]);
+            const result = await service.listConversations('user-a');
+            expect(conversations.findForUser).toHaveBeenCalledWith('user-a');
+            expect(result.conversations).toHaveLength(1);
+            expect(result.conversations[0].id).toBe('conversation-1');
+        });
+    });
+
+    describe('listMessages', () => {
+        it('returns messages for a participant', async () => {
+            messages.findByConversationId.mockResolvedValue([baseMessage]);
+            const result = await service.listMessages('user-a', 'conversation-1');
+            expect(messages.findByConversationId).toHaveBeenCalledWith('conversation-1');
+            expect(result.messages).toHaveLength(1);
+            expect(result.messages[0].body).toBe('Hello there!');
+        });
+
+        it('throws when the user is not a participant', async () => {
+            participants.findByConversationAndUser.mockResolvedValue(null);
+            await expect(service.listMessages('user-a', 'conversation-1')).rejects.toBeInstanceOf(NotFoundException);
+        });
+    });
+
     describe('sendMessage', () => {
         it('stores a text message for a participant', async () => {
             const result = await service.sendMessage('user-a', 'conversation-1', { body: 'Hello there!' });
             expect(messages.save).toHaveBeenCalledWith(expect.objectContaining({ body: 'Hello there!', senderId: 'user-a' }));
+            expect(conversations.update).toHaveBeenCalledWith({ id: 'conversation-1' }, { updatedAt: expect.any(Date) });
             expect(result.message.body).toBe('Hello there!');
         });
 

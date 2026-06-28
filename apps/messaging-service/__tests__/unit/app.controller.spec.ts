@@ -45,6 +45,12 @@ describe('AppController', () => {
         expect(appService.listConversations).toHaveBeenCalledWith('user-a');
     });
 
+    it('listMessages delegates to AppService', async () => {
+        appService.listMessages.mockResolvedValue({ messages: [] });
+        await expect(controller.listMessages(userId, 'conversation-1')).resolves.toEqual({ messages: [] });
+        expect(appService.listMessages).toHaveBeenCalledWith('user-a', 'conversation-1');
+    });
+
     it('sendMessage delegates to AppService', async () => {
         appService.sendMessage.mockResolvedValue({ message: { id: 'message-1', body: 'Hello' } } as never);
         await expect(controller.sendMessage(userId, 'conversation-1', { body: 'Hello' })).resolves.toMatchObject({ message: { body: 'Hello' } });

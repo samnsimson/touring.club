@@ -97,6 +97,32 @@ describe('AppService', () => {
             expect(result.trip.organizerId).toBe('organizer-1');
         });
 
+        it('persists optional trip fields when provided', async () => {
+            const dto = {
+                title: 'Pacific Coast Highway',
+                description: 'A scenic drive',
+                destination: 'California, USA',
+                meetingLocation: 'San Francisco, CA',
+                startDate: '2026-07-01T09:00:00.000Z',
+                endDate: '2026-07-07T18:00:00.000Z',
+                capacity: 12,
+                visibility: 'public' as const,
+                coverImageUrls: ['https://cdn.touring.club/trips/cover.png'],
+                categories: ['Road Trip'],
+                tags: ['coastal'],
+            };
+            await service.createTrip('organizer-1', dto);
+            expect(trips.create).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    description: 'A scenic drive',
+                    meetingLocation: 'San Francisco, CA',
+                    coverImageUrls: ['https://cdn.touring.club/trips/cover.png'],
+                    categories: ['Road Trip'],
+                    tags: ['coastal'],
+                }),
+            );
+        });
+
         it('rejects trips where the end date is not after the start date', async () => {
             const dto = {
                 title: 'Invalid Trip',
@@ -141,9 +167,68 @@ describe('AppService', () => {
             expect(result.trip.title).toBe('Updated Title');
         });
 
+        it('updates all supported trip fields', async () => {
+            trips.findByIdForOrganizer.mockResolvedValueOnce({ ...baseTrip }).mockResolvedValueOnce({
+                ...baseTrip,
+                title: 'Updated Title',
+                description: 'Updated description',
+                destination: 'Oregon, USA',
+                meetingLocation: 'Portland, OR',
+                capacity: 8,
+                visibility: 'private',
+                coverImageUrls: ['https://cdn.touring.club/trips/updated.png'],
+                categories: ['Camping'],
+                tags: ['forest'],
+            });
+            await service.updateTrip('organizer-1', 'trip-1', {
+                title: 'Updated Title',
+                description: 'Updated description',
+                destination: 'Oregon, USA',
+                meetingLocation: 'Portland, OR',
+                startDate: '2026-08-01T09:00:00.000Z',
+                endDate: '2026-08-07T18:00:00.000Z',
+                capacity: 8,
+                visibility: 'private',
+                coverImageUrls: ['https://cdn.touring.club/trips/updated.png'],
+                categories: ['Camping'],
+                tags: ['forest'],
+            });
+            expect(trips.update).toHaveBeenCalledWith(
+                { id: 'trip-1', organizerId: 'organizer-1' },
+                {
+                    title: 'Updated Title',
+                    description: 'Updated description',
+                    destination: 'Oregon, USA',
+                    meetingLocation: 'Portland, OR',
+                    startDate: new Date('2026-08-01T09:00:00.000Z'),
+                    endDate: new Date('2026-08-07T18:00:00.000Z'),
+                    capacity: 8,
+                    visibility: 'private',
+                    coverImageUrls: ['https://cdn.touring.club/trips/updated.png'],
+                    categories: ['Camping'],
+                    tags: ['forest'],
+                },
+            );
+        });
+
         it('rejects updates to cancelled trips', async () => {
             trips.findByIdForOrganizer.mockResolvedValue({ ...baseTrip, status: 'cancelled' });
             await expect(service.updateTrip('organizer-1', 'trip-1', { title: 'Nope' })).rejects.toBeInstanceOf(BadRequestException);
+        });
+
+        it('skips update when dto has no fields', async () => {
+            const result = await service.updateTrip('organizer-1', 'trip-1', {});
+            expect(trips.update).not.toHaveBeenCalled();
+            expect(result.trip.id).toBe('trip-1');
+        });
+
+        it('rejects updates with an invalid date range', async () => {
+            await expect(
+                service.updateTrip('organizer-1', 'trip-1', {
+                    startDate: '2026-07-07T18:00:00.000Z',
+                    endDate: '2026-07-01T09:00:00.000Z',
+                }),
+            ).rejects.toBeInstanceOf(BadRequestException);
         });
     });
 
@@ -223,6 +308,30 @@ describe('AppService', () => {
             trips.findPublishedById.mockResolvedValue({ ...baseTrip, status: 'published' });
             await expect(service.joinTrip('organizer-1', 'trip-1')).rejects.toBeInstanceOf(BadRequestException);
         });
+
+        it('reactivates a former member with a new membership status', async () => {
+            trips.findPublishedById.mockResolvedValue({ ...baseTrip, status: 'published', visibility: 'public' });
+            memberships.findByTripAndUser
+                .mockResolvedValueOnce({ ...baseMembership, status: 'left' })
+                .mockResolvedValueOnce({ ...baseMembership, status: 'active' });
+            memberships.countActiveMembers.mockResolvedValue(0);
+            const result = await service.joinTrip('participant-1', 'trip-1');
+            expect(memberships.update).toHaveBeenCalledWith({ id: 'membership-1' }, { status: 'active' });
+            expect(memberships.create).not.toHaveBeenCalled();
+            expect(result.membership.status).toBe('active');
+        });
+
+        it('rejects when the trip is at capacity', async () => {
+            trips.findPublishedById.mockResolvedValue({ ...baseTrip, status: 'published', visibility: 'public', capacity: 1 });
+            memberships.findByTripAndUser.mockResolvedValue(null);
+            memberships.countActiveMembers.mockResolvedValue(1);
+            await expect(service.joinTrip('participant-1', 'trip-1')).rejects.toBeInstanceOf(BadRequestException);
+        });
+
+        it('throws when the trip is not joinable', async () => {
+            trips.findPublishedById.mockResolvedValue(null);
+            await expect(service.joinTrip('participant-1', 'trip-1')).rejects.toBeInstanceOf(NotFoundException);
+        });
     });
 
     describe('leaveTrip', () => {
@@ -233,6 +342,26 @@ describe('AppService', () => {
             const result = await service.leaveTrip('participant-1', 'trip-1');
             expect(memberships.update).toHaveBeenCalledWith({ id: 'membership-1' }, { status: 'left' });
             expect(result.membership.status).toBe('left');
+        });
+
+        it('throws when the membership is not open', async () => {
+            memberships.findByTripAndUser.mockResolvedValue({ ...baseMembership, status: 'left' });
+            await expect(service.leaveTrip('participant-1', 'trip-1')).rejects.toBeInstanceOf(NotFoundException);
+        });
+
+        it('throws when the membership does not exist', async () => {
+            memberships.findByTripAndUser.mockResolvedValue(null);
+            await expect(service.leaveTrip('participant-1', 'trip-1')).rejects.toBeInstanceOf(NotFoundException);
+        });
+    });
+
+    describe('listTripMembers', () => {
+        it('returns members for an owned trip', async () => {
+            memberships.findByTripId.mockResolvedValue([{ ...baseMembership }]);
+            const result = await service.listTripMembers('organizer-1', 'trip-1');
+            expect(memberships.findByTripId).toHaveBeenCalledWith('trip-1');
+            expect(result.members).toHaveLength(1);
+            expect(result.members[0].id).toBe('membership-1');
         });
     });
 
@@ -245,6 +374,56 @@ describe('AppService', () => {
             memberships.countActiveMembers.mockResolvedValue(0);
             const result = await service.approveMembership('organizer-1', 'trip-1', 'membership-1');
             expect(result.membership.status).toBe('active');
+        });
+
+        it('rejects approving a non-pending membership', async () => {
+            trips.findByIdForOrganizer.mockResolvedValue({ ...baseTrip, status: 'published' });
+            memberships.findByIdForTrip.mockResolvedValue({ ...baseMembership, status: 'active' });
+            await expect(service.approveMembership('organizer-1', 'trip-1', 'membership-1')).rejects.toBeInstanceOf(BadRequestException);
+        });
+
+        it('rejects approval when the trip is at capacity', async () => {
+            trips.findByIdForOrganizer.mockResolvedValue({ ...baseTrip, status: 'published', capacity: 1 });
+            memberships.findByIdForTrip.mockResolvedValue({ ...baseMembership, status: 'pending' });
+            memberships.countActiveMembers.mockResolvedValue(1);
+            await expect(service.approveMembership('organizer-1', 'trip-1', 'membership-1')).rejects.toBeInstanceOf(BadRequestException);
+        });
+
+        it('throws when the membership does not exist', async () => {
+            memberships.findByIdForTrip.mockResolvedValue(null);
+            await expect(service.approveMembership('organizer-1', 'trip-1', 'membership-1')).rejects.toBeInstanceOf(NotFoundException);
+        });
+    });
+
+    describe('rejectMembership', () => {
+        it('rejects a pending membership', async () => {
+            memberships.findByIdForTrip
+                .mockResolvedValueOnce({ ...baseMembership, status: 'pending' })
+                .mockResolvedValueOnce({ ...baseMembership, status: 'rejected' });
+            const result = await service.rejectMembership('organizer-1', 'trip-1', 'membership-1');
+            expect(memberships.update).toHaveBeenCalledWith({ id: 'membership-1' }, { status: 'rejected' });
+            expect(result.membership.status).toBe('rejected');
+        });
+
+        it('rejects rejecting a non-pending membership', async () => {
+            memberships.findByIdForTrip.mockResolvedValue({ ...baseMembership, status: 'active' });
+            await expect(service.rejectMembership('organizer-1', 'trip-1', 'membership-1')).rejects.toBeInstanceOf(BadRequestException);
+        });
+    });
+
+    describe('removeMembership', () => {
+        it('removes an active membership', async () => {
+            memberships.findByIdForTrip
+                .mockResolvedValueOnce({ ...baseMembership, status: 'active' })
+                .mockResolvedValueOnce({ ...baseMembership, status: 'removed' });
+            const result = await service.removeMembership('organizer-1', 'trip-1', 'membership-1');
+            expect(memberships.update).toHaveBeenCalledWith({ id: 'membership-1' }, { status: 'removed' });
+            expect(result.membership.status).toBe('removed');
+        });
+
+        it('rejects removing a non-active membership', async () => {
+            memberships.findByIdForTrip.mockResolvedValue({ ...baseMembership, status: 'pending' });
+            await expect(service.removeMembership('organizer-1', 'trip-1', 'membership-1')).rejects.toBeInstanceOf(BadRequestException);
         });
     });
 });
