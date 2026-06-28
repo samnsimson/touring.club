@@ -31,10 +31,13 @@
             "path": "../../library/config/tsconfig.lib.json"
         },
         {
-            "path": "../../library/database/tsconfig.lib.json"
+            "path": "../../library/common/tsconfig.lib.json"
         },
         {
             "path": "../../library/auth/tsconfig.lib.json"
+        },
+        {
+            "path": "../../library/database/tsconfig.lib.json"
         },
         {
             "path": "../../library/testing/tsconfig.lib.json"

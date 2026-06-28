@@ -1,9 +1,9 @@
-import { Controller, Get, HttpStatus, Param, Patch } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Param, Patch, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { CurrentSession } from '@tc/auth';
+import { CurrentSession, Public } from '@tc/auth';
 import { ApiResource, ApiResourceExceptions } from '@tc/utils';
 import { AppService } from './app.service';
-import { ListNotificationsResponseDto, MarkNotificationReadResponseDto } from './dto';
+import { CreateNotificationDto, CreateNotificationResponseDto, ListNotificationsResponseDto, MarkNotificationReadResponseDto } from './dto';
 
 @ApiTags('Notifications')
 @Controller('notifications')
@@ -15,6 +15,14 @@ export class AppController {
     @ApiResourceExceptions(HttpStatus.UNAUTHORIZED)
     async listNotifications(@CurrentSession('userId') userId: string) {
         return this.appService.listNotifications(userId);
+    }
+
+    @Public()
+    @Post('internal')
+    @ApiResource({ type: CreateNotificationResponseDto, operationId: 'createNotification', status: HttpStatus.CREATED })
+    @ApiResourceExceptions(HttpStatus.BAD_REQUEST)
+    async createNotification(@Body() dto: CreateNotificationDto) {
+        return this.appService.createNotification(dto);
     }
 
     @Patch(':notificationId/read')

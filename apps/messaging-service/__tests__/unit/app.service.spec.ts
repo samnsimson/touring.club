@@ -9,6 +9,12 @@ import {
     TripMembershipRepository,
     TripRepository,
 } from '../../src/app/repositories';
+import { ConversationsGateway } from '../../src/app/gateways';
+import { NotificationsClient } from '../../src/app/clients';
+
+jest.mock('@tc/auth', () => ({
+    WsAuthGuard: class {},
+}));
 
 describe('AppService', () => {
     let service: AppService;
@@ -17,6 +23,8 @@ describe('AppService', () => {
     let messages: jest.Mocked<Pick<MessageRepository, 'create' | 'save' | 'findByConversationId'>>;
     let trips: jest.Mocked<Pick<TripRepository, 'findById'>>;
     let memberships: jest.Mocked<Pick<TripMembershipRepository, 'findByTripAndUser' | 'findActiveByTripId'>>;
+    let gateway: jest.Mocked<Pick<ConversationsGateway, 'emitNewMessage'>>;
+    let notifications: jest.Mocked<Pick<NotificationsClient, 'createNotification'>>;
 
     const baseConversation: Conversation = {
         id: 'conversation-1',
@@ -88,6 +96,8 @@ describe('AppService', () => {
         };
         trips = { findById: jest.fn() };
         memberships = { findByTripAndUser: jest.fn(), findActiveByTripId: jest.fn() };
+        gateway = { emitNewMessage: jest.fn() };
+        notifications = { createNotification: jest.fn(async () => undefined) };
 
         const app = await Test.createTestingModule({
             providers: [
@@ -97,6 +107,8 @@ describe('AppService', () => {
                 { provide: MessageRepository, useValue: messages },
                 { provide: TripRepository, useValue: trips },
                 { provide: TripMembershipRepository, useValue: memberships },
+                { provide: ConversationsGateway, useValue: gateway },
+                { provide: NotificationsClient, useValue: notifications },
             ],
         }).compile();
 
@@ -256,11 +268,24 @@ describe('AppService', () => {
     });
 
     describe('sendMessage', () => {
-        it('stores a text message for a participant', async () => {
+        it('stores a text message for a participant and broadcasts it over the gateway', async () => {
             const result = await service.sendMessage('user-a', 'conversation-1', { body: 'Hello there!' });
             expect(messages.save).toHaveBeenCalledWith(expect.objectContaining({ body: 'Hello there!', senderId: 'user-a' }));
             expect(conversations.update).toHaveBeenCalledWith({ id: 'conversation-1' }, { updatedAt: expect.any(Date) });
+            expect(gateway.emitNewMessage).toHaveBeenCalledWith('conversation-1', expect.objectContaining({ body: 'Hello there!' }));
             expect(result.message.body).toBe('Hello there!');
+        });
+
+        it('notifies participants other than the sender', async () => {
+            participants.findByConversationId.mockResolvedValue([
+                { id: 'participant-1', conversationId: 'conversation-1', userId: 'user-a', createdAt: new Date(), updatedAt: new Date(), deletedAt: null },
+                { id: 'participant-2', conversationId: 'conversation-1', userId: 'user-b', createdAt: new Date(), updatedAt: new Date(), deletedAt: null },
+            ]);
+            await service.sendMessage('user-a', 'conversation-1', { body: 'Hello there!' });
+            expect(notifications.createNotification).toHaveBeenCalledTimes(1);
+            expect(notifications.createNotification).toHaveBeenCalledWith(
+                expect.objectContaining({ userId: 'user-b', type: 'new_message', body: 'Hello there!' }),
+            );
         });
 
         it('throws when the user is not a participant', async () => {

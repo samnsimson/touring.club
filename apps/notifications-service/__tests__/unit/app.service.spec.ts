@@ -3,10 +3,16 @@ import { NotFoundException } from '@nestjs/common';
 import { Notification } from '@tc/database';
 import { AppService } from '../../src/app/app.service';
 import { NotificationRepository } from '../../src/app/repositories';
+import { NotificationsGateway } from '../../src/app/gateways';
+
+jest.mock('@tc/auth', () => ({
+    WsAuthGuard: class {},
+}));
 
 describe('AppService', () => {
     let service: AppService;
-    let notifications: jest.Mocked<Pick<NotificationRepository, 'findByUserId' | 'findByIdAndUserId' | 'save'>>;
+    let notifications: jest.Mocked<Pick<NotificationRepository, 'findByUserId' | 'findByIdAndUserId' | 'save' | 'create'>>;
+    let gateway: jest.Mocked<Pick<NotificationsGateway, 'emitNotificationCreated'>>;
 
     const baseNotification: Notification = {
         id: 'notification-1',
@@ -25,10 +31,12 @@ describe('AppService', () => {
             findByUserId: jest.fn(),
             findByIdAndUserId: jest.fn(),
             save: jest.fn(async (notification) => notification),
+            create: jest.fn((data) => ({ ...baseNotification, ...data }) as Notification),
         };
+        gateway = { emitNotificationCreated: jest.fn() };
 
         const app = await Test.createTestingModule({
-            providers: [AppService, { provide: NotificationRepository, useValue: notifications }],
+            providers: [AppService, { provide: NotificationRepository, useValue: notifications }, { provide: NotificationsGateway, useValue: gateway }],
         }).compile();
 
         service = app.get<AppService>(AppService);
@@ -44,6 +52,15 @@ describe('AppService', () => {
             const result = await service.listNotifications('user-a');
             expect(result.notifications).toHaveLength(1);
             expect(result.notifications[0].title).toBe('New message');
+        });
+    });
+
+    describe('createNotification', () => {
+        it('saves the notification and emits it over the gateway', async () => {
+            const result = await service.createNotification({ userId: 'user-a', type: 'trip_approved', title: 'Approved', body: 'Welcome' });
+            expect(notifications.save).toHaveBeenCalledWith(expect.objectContaining({ userId: 'user-a', type: 'trip_approved', title: 'Approved' }));
+            expect(gateway.emitNotificationCreated).toHaveBeenCalledWith('user-a', expect.objectContaining({ title: 'Approved' }));
+            expect(result.notification.title).toBe('Approved');
         });
     });
 

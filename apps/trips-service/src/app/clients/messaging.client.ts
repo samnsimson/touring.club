@@ -20,8 +20,8 @@ export class MessagingClient {
     ) {}
 
     async postTripSystemEvent(tripId: string, payload: PostTripSystemEventPayload): Promise<void> {
-        const baseUrl = this.config.get('MESSAGING_SERVICE_URL');
         try {
+            const baseUrl = this.config.get('MESSAGING_SERVICE_URL');
             const url = `${baseUrl}/api/v1/conversations/internal/trips/${encodeURIComponent(tripId)}/system-events`;
             await this.http.post(url, payload);
         } catch (error) {

@@ -5,6 +5,7 @@ import { AppService } from '../../src/app/app.service';
 jest.mock('@tc/auth', () => ({
     CurrentSession: () => () => undefined,
     Public: () => () => undefined,
+    WsAuthGuard: class {},
 }));
 
 describe('AppController', () => {

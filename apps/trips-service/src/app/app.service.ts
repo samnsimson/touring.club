@@ -2,7 +2,7 @@ import { BadRequestException, ConflictException, Injectable, NotFoundException }
 import { Trip, type TripMembershipStatus } from '@tc/database';
 import { CreateTripDto, DiscoverTripsQueryDto, TravelHistoryResponseDto, TripMembershipResponse, TripResponse, UpdateTripDto } from './dto';
 import { TripMembershipRepository, TripRepository } from './repositories';
-import { MessagingClient, type TripSystemEventType } from './clients';
+import { MessagingClient, NotificationsClient, type TripSystemEventType } from './clients';
 import { TripStatusUtils } from './trip.status';
 
 const OPEN_MEMBERSHIP_STATUSES: TripMembershipStatus[] = ['pending', 'active'];
@@ -13,6 +13,7 @@ export class AppService {
         private readonly trips: TripRepository,
         private readonly memberships: TripMembershipRepository,
         private readonly messaging: MessagingClient,
+        private readonly notifications: NotificationsClient,
     ) {}
 
     async createTrip(organizerId: string, dto: CreateTripDto) {
@@ -147,6 +148,12 @@ export class AppService {
         await this.memberships.update({ id: membershipId }, { status: 'active' });
         const updated = await this.memberships.findByIdForTrip(membershipId, tripId);
         await this.emitMembershipSystemEvent(tripId, 'member_approved', organizerId, membership.userId);
+        await this.notifications.createNotification({
+            userId: membership.userId,
+            type: 'trip_approved',
+            title: 'Your trip request was approved',
+            body: `You've been approved for ${trip.title}.`,
+        });
         return { membership: updated ? TripMembershipResponse.from(updated) : null };
     }
 

@@ -231,20 +231,20 @@ Libraries must not import from apps. Avoid circular deps between libraries. `@tc
 
 ## Current Projects
 
-| Project                 | Type | Purpose                                                                                        |
-| ----------------------- | ---- | ---------------------------------------------------------------------------------------------- |
-| `auth-service`          | app  | Auth microservice — REST API (`/api/v1/auth/*`)                                                |
-| `users-service`         | app  | User profiles microservice — REST API (`/api/v1/profiles/*`)                                   |
-| `trips-service`         | app  | Trips microservice — organizer CRUD/lifecycle, public discovery, join/leave/approve membership |
-| `messaging-service`     | app  | Messaging microservice — direct conversations, trip group chat, send/list messages             |
-| `notifications-service` | app  | Notifications microservice — list notifications, mark read                                     |
-| `auth`                  | lib  | Shared Better Auth integration (guards, adapter)                                               |
-| `core`                  | lib  | Bootstrap & Swagger                                                                            |
-| `config`                | lib  | Environment & config                                                                           |
-| `database`              | lib  | TypeORM, entities (`auth/` + `general/`), migrations                                           |
-| `testing`               | lib  | Shared e2e testing utilities                                                                   |
-| `utils`                 | lib  | Shared utilities                                                                               |
-| `common`                | lib  | Shared HTTP client — `HttpModule` / `HttpClient` (NestJS axios wrapper)                        |
+| Project                 | Type | Purpose                                                                                                                                |
+| ----------------------- | ---- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `auth-service`          | app  | Auth microservice — REST API (`/api/v1/auth/*`)                                                                                        |
+| `users-service`         | app  | User profiles microservice — REST API (`/api/v1/profiles/*`)                                                                           |
+| `trips-service`         | app  | Trips microservice — organizer CRUD/lifecycle, public discovery, join/leave/approve membership                                         |
+| `messaging-service`     | app  | Messaging microservice — direct conversations, trip group chat, send/list messages, `/conversations` WebSocket gateway (`message:new`) |
+| `notifications-service` | app  | Notifications microservice — list/create/mark-read notifications, `/notifications` WebSocket gateway (`notification:created`)          |
+| `auth`                  | lib  | Shared Better Auth integration (guards, adapter), shared JWT verification (`verifyAuthToken`) and WebSocket auth guard (`WsAuthGuard`) |
+| `core`                  | lib  | Bootstrap & Swagger                                                                                                                    |
+| `config`                | lib  | Environment & config                                                                                                                   |
+| `database`              | lib  | TypeORM, entities (`auth/` + `general/`), migrations                                                                                   |
+| `testing`               | lib  | Shared e2e testing utilities                                                                                                           |
+| `utils`                 | lib  | Shared utilities                                                                                                                       |
+| `common`                | lib  | Shared HTTP client — `HttpModule` / `HttpClient` (NestJS axios wrapper)                                                                |
 
 ## Application Patterns
 

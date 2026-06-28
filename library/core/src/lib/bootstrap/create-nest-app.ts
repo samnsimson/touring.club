@@ -1,5 +1,6 @@
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import { IoAdapter } from '@nestjs/platform-socket.io';
 import cookieParser from 'cookie-parser';
 import { validateEnv } from '@tc/config';
 import { ApplicationBootstrapOptions } from './contract';
@@ -16,6 +17,7 @@ export const createNestApplication = async ({ rootModule, globalPrefix = 'api', 
     app.enableVersioning({ type: VersioningType.URI, defaultVersion: '1', prefix: 'v' });
     app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }));
     app.use(cookieParser());
+    app.useWebSocketAdapter(new IoAdapter(app));
 
     composeHealthRoutes(app, globalPrefix);
 

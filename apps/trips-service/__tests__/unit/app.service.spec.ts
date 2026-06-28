@@ -2,7 +2,7 @@ import { Test } from '@nestjs/testing';
 import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
 import { Trip, TripMembership } from '@tc/database';
 import { AppService } from '../../src/app/app.service';
-import { MessagingClient } from '../../src/app/clients';
+import { MessagingClient, NotificationsClient } from '../../src/app/clients';
 import { TripMembershipRepository, TripRepository } from '../../src/app/repositories';
 
 describe('AppService', () => {
@@ -25,6 +25,7 @@ describe('AppService', () => {
         Pick<TripMembershipRepository, 'create' | 'save' | 'findByTripId' | 'findByTripAndUser' | 'findByIdForTrip' | 'countActiveMembers' | 'update'>
     >;
     let messaging: jest.Mocked<Pick<MessagingClient, 'postTripSystemEvent'>>;
+    let notifications: jest.Mocked<Pick<NotificationsClient, 'createNotification'>>;
 
     const baseTrip: Trip = {
         id: 'trip-1',
@@ -78,6 +79,7 @@ describe('AppService', () => {
             update: jest.fn(async () => ({ affected: 1, raw: [], generatedMaps: [] })),
         };
         messaging = { postTripSystemEvent: jest.fn(async () => undefined) };
+        notifications = { createNotification: jest.fn(async () => undefined) };
 
         const app = await Test.createTestingModule({
             providers: [
@@ -85,6 +87,7 @@ describe('AppService', () => {
                 { provide: TripRepository, useValue: trips },
                 { provide: TripMembershipRepository, useValue: memberships },
                 { provide: MessagingClient, useValue: messaging },
+                { provide: NotificationsClient, useValue: notifications },
             ],
         }).compile();
 
@@ -420,6 +423,7 @@ describe('AppService', () => {
                 actorUserId: 'organizer-1',
                 subjectUserId: 'participant-1',
             });
+            expect(notifications.createNotification).toHaveBeenCalledWith(expect.objectContaining({ userId: 'participant-1', type: 'trip_approved' }));
             expect(result.membership.status).toBe('active');
         });
 

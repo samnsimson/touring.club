@@ -15,4 +15,8 @@ export class ConversationParticipantRepository extends BaseRepository<Conversati
     findByConversationId(conversationId: string) {
         return this.find({ where: { conversation: { id: conversationId } } });
     }
+
+    findByUserId(userId: string) {
+        return this.find({ where: { userId } });
+    }
 }

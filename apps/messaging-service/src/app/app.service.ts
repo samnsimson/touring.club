@@ -2,6 +2,8 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { Conversation, Trip } from '@tc/database';
 import { ConversationResponse, CreateDirectConversationDto, MessageResponse, PostTripSystemEventDto, SendMessageDto } from './dto';
 import { ConversationParticipantRepository, ConversationRepository, MessageRepository, TripMembershipRepository, TripRepository } from './repositories';
+import { ConversationsGateway } from './gateways';
+import { NotificationsClient } from './clients';
 
 @Injectable()
 export class AppService {
@@ -11,6 +13,8 @@ export class AppService {
         private readonly messages: MessageRepository,
         private readonly trips: TripRepository,
         private readonly memberships: TripMembershipRepository,
+        private readonly gateway: ConversationsGateway,
+        private readonly notifications: NotificationsClient,
     ) {}
 
     async createDirectConversation(userId: string, dto: CreateDirectConversationDto) {
@@ -66,7 +70,18 @@ export class AppService {
             }),
         );
         await this.conversations.update({ id: conversationId }, { updatedAt: new Date() });
-        return { message: MessageResponse.from(message) };
+        const response = MessageResponse.from(message);
+        this.gateway.emitNewMessage(conversationId, response);
+        await this.notifyRecipients(conversationId, userId, dto.body);
+        return { message: response };
+    }
+
+    private async notifyRecipients(conversationId: string, senderId: string, body: string): Promise<void> {
+        const participants = await this.participants.findByConversationId(conversationId);
+        const recipients = participants.filter((participant) => participant.userId !== senderId);
+        for (const recipient of recipients) {
+            await this.notifications.createNotification({ userId: recipient.userId, type: 'new_message', title: 'New message', body });
+        }
     }
 
     async postTripSystemEvent(tripId: string, dto: PostTripSystemEventDto) {
