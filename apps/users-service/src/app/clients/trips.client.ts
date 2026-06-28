@@ -23,11 +23,9 @@ export class TripsClient {
 
     async getTravelHistory(userId: string, authorization: string): Promise<TravelHistoryApiResponse> {
         const baseUrl = this.config.get('TRIPS_SERVICE_URL');
-
         try {
-            const response = await this.http.get<TravelHistoryApiResponse>(`${baseUrl}/api/v1/trips/users/${encodeURIComponent(userId)}/travel-history`, {
-                headers: { Authorization: authorization },
-            });
+            const url = `${baseUrl}/api/v1/trips/users/${encodeURIComponent(userId)}/travel-history`;
+            const response = await this.http.get<TravelHistoryApiResponse>(url, { headers: { Authorization: authorization } });
             return response.data;
         } catch (error) {
             if (isHttpError(error) && error.response) {

@@ -10,8 +10,9 @@ export class ResendEmailProvider implements EmailProvider {
 
     async send(input: SendEmailInput): Promise<void> {
         try {
+            const url = 'https://api.resend.com/emails';
             await this.http.post(
-                'https://api.resend.com/emails',
+                url,
                 {
                     from: this.from,
                     to: [input.to],
