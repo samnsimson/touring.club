@@ -1,0 +1,28 @@
+{
+    "extends": "../../../tsconfig.base.json",
+    "compilerOptions": {
+        "outDir": "./out-tsc/jest",
+        "types": ["jest", "node"],
+        "module": "nodenext",
+        "moduleResolution": "nodenext",
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+        "composite": false,
+        "declaration": false,
+        "declarationMap": false,
+        "emitDeclarationOnly": false,
+        "noEmit": true
+    },
+    "include": ["jest.config.ts", "jest.config.cts", "__tests__/unit/**/*.spec.ts", "__tests__/unit/**/*.test.ts", "src/**/*.ts"],
+    "references": [
+        {
+            "path": "../../../library/backend/config/tsconfig.lib.json"
+        },
+        {
+            "path": "../../../library/backend/core/tsconfig.lib.json"
+        },
+        {
+            "path": "../../../library/backend/auth/tsconfig.lib.json"
+        }
+    ]
+}

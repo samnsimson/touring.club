@@ -1,0 +1,35 @@
+{
+    "name": "auth",
+    "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+    "sourceRoot": "library/backend/auth/src",
+    "projectType": "library",
+    "tags": ["auth", "shared"],
+    "targets": {
+        "test": {
+            "executor": "nx:run-commands",
+            "dependsOn": ["utils:build"],
+            "options": {
+                "command": "vitest run --config library/backend/auth/vitest.config.ts",
+                "cwd": "{workspaceRoot}"
+            }
+        },
+        "build": {
+            "executor": "@nx/esbuild:esbuild",
+            "outputs": ["{options.outputPath}"],
+            "options": {
+                "outputPath": "library/backend/auth/dist",
+                "main": "library/backend/auth/src/index.ts",
+                "tsConfig": "library/backend/auth/tsconfig.lib.json",
+                "declarationRootDir": "library/backend/auth/src"
+            }
+        },
+        "generate": {
+            "executor": "nx:run-commands",
+            "dependsOn": ["utils:build"],
+            "options": {
+                "command": "bunx auth@latest generate --config library/backend/auth/scripts/auth.cli.config.ts --yes",
+                "cwd": "{workspaceRoot}"
+            }
+        }
+    }
+}

@@ -79,7 +79,7 @@
         "webpack-dev-server": "^5.2.1",
       },
     },
-    "apps/auth-service": {
+    "apps/backend/auth-service": {
       "name": "@touring.club/auth-service",
       "version": "0.0.1",
       "dependencies": {
@@ -104,7 +104,7 @@
         "@types/supertest": "^7.2.0",
       },
     },
-    "apps/messaging-service": {
+    "apps/backend/messaging-service": {
       "name": "@touring.club/messaging-service",
       "version": "0.0.1",
       "dependencies": {
@@ -133,7 +133,7 @@
         "@types/multer": "^2.1.0",
       },
     },
-    "apps/notifications-service": {
+    "apps/backend/notifications-service": {
       "name": "@touring.club/notifications-service",
       "version": "0.0.1",
       "dependencies": {
@@ -161,7 +161,7 @@
         "@types/express": "^5.0.6",
       },
     },
-    "apps/trips-service": {
+    "apps/backend/trips-service": {
       "name": "@touring.club/trips-service",
       "version": "0.0.1",
       "dependencies": {
@@ -188,7 +188,7 @@
         "@types/multer": "^2.1.0",
       },
     },
-    "apps/users-service": {
+    "apps/backend/users-service": {
       "name": "@touring.club/users-service",
       "version": "0.0.1",
       "dependencies": {
@@ -215,7 +215,7 @@
         "@types/multer": "^2.1.0",
       },
     },
-    "library/auth": {
+    "library/backend/auth": {
       "name": "@tc/auth",
       "version": "0.0.1",
       "dependencies": {
@@ -237,7 +237,7 @@
         "@types/express": "^5.0.6",
       },
     },
-    "library/common": {
+    "library/backend/common": {
       "name": "@tc/common",
       "version": "0.0.1",
       "dependencies": {
@@ -248,7 +248,7 @@
         "rxjs": "^7.8.2",
       },
     },
-    "library/config": {
+    "library/backend/config": {
       "name": "@tc/config",
       "version": "0.0.1",
       "dependencies": {
@@ -257,7 +257,7 @@
         "zod": "^4.4.3",
       },
     },
-    "library/core": {
+    "library/backend/core": {
       "name": "@tc/core",
       "version": "0.0.1",
       "dependencies": {
@@ -279,7 +279,7 @@
         "@types/express": "^5.0.6",
       },
     },
-    "library/database": {
+    "library/backend/database": {
       "name": "@tc/database",
       "version": "0.0.1",
       "dependencies": {
@@ -290,7 +290,7 @@
         "typeorm": "^1.0.0",
       },
     },
-    "library/utils": {
+    "library/backend/utils": {
       "name": "@tc/utils",
       "version": "0.0.1",
       "dependencies": {
@@ -1028,17 +1028,17 @@
 
     "@swc/types": ["@swc/types@0.1.27", "", { "dependencies": { "@swc/counter": "^0.1.3" } }, "sha512-K6h3iUlqeM946U4sXFYeahefR1YBbXJvko+hv8WS8/0BNJ4OHiHRywMnQUJCqkR7Y9+hqQ1TvEpiKqUhz7NEFg=="],
 
-    "@tc/auth": ["@tc/auth@workspace:library/auth"],
+    "@tc/auth": ["@tc/auth@workspace:library/backend/auth"],
 
-    "@tc/common": ["@tc/common@workspace:library/common"],
+    "@tc/common": ["@tc/common@workspace:library/backend/common"],
 
-    "@tc/config": ["@tc/config@workspace:library/config"],
+    "@tc/config": ["@tc/config@workspace:library/backend/config"],
 
-    "@tc/core": ["@tc/core@workspace:library/core"],
+    "@tc/core": ["@tc/core@workspace:library/backend/core"],
 
-    "@tc/database": ["@tc/database@workspace:library/database"],
+    "@tc/database": ["@tc/database@workspace:library/backend/database"],
 
-    "@tc/utils": ["@tc/utils@workspace:library/utils"],
+    "@tc/utils": ["@tc/utils@workspace:library/backend/utils"],
 
     "@thallesp/nestjs-better-auth": ["@thallesp/nestjs-better-auth@2.6.1", "", { "peerDependencies": { "@nestjs/common": "^11.1.6", "@nestjs/core": "^11.1.6", "@nestjs/graphql": "^13.1.0", "@nestjs/websockets": "^11.1.6", "better-auth": ">=1.5.0 <2.0.0", "express": "^5.1.0", "graphql": "^16.11.0", "qs": "^6.14.0", "typescript": "^5.9.2 || ^6.0.0" }, "optionalPeers": ["@nestjs/graphql", "@nestjs/websockets", "express", "graphql", "qs"] }, "sha512-SUfRXLMFtdLa+aL79LH8KkjC2uFkwwbwthymvYXqClWUf8vujUYXoc+es1puIn1OalQ45PiY2p3MPZdslcglKw=="],
 
@@ -1046,15 +1046,15 @@
 
     "@tokenizer/token": ["@tokenizer/token@0.3.0", "", {}, "sha512-OvjF+z51L3ov0OyAU0duzsYuvO01PH7x4t6DJx+guahgTnBHkhJdG7soQeTSFLWN3efnHyibZ4Z8l2EuWwJN3A=="],
 
-    "@touring.club/auth-service": ["@touring.club/auth-service@workspace:apps/auth-service"],
+    "@touring.club/auth-service": ["@touring.club/auth-service@workspace:apps/backend/auth-service"],
 
-    "@touring.club/messaging-service": ["@touring.club/messaging-service@workspace:apps/messaging-service"],
+    "@touring.club/messaging-service": ["@touring.club/messaging-service@workspace:apps/backend/messaging-service"],
 
-    "@touring.club/notifications-service": ["@touring.club/notifications-service@workspace:apps/notifications-service"],
+    "@touring.club/notifications-service": ["@touring.club/notifications-service@workspace:apps/backend/notifications-service"],
 
-    "@touring.club/trips-service": ["@touring.club/trips-service@workspace:apps/trips-service"],
+    "@touring.club/trips-service": ["@touring.club/trips-service@workspace:apps/backend/trips-service"],
 
-    "@touring.club/users-service": ["@touring.club/users-service@workspace:apps/users-service"],
+    "@touring.club/users-service": ["@touring.club/users-service@workspace:apps/backend/users-service"],
 
     "@tsconfig/node10": ["@tsconfig/node10@1.0.12", "", {}, "sha512-UCYBaeFvM11aU2y3YPZ//O5Rhj+xKyzy7mvcIoAjASbigy8mHMryP5cK7dgjlz2hWxh1g5pLw084E0a/wlUSFQ=="],
 
