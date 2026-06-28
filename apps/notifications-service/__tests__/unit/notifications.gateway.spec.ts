@@ -12,18 +12,11 @@ describe('NotificationsGateway', () => {
         gateway = new NotificationsGateway();
     });
 
-    it('joins the user-scoped room on connect', () => {
-        const client = { data: { userId: 'user-a' }, join: jest.fn(), disconnect: jest.fn() } as never;
-        gateway.handleConnection(client);
+    it('joins the user-scoped room', () => {
+        const client = { data: { userId: 'user-a' }, join: jest.fn() } as never;
+        const result = gateway.handleJoin(client);
         expect(client.join).toHaveBeenCalledWith('notifications:user:user-a');
-        expect(client.disconnect).not.toHaveBeenCalled();
-    });
-
-    it('disconnects clients with no authenticated userId', () => {
-        const client = { data: {}, join: jest.fn(), disconnect: jest.fn() } as never;
-        gateway.handleConnection(client);
-        expect(client.disconnect).toHaveBeenCalledWith(true);
-        expect(client.join).not.toHaveBeenCalled();
+        expect(result).toEqual({ joined: true });
     });
 
     it('emits notification:created to the user-scoped room', () => {

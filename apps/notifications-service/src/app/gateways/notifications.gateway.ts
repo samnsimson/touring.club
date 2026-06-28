@@ -1,23 +1,21 @@
 import { Injectable, UseGuards } from '@nestjs/common';
-import { OnGatewayConnection, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
+import { ConnectedSocket, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import type { Server } from 'socket.io';
-import { AuthenticatedSocket, WsAuthGuard } from '@tc/auth';
+import { WsAuthGuard } from '@tc/auth';
+import type { AuthenticatedSocket } from '@tc/auth';
 import { NotificationResponse } from '../dto';
 
 @Injectable()
-@UseGuards(WsAuthGuard)
 @WebSocketGateway({ namespace: '/notifications' })
-export class NotificationsGateway implements OnGatewayConnection {
+export class NotificationsGateway {
     @WebSocketServer()
     private readonly server!: Server;
 
-    handleConnection(client: AuthenticatedSocket): void {
-        const userId = client.data.userId;
-        if (!userId) {
-            client.disconnect(true);
-            return;
-        }
-        client.join(`notifications:user:${userId}`);
+    @UseGuards(WsAuthGuard)
+    @SubscribeMessage('notifications:join')
+    handleJoin(@ConnectedSocket() client: AuthenticatedSocket): { joined: true } {
+        client.join(`notifications:user:${client.data.userId}`);
+        return { joined: true };
     }
 
     emitNotificationCreated(userId: string, notification: NotificationResponse): void {

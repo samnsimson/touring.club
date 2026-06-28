@@ -17,7 +17,9 @@ export interface E2EApplicationOptions {
     fixturesDir?: string;
     /** Overrides the global AuthGuard for in-process e2e (session validation instead of remote JWKS). */
     authGuard?: Type<CanActivate>;
-    /** When set, the app listens on this URL so remote JWKS validation (AuthGuard) can reach the in-process server. */
+    /** Overrides WsAuthGuard for in-process WebSocket e2e (session validation instead of remote JWKS). */
+    wsAuthGuard?: Type<CanActivate>;
+    /** When set, the app listens on this URL so remote JWKS validation (AuthGuard) or a real WebSocket client can reach the in-process server. */
     listenUrl?: string;
     configure?: (app: NestExpressApplication) => void | Promise<void>;
 }

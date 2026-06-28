@@ -20,18 +20,11 @@ describe('ConversationsGateway', () => {
             { id: 'p1', conversationId: 'conversation-1', userId: 'user-a', createdAt: new Date(), updatedAt: new Date(), deletedAt: null },
             { id: 'p2', conversationId: 'conversation-2', userId: 'user-a', createdAt: new Date(), updatedAt: new Date(), deletedAt: null },
         ]);
-        const client = { data: { userId: 'user-a' }, join: jest.fn(), disconnect: jest.fn() } as never;
-        await gateway.handleConnection(client);
+        const client = { data: { userId: 'user-a' }, join: jest.fn() } as never;
+        const result = await gateway.handleJoin(client);
         expect(client.join).toHaveBeenCalledWith('conversation:conversation-1');
         expect(client.join).toHaveBeenCalledWith('conversation:conversation-2');
-        expect(client.disconnect).not.toHaveBeenCalled();
-    });
-
-    it('disconnects clients with no authenticated userId', async () => {
-        const client = { data: {}, join: jest.fn(), disconnect: jest.fn() } as never;
-        await gateway.handleConnection(client);
-        expect(client.disconnect).toHaveBeenCalledWith(true);
-        expect(participants.findByUserId).not.toHaveBeenCalled();
+        expect(result).toEqual({ joined: true });
     });
 
     it('emits message:new to the conversation room', () => {
