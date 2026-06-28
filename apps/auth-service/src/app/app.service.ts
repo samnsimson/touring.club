@@ -70,7 +70,11 @@ export class AppService {
     }
 
     async forgotPassword(dto: ForgotPasswordDto) {
-        await this.authService.api.requestPasswordReset({ body: { ...dto } });
+        try {
+            await this.authService.api.requestPasswordReset({ body: { ...dto } });
+        } catch (error) {
+            this.logger.warn(`Password reset request failed for ${dto.email}: ${error instanceof Error ? error.message : String(error)}`);
+        }
         return { success: true };
     }
 

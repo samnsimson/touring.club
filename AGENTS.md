@@ -156,7 +156,7 @@ Libraries export through `src/index.ts`. Add new public APIs there; keep interna
 - `DatabaseModule.forRootAsync()` — global TypeORM setup (auto-loaded entities, snake_case naming)
 - `BaseRepository<Entity>` — abstract TypeORM `Repository` wrapper for NestJS DI; **extend in each service**, do not put domain repositories in `library/`
 - Entities in `src/entities/`, migrations in `src/migrations/`
-- **Auth entities** — PostgreSQL schema `auth`, path `entities/auth/`; regenerated via `auth:generate` (entities only — no migration files)
+- **Auth entities** — PostgreSQL schema `auth`, path `entities/auth/`; regenerated via `auth:generate` (entities only — no migration files). After `auth:generate`, add new entity classes to `entities/auth/index.ts`.
 - **All other domain entities** — PostgreSQL schema `general`, path `entities/general/` (profiles, trips, messages, etc.)
 - Use `@Entity({ schema: 'general', name: 'table_name' })` for non-auth entities
 - **All schema migrations** (auth and general) — TypeORM only: `bun run migration:generate --name=...` then `bun run migration:run`

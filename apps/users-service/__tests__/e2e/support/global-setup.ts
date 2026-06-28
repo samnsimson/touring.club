@@ -1,15 +1,4 @@
 import { spawnSync } from 'node:child_process';
-import pg from 'pg';
-
-async function resetAuthJwks(databaseUrl: string): Promise<void> {
-    const client = new pg.Client({ connectionString: databaseUrl });
-    await client.connect();
-    try {
-        await client.query('DELETE FROM auth.jwkss');
-    } finally {
-        await client.end();
-    }
-}
 
 declare global {
     var __TEARDOWN_MESSAGE__: string;
@@ -25,8 +14,6 @@ module.exports = async function () {
             env: process.env,
         });
         if (result.status !== 0) throw new Error('Database migrations failed during e2e global setup');
-
-        await resetAuthJwks(process.env.DATABASE_URL);
     }
 
     globalThis.__TEARDOWN_MESSAGE__ = '\nTearing down users-service e2e...\n';

@@ -21,25 +21,25 @@ export class Account {
     user!: User;
 
     @Column('text', { name: 'access_token', nullable: true })
-    accessToken: string | null;
+    accessToken: string | null = null;
 
     @Column('text', { name: 'refresh_token', nullable: true })
-    refreshToken: string | null;
+    refreshToken: string | null = null;
 
     @Column('text', { name: 'id_token', nullable: true })
-    idToken: string | null;
+    idToken: string | null = null;
 
     @Column('timestamptz', { name: 'access_token_expires_at', nullable: true })
-    accessTokenExpiresAt: Date | null;
+    accessTokenExpiresAt: Date | null = null;
 
     @Column('timestamptz', { name: 'refresh_token_expires_at', nullable: true })
-    refreshTokenExpiresAt: Date | null;
+    refreshTokenExpiresAt: Date | null = null;
 
     @Column('text', { name: 'scope', nullable: true })
-    scope: string | null;
+    scope: string | null = null;
 
     @Column('text', { name: 'password', nullable: true })
-    password: string | null;
+    password: string | null = null;
 
     @Column('timestamptz', { name: 'created_at', default: () => 'CURRENT_TIMESTAMP' })
     createdAt!: Date;

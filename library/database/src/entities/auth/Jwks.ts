@@ -15,5 +15,5 @@ export class Jwks {
     createdAt!: Date;
 
     @Column('timestamptz', { name: 'expires_at', nullable: true })
-    expiresAt: Date | null;
+    expiresAt: Date | null = null;
 }

@@ -37,9 +37,6 @@
             "path": "../../library/auth/tsconfig.lib.json"
         },
         {
-            "path": "../auth-service/tsconfig.app.json"
-        },
-        {
             "path": "../../library/testing/tsconfig.lib.json"
         }
     ]

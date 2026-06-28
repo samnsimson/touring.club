@@ -1,3 +1,5 @@
-import { discoverEntities } from '../../lib/discover-entities';
+import { Profile } from './Profile';
 
-export const generalEntities = discoverEntities(import.meta.url, ['base.entity.ts', 'index.ts']);
+export const generalEntities = [Profile];
+
+export { Profile };

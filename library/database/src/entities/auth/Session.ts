@@ -19,10 +19,10 @@ export class Session {
     updatedAt!: Date;
 
     @Column('text', { name: 'ip_address', nullable: true })
-    ipAddress: string | null;
+    ipAddress: string | null = null;
 
     @Column('text', { name: 'user_agent', nullable: true })
-    userAgent: string | null;
+    userAgent: string | null = null;
 
     @Index('sessions_user_id_idx')
     @Column('text', { name: 'user_id' })
@@ -33,5 +33,5 @@ export class Session {
     user!: User;
 
     @Column('text', { name: 'impersonated_by', nullable: true })
-    impersonatedBy: string | null;
+    impersonatedBy: string | null = null;
 }

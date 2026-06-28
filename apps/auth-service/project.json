@@ -48,7 +48,12 @@
             "continuous": true,
             "executor": "@nx/js:node",
             "defaultConfiguration": "development",
-            "dependsOn": ["build"],
+            "dependsOn": [
+                {
+                    "target": "build",
+                    "params": "forward"
+                }
+            ],
             "options": {
                 "buildTarget": "auth-service:build",
                 "runBuildTargetDependencies": false
