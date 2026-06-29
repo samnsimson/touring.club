@@ -15,37 +15,17 @@ export interface ApiClientConfig {
 }
 
 export class ApiClient {
-    private readonly authSdk: AuthSdk;
-    private readonly usersSdk: UsersSdk;
-    private readonly tripsSdk: TripsSdk;
-    private readonly messagingSdk: MessagingSdk;
-    private readonly notificationsSdk: NotificationsSdk;
+    public readonly authClient: AuthSdk;
+    public readonly usersClient: UsersSdk;
+    public readonly tripsClient: TripsSdk;
+    public readonly messagingClient: MessagingSdk;
+    public readonly notificationsClient: NotificationsSdk;
 
     constructor(config: ApiClientConfig = {}) {
-        this.authSdk = new AuthSdk({ client: createAuthClient({ baseUrl: config.baseUrl }) });
-        this.usersSdk = new UsersSdk({ client: createUsersClient({ baseUrl: config.baseUrl }) });
-        this.tripsSdk = new TripsSdk({ client: createTripsClient({ baseUrl: config.baseUrl }) });
-        this.messagingSdk = new MessagingSdk({ client: createMessagingClient({ baseUrl: config.baseUrl }) });
-        this.notificationsSdk = new NotificationsSdk({ client: createNotificationsClient({ baseUrl: config.baseUrl }) });
-    }
-
-    get authClient() {
-        return this.authSdk;
-    }
-
-    get usersClient() {
-        return this.usersSdk;
-    }
-
-    get tripsClient() {
-        return this.tripsSdk;
-    }
-
-    get messagingClient() {
-        return this.messagingSdk;
-    }
-
-    get notificationsClient() {
-        return this.notificationsSdk;
+        this.authClient = new AuthSdk({ client: createAuthClient({ baseUrl: config.baseUrl }) });
+        this.usersClient = new UsersSdk({ client: createUsersClient({ baseUrl: config.baseUrl }) });
+        this.tripsClient = new TripsSdk({ client: createTripsClient({ baseUrl: config.baseUrl }) });
+        this.messagingClient = new MessagingSdk({ client: createMessagingClient({ baseUrl: config.baseUrl }) });
+        this.notificationsClient = new NotificationsSdk({ client: createNotificationsClient({ baseUrl: config.baseUrl }) });
     }
 }
