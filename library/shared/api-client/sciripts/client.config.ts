@@ -4,8 +4,12 @@ const SERVICES = ['auth-service', 'users-service', 'trips-service', 'messaging-s
 
 const buildServiceConfig = (service: string): UserConfig => ({
     input: { watch: false, path: `apps/backend/${service}/openapi/${service}.openapi.json` },
-    output: { path: `library/shared/api-client/src/lib/${service}-client`, header: (ctx) => ['/* eslint-disable */', ...ctx.defaultValue] },
     plugins: [{ name: '@hey-api/typescript' }, { name: '@hey-api/sdk', auth: true, operations: { strategy: 'single' } }],
+    output: {
+        postProcess: ['prettier'],
+        path: `library/shared/api-client/src/lib/${service}-client`,
+        header: (ctx) => ['/* eslint-disable */', ...ctx.defaultValue],
+    },
 });
 
 createClient(SERVICES.map(buildServiceConfig));
