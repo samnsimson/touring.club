@@ -1,7 +1,7 @@
 <!-- nx configuration start-->
 <!-- Leave the start & end comments to automatically receive updates. -->
 
-# General Guidelines for working with Nx
+## General Guidelines for working with Nx
 
 - For navigating/exploring the workspace, invoke the `nx-workspace` skill first - it has patterns for querying projects, targets, and dependencies
 - When running tasks (for example build, lint, test, e2e, etc.), always prefer running the task through `nx` (i.e. `nx run`, `nx run-many`, `nx affected`) instead of using the underlying tooling directly
@@ -123,25 +123,54 @@ touring.club/
 
 Do **not** put domain business logic in `library/` or microservice-specific code that belongs in another service's app. Libraries hold **shared infrastructure**; each microservice owns its domain controllers, services, and DTOs. **CLI/tooling entrypoints** (migrations runner, TypeORM data source, Better Auth generate config) live under `library/backend/<lib>/scripts/` — not in `src/`.
 
-### Scaffold microservice
+### Scaffold microservice (required command)
 
-When creating a new domain microservice, invoke the `nx-generate` skill and run:
-
-```bash
-bun nx generate @nx/nest:application --directory=apps/backend/<domain>-service --linter=eslint --name=<domain>-service --tags=<domain>-service --unitTestRunner=jest --useProjectJson=true --no-interactive
-```
-
-Replace `<domain>-service` with the target name (e.g. `users-service`). Use these flags exactly — do not substitute other generator options unless the user asks.
-
-### Scaffold frontend app
-
-When creating a new frontend client app, invoke the `nx-generate` skill and run (web example):
+When scaffolding a **new domain microservice** under `apps/backend/`, invoke the `nx-generate` skill and always use this command shape. Prefix with `bun` (this workspace's package manager). Substitute `<domain>-service` for the service name (e.g. `users-service`, `trips-service`):
 
 ```bash
-bun nx generate @nx/next:application --directory=apps/frontend/<app-name> --linter=eslint --name=<app-name> --unitTestRunner=jest --e2eTestRunner=none --tags=<app-name>,scope:frontend --useProjectJson=true --no-interactive
+bun nx generate @nx/nest:application \
+  --directory=apps/backend/<domain>-service \
+  --linter=eslint \
+  --name=<domain>-service \
+  --tags=<domain>-service,scope:backend \
+  --unitTestRunner=jest \
+  --useProjectJson=true \
+  --no-interactive
 ```
 
-Replace `<app-name>` with the target name (e.g. `web`). Use `@nx/next:application` for Next.js web clients; a future React Native client (`apps/frontend/mobile/`) would use the equivalent React Native generator instead. Always tag the project `scope:frontend` — `@nx/enforce-module-boundaries` in the root `eslint.config.mjs` restricts `scope:frontend` projects to only depend on `scope:frontend`/`scope:shared` code, never backend. Set `e2eTestRunner=none` — e2e is out of scope pre-go-live (see Testing scope note above).
+Example (users domain):
+
+```bash
+bun nx generate @nx/nest:application --directory=apps/backend/users-service --linter=eslint --name=users-service --tags=users-service,scope:backend --unitTestRunner=jest --useProjectJson=true --no-interactive
+```
+
+The `scope:backend` tag is required — `@nx/enforce-module-boundaries` in the root `eslint.config.mjs` restricts `scope:backend` projects to only depend on other `scope:backend` projects (see "Module boundaries" below).
+
+Do **not** improvise different flags for `@nx/nest:application` unless the user explicitly asks. After generation, wire workspace deps via `link-workspace-packages`, add env vars to `@tc/config`, follow `auth-service` / `users-service` patterns (Jest config from `jest/`, repositories under `src/app/repositories/`), and run `docs-sync` to update markdown. Do not scaffold `__tests__/e2e/` or an e2e Jest config — e2e is out of scope pre-go-live (see "Testing scope" above).
+
+### Scaffold frontend app (required command)
+
+When scaffolding a **new frontend client app**, place it under `apps/frontend/<app-name>/` — mirrors how each backend domain gets its own folder under `apps/backend/<domain>-service/`. Invoke the `nx-generate` skill and prefix with `bun`. For a Next.js web client:
+
+```bash
+bun nx generate @nx/next:application \
+  --directory=apps/frontend/<app-name> \
+  --linter=eslint \
+  --name=<app-name> \
+  --unitTestRunner=jest \
+  --e2eTestRunner=none \
+  --tags=<app-name>,scope:frontend \
+  --useProjectJson=true \
+  --no-interactive
+```
+
+Example (web):
+
+```bash
+bun nx generate @nx/next:application --directory=apps/frontend/web --linter=eslint --name=web --unitTestRunner=jest --e2eTestRunner=none --tags=web,scope:frontend --useProjectJson=true --no-interactive
+```
+
+The `scope:frontend` tag is required — `@nx/enforce-module-boundaries` restricts `scope:frontend` projects to only depend on `scope:frontend`/`scope:shared` code, never backend (see "Module boundaries" below). Always set `--e2eTestRunner=none` — e2e is out of scope pre-go-live. A future React Native client (`apps/frontend/mobile/`) would use the equivalent React Native generator instead of `@nx/next:application`. `@nx/next` and `@nx/react` must be installed as devDependencies before the first Next.js app is generated (`@nx/react` provides the jest transform the generated `jest.config.cts` depends on).
 
 ## Package Naming & Imports
 
