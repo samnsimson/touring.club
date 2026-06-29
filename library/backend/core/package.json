@@ -21,12 +21,11 @@
         "@nestjs/platform-express": "^11.0.0",
         "@nestjs/platform-socket.io": "^11.0.0",
         "@nestjs/swagger": "^11.4.4",
-        "@nestjs/testing": "^11.1.27",
         "@nestjs/typeorm": "^11.0.2",
-        "@tc/auth": "workspace:*",
         "@tc/common": "workspace:*",
         "@tc/config": "workspace:*",
         "@tc/database": "workspace:*",
+        "cookie-parser": "^1.4.7",
         "express": "^5.2.1",
         "typeorm": "^1.0.0"
     },
