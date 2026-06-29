@@ -28,16 +28,13 @@
             "path": "../../../library/backend/core/tsconfig.lib.json"
         },
         {
-            "path": "../../../library/backend/auth/tsconfig.lib.json"
-        },
-        {
             "path": "../../../library/backend/config/tsconfig.lib.json"
         },
         {
-            "path": "../../../library/backend/common/tsconfig.lib.json"
+            "path": "../../../library/backend/database/tsconfig.lib.json"
         },
         {
-            "path": "../../../library/backend/database/tsconfig.lib.json"
+            "path": "../../../library/backend/common/tsconfig.lib.json"
         }
     ]
 }
