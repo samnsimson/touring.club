@@ -4,37 +4,37 @@
     "files": [],
     "references": [
         {
-            "path": "./library/database"
+            "path": "./library/backend/database"
         },
         {
-            "path": "./library/config"
+            "path": "./library/backend/config"
         },
         {
-            "path": "./library/auth"
+            "path": "./library/backend/auth"
         },
         {
-            "path": "./library/utils"
+            "path": "./library/backend/utils"
         },
         {
-            "path": "./library/core"
+            "path": "./library/backend/core"
         },
         {
-            "path": "./apps/auth-service"
+            "path": "./apps/backend/auth-service"
         },
         {
-            "path": "./library/common"
+            "path": "./library/backend/common"
         },
         {
-            "path": "./apps/users-service"
+            "path": "./apps/backend/users-service"
         },
         {
-            "path": "./apps/trips-service"
+            "path": "./apps/backend/trips-service"
         },
         {
-            "path": "./apps/messaging-service"
+            "path": "./apps/backend/messaging-service"
         },
         {
-            "path": "./apps/notifications-service"
+            "path": "./apps/backend/notifications-service"
         }
     ]
 }

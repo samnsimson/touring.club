@@ -20,23 +20,23 @@ Run this checklist before finishing any task that:
 
 ## Checklist
 
-| If you changed…              | Update these files                                                                                                                               |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| New microservice             | [AGENTS.md](../../AGENTS.md) (Current Projects, layout tree), [docs/PROJECT.md](../../docs/PROJECT.md) (services table, repo structure)          |
-| New API routes               | [docs/PROJECT.md](../../docs/PROJECT.md) (feature/service description), Bruno collection under `apps/<service>/bruno/` if the service uses Bruno |
-| New entity / migration       | [docs/PROJECT.md](../../docs/PROJECT.md) (entity layout), [AGENTS.md](../../AGENTS.md) if new schema/path conventions                            |
-| New env var / port           | `library/config/src/lib/env.schema.ts` (required first), [AGENTS.md](../../AGENTS.md) if documenting service ports                               |
-| New shared pattern           | [AGENTS.md](../../AGENTS.md), [CLAUDE.md](../../CLAUDE.md), relevant `.agents/skills/*.md`                                                       |
-| Roadmap / priority progress  | [docs/PROJECT.md](../../docs/PROJECT.md), [.agents/skills/project-status/SKILL.md](../project-status/SKILL.md)                                   |
-| Unit test conventions        | [AGENTS.md](../../AGENTS.md) Coding Standards — all tests under `__tests__/unit/` (e2e is out of scope pre-go-live, see Testing scope note)      |
-| Generator / scaffold command | [.agents/skills/nx-generate/SKILL.md](../nx-generate/SKILL.md), [AGENTS.md](../../AGENTS.md)                                                     |
+| If you changed…              | Update these files                                                                                                                                       |
+| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| New microservice             | [AGENTS.md](../../AGENTS.md) (Current Projects, layout tree), [docs/PROJECT.md](../../docs/PROJECT.md) (services table, repo structure)                  |
+| New API routes               | [docs/PROJECT.md](../../docs/PROJECT.md) (feature/service description), Bruno collection under `apps/backend/<service>/bruno/` if the service uses Bruno |
+| New entity / migration       | [docs/PROJECT.md](../../docs/PROJECT.md) (entity layout), [AGENTS.md](../../AGENTS.md) if new schema/path conventions                                    |
+| New env var / port           | `library/backend/config/src/lib/env.schema.ts` (required first), [AGENTS.md](../../AGENTS.md) if documenting service ports                               |
+| New shared pattern           | [AGENTS.md](../../AGENTS.md), [CLAUDE.md](../../CLAUDE.md), relevant `.agents/skills/*.md`                                                               |
+| Roadmap / priority progress  | [docs/PROJECT.md](../../docs/PROJECT.md), [.agents/skills/project-status/SKILL.md](../project-status/SKILL.md)                                           |
+| Unit test conventions        | [AGENTS.md](../../AGENTS.md) Coding Standards — all tests under `__tests__/unit/` (e2e is out of scope pre-go-live, see Testing scope note)              |
+| Generator / scaffold command | [.agents/skills/nx-generate/SKILL.md](../nx-generate/SKILL.md), [AGENTS.md](../../AGENTS.md)                                                             |
 
 ## Repository pattern (reference)
 
 When adding DB access to a service, document is already in AGENTS.md — ensure new services follow:
 
-- Entity in `library/database/src/entities/general/`
-- Repository in `apps/<service>/src/app/repositories/` extending `BaseRepository`
+- Entity in `library/backend/database/src/entities/general/`
+- Repository in `apps/backend/<service>/src/app/repositories/` extending `BaseRepository`
 - `@InjectDataSource()` + `DataSource` type from `@tc/database`
 - No direct `typeorm` dependency in app `package.json`
 

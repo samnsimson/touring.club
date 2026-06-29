@@ -1,0 +1,28 @@
+{
+    "name": "common",
+    "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+    "sourceRoot": "library/backend/common/src",
+    "projectType": "library",
+    "tags": ["common", "shared", "scope:backend"],
+    "targets": {
+        "build": {
+            "executor": "@nx/esbuild:esbuild",
+            "outputs": ["{options.outputPath}"],
+            "options": {
+                "outputPath": "library/backend/common/dist",
+                "main": "library/backend/common/src/index.ts",
+                "tsConfig": "library/backend/common/tsconfig.lib.json",
+                "format": ["esm"],
+                "declarationRootDir": "library/backend/common/src"
+            }
+        },
+        "test": {
+            "executor": "@nx/jest:jest",
+            "cwd": "{workspaceRoot}",
+            "options": {
+                "jestConfig": "library/backend/common/jest.config.cts",
+                "passWithNoTests": true
+            }
+        }
+    }
+}

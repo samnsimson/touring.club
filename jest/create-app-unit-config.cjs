@@ -1,10 +1,11 @@
+const { join, relative } = require('path');
 const { readSwcJestConfig } = require('./read-swc-config.cjs');
 
 /** @param {string} displayName @param {string} projectRoot */
 function createAppUnitJestConfig(displayName, projectRoot) {
     return {
         displayName,
-        preset: '../../jest.preset.js',
+        preset: relative(projectRoot, join(__dirname, '..', 'jest.preset.js')),
         testEnvironment: 'node',
         roots: ['<rootDir>/__tests__/unit'],
         transform: {

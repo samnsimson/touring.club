@@ -1,0 +1,59 @@
+{
+    "name": "database",
+    "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+    "sourceRoot": "library/backend/database/src",
+    "projectType": "library",
+    "tags": ["database", "shared", "scope:backend"],
+    "targets": {
+        "build": {
+            "executor": "@nx/esbuild:esbuild",
+            "outputs": ["{options.outputPath}"],
+            "options": {
+                "outputPath": "library/backend/database/dist",
+                "main": "library/backend/database/src/index.ts",
+                "tsConfig": "library/backend/database/tsconfig.lib.json",
+                "declarationRootDir": "library/backend/database/src",
+                "bundle": false
+            }
+        },
+        "migration:run": {
+            "executor": "nx:run-commands",
+            "dependsOn": ["database:build-migrations"],
+            "options": {
+                "command": "bun --env-file=.env library/backend/database/dist/scripts/run-migrations.cjs",
+                "cwd": "{workspaceRoot}"
+            }
+        },
+        "build-migrations": {
+            "executor": "@nx/esbuild:esbuild",
+            "outputs": ["{options.outputPath}"],
+            "dependsOn": ["config:build", "utils:build"],
+            "options": {
+                "outputPath": "library/backend/database/dist/scripts",
+                "main": "library/backend/database/scripts/run-migrations-entry.ts",
+                "tsConfig": "library/backend/database/scripts/tsconfig.json",
+                "bundle": true,
+                "platform": "node",
+                "format": ["cjs"],
+                "outputFileName": "run-migrations.js",
+                "thirdParty": true,
+                "external": ["@tc/config", "@tc/utils", "typeorm", "pg", "pg-native", "reflect-metadata"]
+            }
+        },
+        "migration:generate": {
+            "executor": "nx:run-commands",
+            "dependsOn": ["config:build", "utils:build"],
+            "options": {
+                "command": "bun ./node_modules/typeorm/cli.js migration:generate library/backend/database/src/migrations/{args.name} --dataSource=library/backend/database/scripts/database.datasource.ts",
+                "cwd": "{workspaceRoot}"
+            }
+        },
+        "test": {
+            "executor": "@nx/jest:jest",
+            "options": {
+                "jestConfig": "library/backend/database/jest.config.cts",
+                "passWithNoTests": true
+            }
+        }
+    }
+}

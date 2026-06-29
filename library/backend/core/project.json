@@ -1,0 +1,26 @@
+{
+    "name": "core",
+    "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+    "sourceRoot": "library/backend/core/src",
+    "projectType": "library",
+    "tags": ["core", "scope:backend"],
+    "targets": {
+        "build": {
+            "executor": "@nx/esbuild:esbuild",
+            "outputs": ["{options.outputPath}"],
+            "options": {
+                "outputPath": "library/backend/core/dist",
+                "main": "library/backend/core/src/index.ts",
+                "tsConfig": "library/backend/core/tsconfig.lib.json",
+                "declarationRootDir": "library/backend/core/src"
+            }
+        },
+        "test": {
+            "executor": "@nx/jest:jest",
+            "options": {
+                "jestConfig": "library/backend/core/jest.config.cts",
+                "passWithNoTests": true
+            }
+        }
+    }
+}

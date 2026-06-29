@@ -94,8 +94,8 @@
         "webpack-dev-server": "^5.2.1"
     },
     "workspaces": [
-        "apps/*",
-        "library/*"
+        "apps/backend/*",
+        "library/backend/*"
     ],
     "lint-staged": {
         "*.{js,jsx,ts,tsx,mjs,cjs,mts,cts}": [

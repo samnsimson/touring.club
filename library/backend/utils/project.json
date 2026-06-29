@@ -1,0 +1,28 @@
+{
+    "name": "utils",
+    "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+    "sourceRoot": "library/backend/utils/src",
+    "projectType": "library",
+    "tags": ["utils", "shared", "scope:backend"],
+    "targets": {
+        "build": {
+            "executor": "@nx/esbuild:esbuild",
+            "outputs": ["{options.outputPath}"],
+            "options": {
+                "outputPath": "library/backend/utils/dist",
+                "main": "library/backend/utils/src/index.ts",
+                "tsConfig": "library/backend/utils/tsconfig.lib.json",
+                "declarationRootDir": "library/backend/utils/src"
+            }
+        },
+        "test": {
+            "executor": "@nx/jest:jest",
+            "cwd": "{workspaceRoot}",
+            "options": {
+                "jestConfig": "library/backend/utils/jest.config.cts",
+                "passWithNoTests": true,
+                "coverage": true
+            }
+        }
+    }
+}

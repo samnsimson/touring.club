@@ -57,34 +57,36 @@ Local infrastructure: `docker compose up` starts PostgreSQL 17 on port 5432 (`to
 
 ## Architecture
 
-**Microservices — one service per domain.** Each domain (auth, users, trips, messaging, notifications) is a deployable NestJS app under `apps/<domain>-service/`. Services are independently deployable and scalable.
+**Microservices — one service per domain.** Each domain (auth, users, trips, messaging, notifications) is a deployable NestJS app under `apps/backend/<domain>-service/`. Services are independently deployable and scalable.
 
-**Libraries are shared infrastructure only.** `library/` holds cross-cutting code consumed by all services: config, bootstrap, database, Better Auth integration, utilities, and test helpers. Do **not** create domain libraries (e.g. `library/users`, `library/trips`) — domain logic belongs in the owning microservice.
+**Libraries are shared infrastructure only.** `library/` holds cross-cutting code consumed by all services: config, bootstrap, database, Better Auth integration, utilities, and test helpers. Do **not** create domain libraries (e.g. `library/backend/users`, `library/backend/trips`) — domain logic belongs in the owning microservice.
 
-| Layer        | Location                 | Contains                                                             |
-| ------------ | ------------------------ | -------------------------------------------------------------------- |
-| Microservice | `apps/<domain>-service/` | Controllers, DTOs, domain services, module wiring for one domain     |
-| Shared lib   | `library/<name>/`        | Config, core bootstrap, TypeORM, auth guards, utils, testing helpers |
+| Layer        | Location                         | Contains                                                             |
+| ------------ | -------------------------------- | -------------------------------------------------------------------- |
+| Microservice | `apps/backend/<domain>-service/` | Controllers, DTOs, domain services, module wiring for one domain     |
+| Shared lib   | `library/backend/<name>/`        | Config, core bootstrap, TypeORM, auth guards, utils, testing helpers |
 
-Reference implementation: `apps/auth-service/` + `@tc/auth` (shared Better Auth integration, not a substitute for the auth microservice).
+Reference implementation: `apps/backend/auth-service/` + `@tc/auth` (shared Better Auth integration, not a substitute for the auth microservice).
 
 ## Repository Layout
 
 ```
 touring.club/
-├── apps/                    # Deployable NestJS microservices (one per domain)
-│   ├── auth-service/        # Auth API — sign-up, sign-in, verify-email, sessions
-│   ├── users-service/       # User profiles — GET/PATCH me, travel history, public profile
-│   ├── trips-service/       # Trips — create, discovery, membership
-│   ├── messaging-service/   # Direct and trip group chat — conversations and messages
-│   └── notifications-service/ # In-app notifications — list and mark read
-├── library/                 # Shared infrastructure consumed by all services
-│   ├── auth/                # Better Auth config, guards, adapter (shared auth infra)
-│   ├── config/              # Zod env schema, ConfigModule/ConfigService
-│   ├── core/                # App bootstrap, Swagger, health routes
-│   ├── database/            # TypeORM module, entities, migrations
-│   ├── utils/               # Cross-cutting utilities and decorators
-│   └── common/              # Shared types/constants (use sparingly)
+├── apps/
+│   └── backend/             # Deployable NestJS microservices (one per domain)
+│       ├── auth-service/        # Auth API — sign-up, sign-in, verify-email, sessions
+│       ├── users-service/       # User profiles — GET/PATCH me, travel history, public profile
+│       ├── trips-service/       # Trips — create, discovery, membership
+│       ├── messaging-service/   # Direct and trip group chat — conversations and messages
+│       └── notifications-service/ # In-app notifications — list and mark read
+├── library/
+│   └── backend/             # Shared infrastructure consumed by all backend services
+│       ├── auth/                # Better Auth config, guards, adapter (shared auth infra)
+│       ├── config/              # Zod env schema, ConfigModule/ConfigService
+│       ├── core/                # App bootstrap, Swagger, health routes
+│       ├── database/            # TypeORM module, entities, migrations
+│       ├── utils/                # Cross-cutting utilities and decorators
+│       └── common/               # HTTP client (axios) and S3 object storage (StorageModule/StorageService)
 ├── .agents/skills/          # Workspace Nx skills (read before scaffolding/CI)
 ├── patches/                 # bun patch overrides (e.g. better-auth-typeorm)
 ├── docker-compose.yml
@@ -93,35 +95,37 @@ touring.club/
 └── package.json             # Root workspace: @touring.club/source
 ```
 
+`apps/backend/` and `library/backend/` are nested one level deeper than a typical Nx layout on purpose — it reserves `apps/web/`, `apps/mobile/`, `library/frontend/`, and `library/shared/` as siblings for the future Next.js/React Native clients, so the backend/frontend/shared boundary is visible in the folder tree itself, not just enforced by lint config.
+
 **Where to create new files:**
 
-| Artifact                    | Location                                 | Generator                                                                                       |
-| --------------------------- | ---------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| New domain microservice     | `apps/<domain>-service/`                 | See **Scaffold microservice** below                                                             |
-| New shared library          | `library/<lib-name>/`                    | `nx-generate` skill → `@nx/js:library`                                                          |
-| DTOs, controllers, services | `apps/<service>/src/app/`                | Hand-written — domain logic stays in the service                                                |
-| App unit tests              | `apps/<service>/__tests__/unit/`         | Hand-written Jest specs                                                                         |
-| Lib unit tests              | `library/<lib>/__tests__/unit/`          | Hand-written Jest specs (Vitest for `auth` lib)                                                 |
-| App Jest config             | `apps/<service>/jest.config.cts`         | `createAppUnitJestConfig` from `jest/`                                                          |
-| Lib Jest config             | `library/<lib>/jest.config.cts`          | `createLibJestConfig` from `jest/`                                                              |
-| Auth DB entities            | `library/database/src/entities/auth/`    | Better Auth generate (`auth:generate`)                                                          |
-| Other DB entities           | `library/database/src/entities/general/` | Hand-written + TypeORM migrations                                                               |
-| Service repositories        | `apps/<service>/src/app/repositories/`   | Extend `BaseRepository` from `@tc/database`                                                     |
-| DB migrations               | `library/database/src/migrations/`       | `bun nx run database:migration:generate`                                                        |
-| DB CLI scripts              | `library/database/scripts/`              | `database.datasource.ts`, bundled `run-migrations-entry.ts` → `dist/scripts/run-migrations.cjs` |
-| Env variables               | `library/config/src/lib/env.schema.ts`   | Hand-written                                                                                    |
-| Shared utilities            | `library/utils/src/lib/`                 | Hand-written                                                                                    |
-| Auth integration (shared)   | `library/auth/src/lib/`                  | Hand-written                                                                                    |
-| Auth CLI scripts            | `library/auth/scripts/`                  | `auth.cli.config.ts` for `auth:generate`                                                        |
+| Artifact                    | Location                                         | Generator                                                                                       |
+| --------------------------- | ------------------------------------------------ | ----------------------------------------------------------------------------------------------- |
+| New domain microservice     | `apps/backend/<domain>-service/`                 | See **Scaffold microservice** below                                                             |
+| New shared library          | `library/backend/<lib-name>/`                    | `nx-generate` skill → `@nx/js:library`                                                          |
+| DTOs, controllers, services | `apps/backend/<service>/src/app/`                | Hand-written — domain logic stays in the service                                                |
+| App unit tests              | `apps/backend/<service>/__tests__/unit/`         | Hand-written Jest specs                                                                         |
+| Lib unit tests              | `library/backend/<lib>/__tests__/unit/`          | Hand-written Jest specs (Vitest for `auth` lib)                                                 |
+| App Jest config             | `apps/backend/<service>/jest.config.cts`         | `createAppUnitJestConfig` from `jest/`                                                          |
+| Lib Jest config             | `library/backend/<lib>/jest.config.cts`          | `createLibJestConfig` from `jest/`                                                              |
+| Auth DB entities            | `library/backend/database/src/entities/auth/`    | Better Auth generate (`auth:generate`)                                                          |
+| Other DB entities           | `library/backend/database/src/entities/general/` | Hand-written + TypeORM migrations                                                               |
+| Service repositories        | `apps/backend/<service>/src/app/repositories/`   | Extend `BaseRepository` from `@tc/database`                                                     |
+| DB migrations               | `library/backend/database/src/migrations/`       | `bun nx run database:migration:generate`                                                        |
+| DB CLI scripts              | `library/backend/database/scripts/`              | `database.datasource.ts`, bundled `run-migrations-entry.ts` → `dist/scripts/run-migrations.cjs` |
+| Env variables               | `library/backend/config/src/lib/env.schema.ts`   | Hand-written                                                                                    |
+| Shared utilities            | `library/backend/utils/src/lib/`                 | Hand-written                                                                                    |
+| Auth integration (shared)   | `library/backend/auth/src/lib/`                  | Hand-written                                                                                    |
+| Auth CLI scripts            | `library/backend/auth/scripts/`                  | `auth.cli.config.ts` for `auth:generate`                                                        |
 
-Do **not** put domain business logic in `library/` or microservice-specific code that belongs in another service's app. Libraries hold **shared infrastructure**; each microservice owns its domain controllers, services, and DTOs. **CLI/tooling entrypoints** (migrations runner, TypeORM data source, Better Auth generate config) live under `library/<lib>/scripts/` — not in `src/`.
+Do **not** put domain business logic in `library/` or microservice-specific code that belongs in another service's app. Libraries hold **shared infrastructure**; each microservice owns its domain controllers, services, and DTOs. **CLI/tooling entrypoints** (migrations runner, TypeORM data source, Better Auth generate config) live under `library/backend/<lib>/scripts/` — not in `src/`.
 
 ### Scaffold microservice
 
 When creating a new domain microservice, invoke the `nx-generate` skill and run:
 
 ```bash
-bun nx generate @nx/nest:application --directory=apps/<domain>-service --linter=eslint --name=<domain>-service --tags=<domain>-service --unitTestRunner=jest --useProjectJson=true --no-interactive
+bun nx generate @nx/nest:application --directory=apps/backend/<domain>-service --linter=eslint --name=<domain>-service --tags=<domain>-service --unitTestRunner=jest --useProjectJson=true --no-interactive
 ```
 
 Replace `<domain>-service` with the target name (e.g. `users-service`). Use these flags exactly — do not substitute other generator options unless the user asks.
@@ -134,7 +138,7 @@ Replace `<domain>-service` with the target name (e.g. `users-service`). Use thes
 | `@touring.club/<app>`  | `@touring.club/auth-service` | App package names                |
 | `@tc/<lib>`            | `@tc/auth`, `@tc/core`       | Shared library imports           |
 
-Always import shared code via `@tc/*` package names — never relative paths across project boundaries. When adding a new workspace dependency, use the `link-workspace-packages` skill (Bun: `bun add @tc/foo --cwd apps/my-app`).
+Always import shared code via `@tc/*` package names — never relative paths across project boundaries. When adding a new workspace dependency, use the `link-workspace-packages` skill (Bun: `bun add @tc/foo --cwd apps/backend/my-app`).
 
 Libraries export through `src/index.ts`. Add new public APIs there; keep internals in `src/lib/`.
 
@@ -167,7 +171,7 @@ Libraries export through `src/index.ts`. Add new public APIs there; keep interna
 
 #### Repository pattern (required for DB access in services)
 
-Each microservice defines its own repositories under `apps/<service>/src/app/repositories/`. Reference: `apps/users-service/src/app/repositories/profile.repository.ts`.
+Each microservice defines its own repositories under `apps/backend/<service>/src/app/repositories/`. Reference: `apps/backend/users-service/src/app/repositories/profile.repository.ts`.
 
 ```typescript
 import { Injectable } from '@nestjs/common';
@@ -193,7 +197,7 @@ export class ProfileRepository extends BaseRepository<Profile> {
 - Custom TypeORM adapter for Better Auth (with patched `@hedystia/better-auth-typeorm`)
 - Adapter options in `auth.adapter.options.ts` — `generateMigrations: false` so `auth:generate` writes **entity files only**
 - After Better Auth plugin/config changes: `bun run auth:generate` → review entities → `bun run migration:generate --name=...` → `bun run migration:run`
-- **Not a domain service** — the auth microservice is `apps/auth-service/`; `@tc/auth` provides integration other services import for token validation and guards
+- **Not a domain service** — the auth microservice is `apps/backend/auth-service/`; `@tc/auth` provides integration other services import for token validation and guards
 
 ### `@tc/utils`
 
@@ -210,12 +214,12 @@ export class ProfileRepository extends BaseRepository<Profile> {
 - Inject `HttpClient` in services and clients — axios is configured through `HttpModule.forRoot()`, not in `HttpClient`
 - `StorageModule.forRoot(options?)` — registers an AWS SDK `S3Client` (`@aws-sdk/client-s3`); registered globally via `@tc/core` `RootModule`
 - `StorageService.upload({ key, body, contentType })` / `.delete(key)` / `.getPublicUrl(key)` — use for **all object storage** (profile photos, trip cover images, chat attachments) instead of calling the AWS SDK directly; bucket/region/credentials come from `@tc/config` (`AWS_S3_BUCKET`, `AWS_REGION`, `AWS_S3_ENDPOINT`, `AWS_S3_PUBLIC_URL`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`)
-- Reference: `apps/users-service/src/app/app.service.ts` `uploadAvatar()` + `POST /api/v1/profiles/me/avatar`; `apps/trips-service/src/app/app.service.ts` `uploadCoverImage()` + `POST /api/v1/trips/:tripId/cover-image`; `apps/messaging-service/src/app/app.service.ts` `uploadMessageAttachment()`/`uploadTripMessageAttachment()` + `POST .../messages/attachment` (all multipart, `FileInterceptor('file')` from `@nestjs/platform-express`)
+- Reference: `apps/backend/users-service/src/app/app.service.ts` `uploadAvatar()` + `POST /api/v1/profiles/me/avatar`; `apps/backend/trips-service/src/app/app.service.ts` `uploadCoverImage()` + `POST /api/v1/trips/:tripId/cover-image`; `apps/backend/messaging-service/src/app/app.service.ts` `uploadMessageAttachment()`/`uploadTripMessageAttachment()` + `POST .../messages/attachment` (all multipart, `FileInterceptor('file')` from `@nestjs/platform-express`)
 
 ## Dependency Direction
 
 ```
-apps/*  →  @tc/core, @tc/auth, @tc/config, @tc/common, @tc/utils, …
+apps/backend/*  →  @tc/core, @tc/auth, @tc/config, @tc/common, @tc/utils, …
 @tc/core  →  @tc/config, @tc/common, @tc/database
 @tc/database  →  @tc/config, @tc/utils
 @tc/auth  →  @tc/common, @tc/config, @tc/utils
@@ -268,7 +272,7 @@ bootstrap();
 Shared factories live in `jest/`. New apps only need thin wrappers — no per-project SWC/Jest boilerplate. SWC config falls back to `jest/.spec.swcrc` when the app has no local `.spec.swcrc`.
 
 ```javascript
-// apps/my-service/jest.config.cts
+// apps/backend/my-service/jest.config.cts
 const { createAppUnitJestConfig } = require('../../jest/create-app-unit-config.cjs');
 module.exports = createAppUnitJestConfig('my-service', __dirname);
 ```
@@ -278,14 +282,14 @@ module.exports = createAppUnitJestConfig('my-service', __dirname);
 Libraries use the same `__tests__/unit/` layout. New libs only need a thin wrapper:
 
 ```javascript
-// library/my-lib/jest.config.cts
+// library/backend/my-lib/jest.config.cts
 const { createLibJestConfig } = require('../../jest/create-lib-jest-config.cjs');
 module.exports = createLibJestConfig('my-lib', __dirname);
 ```
 
 **Never colocate specs under `src/`** — all unit tests belong under `__tests__/unit/` (apps and libraries alike). Import source via `../../src/...` from spec files.
 
-The `auth` library uses **Vitest** for adapter tests — place specs in `library/auth/__tests__/unit/` and wire `vitest.config.ts` to that path.
+The `auth` library uses **Vitest** for adapter tests — place specs in `library/backend/auth/__tests__/unit/` and wire `vitest.config.ts` to that path.
 
 ### Controllers
 
@@ -299,7 +303,7 @@ The `auth` library uses **Vitest** for adapter tests — place specs in `library
 ### Gateways (WebSocket)
 
 - **Guards never run for `handleConnection`** — NestJS only invokes `@UseGuards()` around `@SubscribeMessage()` handlers, never around gateway lifecycle hooks. Auth must happen via an explicit guarded message handler, not in `handleConnection`.
-- Pattern: client connects, then emits a guarded "join" message (e.g. `conversations:join`, `notifications:join`) to authenticate and join its rooms; the handler returns an ack payload. See `apps/messaging-service/src/app/gateways/conversations.gateway.ts` and `apps/notifications-service/src/app/gateways/notifications.gateway.ts`.
+- Pattern: client connects, then emits a guarded "join" message (e.g. `conversations:join`, `notifications:join`) to authenticate and join its rooms; the handler returns an ack payload. See `apps/backend/messaging-service/src/app/gateways/conversations.gateway.ts` and `apps/backend/notifications-service/src/app/gateways/notifications.gateway.ts`.
 - Guard with `@UseGuards(WsAuthGuard)` from `@tc/auth` on the `@SubscribeMessage()` handler; it sets `client.data.userId` from the verified JWT.
 - `app.useWebSocketAdapter(new IoAdapter(app.getHttpServer()))` — pass the raw HTTP server, not the Nest app instance. Passing `app` relies on an `instanceof NestApplication` check that fails across this monorepo's separately bundled packages (webpack app bundles vs esbuild lib bundles each carry their own `@nestjs/core`).
 
@@ -307,7 +311,7 @@ The `auth` library uses **Vitest** for adapter tests — place specs in `library
 
 - Service modules import shared libs (`AuthModule.forRoot()` where needed, etc.) and declare domain controllers/providers
 - `RootModule` (from `@tc/core`) provides Config + Database globally
-- Each microservice owns its domain module; do not split domain logic into `library/<domain>/`
+- Each microservice owns its domain module; do not split domain logic into `library/backend/<domain>/`
 
 ## Coding Standards
 
@@ -320,8 +324,8 @@ The `auth` library uses **Vitest** for adapter tests — place specs in `library
 7. **Comments** — only for non-obvious logic; code should be self-explanatory
 8. **Tests** — add only when they cover meaningful behavior. **All tests live under `__tests__/unit/`** — never colocate `*.spec.ts` under `src/`. Apps: Jest unit specs (`createAppUnitJestConfig`). Libraries: Jest (`createLibJestConfig`); Vitest for `auth` lib adapter tests. **E2e suites are out of scope pre-go-live** — see Testing scope note above; do not add `__tests__/e2e/`, e2e Jest configs, or `@tc/testing`-style helpers.
 9. **No secrets in code** — env vars via `@tc/config`; never commit `.env`
-10. **Module boundaries** — ESLint `@nx/enforce-module-boundaries` is enabled; respect project tags
-11. **Repositories** — extend `BaseRepository` in `apps/<service>/src/app/repositories/`; inject via `@InjectDataSource()`; import `DataSource` types from `@tc/database`; never add direct `typeorm` to apps
+10. **Module boundaries** — ESLint `@nx/enforce-module-boundaries` enforces `scope:backend`/`scope:frontend`/`scope:shared` tags (set in each `project.json`): backend code may only depend on backend code, and the same rule is wired (pre-emptively) for `scope:frontend`/`scope:shared` once `apps/web`, `apps/mobile`, and `library/frontend`/`library/shared` exist. Tag any new project under `apps/backend/` or `library/backend/` with `scope:backend`.
+11. **Repositories** — extend `BaseRepository` in `apps/backend/<service>/src/app/repositories/`; inject via `@InjectDataSource()`; import `DataSource` types from `@tc/database`; never add direct `typeorm` to apps
 12. **Keep docs in sync** — when adding features, endpoints, services, entities, env vars, or patterns, update related markdown in the same change (see **Documentation sync** below)
 
 ## Formatting Preferences
@@ -369,7 +373,7 @@ bun nx graph                                  # Dependency graph
 3. **Build deps first** — lib `test` targets depend on `^build`; run `bun nx run-many -t build` if imports fail
 4. **Link workspace packages properly** — use `link-workspace-packages` skill, not tsconfig path hacks
 5. **Generate, don't hand-scaffold** — use `nx-generate` skill for new **services** and shared libs
-6. **One service per domain** — new domains get `apps/<domain>-service/`, not `library/<domain>/`
+6. **One service per domain** — new domains get `apps/backend/<domain>-service/`, not `library/backend/<domain>/`
 7. **One env schema** — extend `EnvSchema` in `@tc/config` for new services/ports
 8. **Migrations are committed** — never rely on `synchronize: true` in production
 
@@ -393,7 +397,7 @@ When given a task:
 
 1. **Clarify scope** — is this a new microservice, shared lib change, bug fix, or infra change?
 2. **Identify affected projects** — `bun nx show projects`, check dependency graph
-3. **Pick the right target** — new domain → `apps/<domain>-service/`; cross-cutting → `library/<name>/`
+3. **Pick the right target** — new domain → `apps/backend/<domain>-service/`; cross-cutting → `library/backend/<name>/`
 4. **Read existing code** in that area before writing
 5. **Scaffold if needed** — `nx-generate` skill for new services
 6. **Wire dependencies** — `link-workspace-packages` skill
@@ -408,23 +412,23 @@ When given a task:
 
 Invoke the `docs-sync` skill for the checklist. At minimum, consider:
 
-| Change type                            | Update                                                                                       |
-| -------------------------------------- | -------------------------------------------------------------------------------------------- |
-| New microservice                       | `AGENTS.md` (Current Projects, layout), `docs/PROJECT.md` (architecture/services)            |
-| New API endpoints                      | `docs/PROJECT.md` (feature status if applicable), Bruno collections if the service uses them |
-| New entity / migration                 | `AGENTS.md` / `docs/PROJECT.md` (entity layout), `docs/PROJECT.md` database section          |
-| New env var                            | `library/config/src/lib/env.schema.ts` + mention in `AGENTS.md` if service-specific port     |
-| New shared pattern (e.g. repositories) | `AGENTS.md`, `CLAUDE.md`, relevant `.agents/skills/`                                         |
-| Priority / roadmap shift               | `docs/PROJECT.md`, `.agents/skills/project-status/SKILL.md`                                  |
+| Change type                            | Update                                                                                           |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| New microservice                       | `AGENTS.md` (Current Projects, layout), `docs/PROJECT.md` (architecture/services)                |
+| New API endpoints                      | `docs/PROJECT.md` (feature status if applicable), Bruno collections if the service uses them     |
+| New entity / migration                 | `AGENTS.md` / `docs/PROJECT.md` (entity layout), `docs/PROJECT.md` database section              |
+| New env var                            | `library/backend/config/src/lib/env.schema.ts` + mention in `AGENTS.md` if service-specific port |
+| New shared pattern (e.g. repositories) | `AGENTS.md`, `CLAUDE.md`, relevant `.agents/skills/`                                             |
+| Priority / roadmap shift               | `docs/PROJECT.md`, `.agents/skills/project-status/SKILL.md`                                      |
 
 Do not leave `AGENTS.md` or `docs/PROJECT.md` stale after shipping code.
 
-For auth-related work, always check `library/auth/src/lib/auth.config.ts` and the Better Auth plugin setup before changing behavior. After `auth:generate`, always follow with TypeORM `migration:generate` / `migration:run` — never rely on the adapter to write migration files.
+For auth-related work, always check `library/backend/auth/src/lib/auth.config.ts` and the Better Auth plugin setup before changing behavior. After `auth:generate`, always follow with TypeORM `migration:generate` / `migration:run` — never rely on the adapter to write migration files.
 
 ## Patches & Special Notes
 
 - `@hedystia/better-auth-typeorm@1.0.1` is patched via `patches/` (bun `patchedDependencies`) — schema-aware entity generation, PostgreSQL `auth` schema, and `generateMigrations: false` (entities only)
-- Auth entities: `library/database/src/entities/auth/` (PostgreSQL schema `auth`)
-- Non-auth entities: `library/database/src/entities/general/` (PostgreSQL schema `general`)
+- Auth entities: `library/backend/database/src/entities/auth/` (PostgreSQL schema `auth`)
+- Non-auth entities: `library/backend/database/src/entities/general/` (PostgreSQL schema `general`)
 - `auth` lib tests use Vitest; most other projects use Jest
 - API routes are versioned: `/api/v1/...` (configured in `bootstrapApplication`)

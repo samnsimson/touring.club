@@ -216,33 +216,37 @@ Delivery channels:
 
 ### Repository Structure (target)
 
-The project uses an **Nx monorepo** with a **microservices backend**: one deployable NestJS service per domain. Shared infrastructure lives in `library/`; domain logic lives in `apps/<domain>-service/`.
+The project uses an **Nx monorepo** with a **microservices backend**: one deployable NestJS service per domain. Shared infrastructure lives in `library/backend/`; domain logic lives in `apps/backend/<domain>-service/`. Backend, web, and mobile each get their own top-level subfolder under `apps/` and `library/` — this keeps the platform boundary visible in the folder tree, not just enforced by lint config.
 
 ```
-apps/                          # One NestJS microservice per domain
-  auth-service                 # Authentication (implemented)
-  users-service                # User profiles — GET/PATCH me, travel history, public profile
-  trips-service                # Trip creation, discovery, membership
-  messaging-service            # Direct and trip group chat
-  notifications-service        # In-app and push notifications
-  web                          # Next.js (future)
-  mobile                       # React Native (future)
+apps/
+  backend/                      # One NestJS microservice per domain
+    auth-service                 # Authentication (implemented)
+    users-service                # User profiles — GET/PATCH me, travel history, public profile
+    trips-service                # Trip creation, discovery, membership
+    messaging-service            # Direct and trip group chat
+    notifications-service        # In-app and push notifications
+  web                            # Next.js (future)
+  mobile                         # React Native (future)
 
-library/                       # Shared libraries consumed by all services
-  auth                         # Better Auth config, guards, adapter (not a domain service)
-  config                       # Env schema, ConfigModule
-  core                         # Bootstrap, Swagger, health routes
-  database                     # TypeORM module, entities, migrations
-  utils                        # Cross-cutting utilities
-  common                       # HTTP client (axios) and S3 object storage (StorageModule/StorageService)
+library/
+  backend/                       # Shared infrastructure consumed by all backend services
+    auth                         # Better Auth config, guards, adapter (not a domain service)
+    config                       # Env schema, ConfigModule
+    core                         # Bootstrap, Swagger, health routes
+    database                     # TypeORM module, entities, migrations
+    utils                        # Cross-cutting utilities
+    common                       # HTTP client (axios) and S3 object storage (StorageModule/StorageService)
+  frontend                        # Web + mobile UI/state, nothing backend-aware (future)
+  shared                          # Contracts shared by backend and frontend — types, API client/SDK (future)
 
-packages/                      # Client packages (future)
+packages/                      # Client packages (future, may fold into library/shared instead)
   ui
   types
   sdk
 ```
 
-Do **not** create domain libraries (e.g. `library/users`, `library/trips`). Each domain is a **service** under `apps/`.
+Do **not** create domain libraries (e.g. `library/backend/users`, `library/backend/trips`). Each domain is a **service** under `apps/backend/`.
 
 ### Backend
 
@@ -289,7 +293,7 @@ PostgreSQL is the source of truth for all business data.
 
 #### Entity layout
 
-All TypeORM entities live in `@tc/database` under `library/database/src/entities/`, organized by **PostgreSQL schema**:
+All TypeORM entities live in `@tc/database` under `library/backend/database/src/entities/`, organized by **PostgreSQL schema**:
 
 | Path                           | PostgreSQL schema | Owner                        | Notes                                                                                            |
 | ------------------------------ | ----------------- | ---------------------------- | ------------------------------------------------------------------------------------------------ |
@@ -305,16 +309,16 @@ export class Profile {
 }
 ```
 
-Migrations live in `library/database/src/migrations/` and are shared across all services.
+Migrations live in `library/backend/database/src/migrations/` and are shared across all services.
 
 #### Repository pattern
 
 - **`BaseRepository<Entity>`** in `@tc/database` — abstract TypeORM `Repository` wrapper for NestJS DI
-- **Service repositories** in `apps/<service>/src/app/repositories/` — extend `BaseRepository`, add domain queries
+- **Service repositories** in `apps/backend/<service>/src/app/repositories/` — extend `BaseRepository`, add domain queries
 - Inject via `@InjectDataSource()`; import `DataSource` types from `@tc/database` (apps must not depend on `typeorm` directly)
 - Register repositories in the service module; services inject repositories, not `@InjectRepository()`
 
-Reference: `apps/users-service/src/app/repositories/profile.repository.ts`
+Reference: `apps/backend/users-service/src/app/repositories/profile.repository.ts`
 
 ### File Storage
 
@@ -410,7 +414,7 @@ Supports:
 - Avoid premature optimization
 - Build maintainable systems
 - Prefer explicit code over clever abstractions
-- Keep business logic inside the owning microservice (`apps/<domain>-service/`)
+- Keep business logic inside the owning microservice (`apps/backend/<domain>-service/`)
 
 ### Backend Standards
 
@@ -460,7 +464,7 @@ All architectural decisions should support both web and mobile clients.
 
 When generating code:
 
-- Assume Nx monorepo with **one microservice per domain** under `apps/<domain>-service/`
+- Assume Nx monorepo with **one microservice per domain** under `apps/backend/<domain>-service/`
 - Assume shared infrastructure in `library/` (`@tc/config`, `@tc/core`, `@tc/database`, `@tc/auth`, `@tc/utils`)
 - Assume NestJS backend per service
 - Assume PostgreSQL with schema-separated entities (`auth` and `general`)

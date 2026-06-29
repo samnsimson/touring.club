@@ -1,0 +1,19 @@
+{
+    "name": "config",
+    "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+    "sourceRoot": "library/backend/config/src",
+    "projectType": "library",
+    "tags": ["config", "shared", "scope:backend"],
+    "targets": {
+        "build": {
+            "executor": "@nx/esbuild:esbuild",
+            "outputs": ["{options.outputPath}"],
+            "options": {
+                "outputPath": "library/backend/config/dist",
+                "main": "library/backend/config/src/index.ts",
+                "tsConfig": "library/backend/config/tsconfig.lib.json",
+                "declarationRootDir": "library/backend/config/src"
+            }
+        }
+    }
+}
