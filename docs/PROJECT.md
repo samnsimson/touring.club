@@ -239,12 +239,12 @@ library/
     utils                        # Cross-cutting utilities
     common                       # HTTP client (axios) and S3 object storage (StorageModule/StorageService)
   frontend                        # Web + mobile UI/state, nothing backend-aware (future)
-  shared                          # Contracts shared by backend and frontend — types, API client/SDK (future)
+  shared                          # Contracts shared by backend and frontend — types, API client/SDK
+    api-client                     # Generated hey-api SDKs per backend service + ApiClient wrapper
 
 packages/                      # Client packages (future, may fold into library/shared instead)
   ui
   types
-  sdk
 ```
 
 Do **not** create domain libraries (e.g. `library/backend/users`, `library/backend/trips`). Each domain is a **service** under `apps/backend/`.

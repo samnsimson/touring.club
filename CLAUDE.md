@@ -89,6 +89,8 @@ touring.club/
 │       ├── database/            # TypeORM module, entities, migrations
 │       ├── utils/                # Cross-cutting utilities and decorators
 │       └── common/               # HTTP client (axios) and S3 object storage (StorageModule/StorageService)
+│   └── shared/               # Shared infrastructure consumed by frontend (and, where applicable, backend) projects
+│       └── api-client/           # Generated hey-api SDKs per backend service + ApiClient wrapper (see below)
 ├── .agents/skills/          # Workspace Nx skills (read before scaffolding/CI)
 ├── patches/                 # bun patch overrides (e.g. better-auth-typeorm)
 ├── docker-compose.yml
@@ -97,7 +99,7 @@ touring.club/
 └── package.json             # Root workspace: @touring.club/source
 ```
 
-`apps/backend/` and `library/backend/` are nested one level deeper than a typical Nx layout on purpose — each platform gets its own grouping folder (`apps/backend/<domain>-service/`, `apps/frontend/<client-app>/`) so the backend/frontend/shared boundary is visible in the folder tree itself, not just enforced by lint config. `apps/frontend/web/` now holds a real Nx-generated Next.js app (`@nx/next:app`, App Router, tag `scope:frontend`) with the framework's default starter page; no product features have been built yet. `apps/frontend/mobile/` (React Native) and `library/frontend/`/`library/shared/` are reserved for future clients and shared frontend code — new frontend apps go under `apps/frontend/<app-name>/`, mirroring how new domains go under `apps/backend/<domain>-service/`.
+`apps/backend/` and `library/backend/` are nested one level deeper than a typical Nx layout on purpose — each platform gets its own grouping folder (`apps/backend/<domain>-service/`, `apps/frontend/<client-app>/`) so the backend/frontend/shared boundary is visible in the folder tree itself, not just enforced by lint config. `apps/frontend/web/` now holds a real Nx-generated Next.js app (`@nx/next:app`, App Router, tag `scope:frontend`) with the framework's default starter page; no product features have been built yet. `apps/frontend/mobile/` (React Native) and `library/frontend/` are reserved for future clients and shared frontend code — new frontend apps go under `apps/frontend/<app-name>/`, mirroring how new domains go under `apps/backend/<domain>-service/`. `library/shared/` now has its first occupant, `api-client` (tags `scope:shared`) — see **Shared frontend API client** below.
 
 **Where to create new files:**
 
@@ -122,8 +124,10 @@ touring.club/
 | Auth CLI scripts            | `library/backend/auth/scripts/`                                      | `auth.cli.config.ts` for `auth:generate`                                                        |
 | OpenAPI CLI config          | `apps/backend/<service>/openapi.config.ts`                           | `openapi:generate` target (`@tc/core` `generateOpenApiDocument`)                                |
 | Generated OpenAPI specs     | `apps/backend/<service>/openapi/<service>.openapi.json` (gitignored) | `bun run openapi:generate` / `bun nx run <service>:openapi:generate`                            |
+| Generated per-service SDKs  | `library/shared/api-client/src/lib/<service>-client/` (committed)    | `bun nx run api-client:api:generate` (see **Shared frontend API client** below)                 |
+| `ApiClient` codegen scripts | `library/shared/api-client/scripts/`                                 | `client.config.ts` (hey-api codegen) + `generate-client.ts` (Handlebars template render)        |
 
-Do **not** put domain business logic in `library/` or microservice-specific code that belongs in another service's app. Libraries hold **shared infrastructure**; each microservice owns its domain controllers, services, and DTOs. **CLI/tooling entrypoints** (migrations runner, TypeORM data source, Better Auth generate config) live under `library/backend/<lib>/scripts/` — not in `src/`.
+Do **not** put domain business logic in `library/` or microservice-specific code that belongs in another service's app. Libraries hold **shared infrastructure**; each microservice owns its domain controllers, services, and DTOs. **CLI/tooling entrypoints** (migrations runner, TypeORM data source, Better Auth generate config, api-client codegen) live under `library/<backend|shared>/<lib>/scripts/` — not in `src/`.
 
 ### Scaffold microservice (required command)
 
@@ -258,6 +262,17 @@ export class ProfileRepository extends BaseRepository<Profile> {
 - `StorageService.upload({ key, body, contentType })` / `.delete(key)` / `.getPublicUrl(key)` — use for **all object storage** (profile photos, trip cover images, chat attachments) instead of calling the AWS SDK directly; bucket/region/credentials come from `@tc/config` (`AWS_S3_BUCKET`, `AWS_REGION`, `AWS_S3_ENDPOINT`, `AWS_S3_PUBLIC_URL`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`)
 - Reference: `apps/backend/users-service/src/app/app.service.ts` `uploadAvatar()` + `POST /api/v1/profiles/me/avatar`; `apps/backend/trips-service/src/app/app.service.ts` `uploadCoverImage()` + `POST /api/v1/trips/:tripId/cover-image`; `apps/backend/messaging-service/src/app/app.service.ts` `uploadMessageAttachment()`/`uploadTripMessageAttachment()` + `POST .../messages/attachment` (all multipart, `FileInterceptor('file')` from `@nestjs/platform-express`)
 
+### Shared frontend API client (`@tc/api-client`)
+
+`library/shared/api-client` (tags `scope:shared`) generates and wraps typed SDKs for every backend microservice, for consumption by frontend apps (`apps/frontend/*`).
+
+- **Source of truth for the service list**: `library/shared/api-client/src/services.ts` exports `SERVICES` (e.g. `['auth-service', 'users-service', ...]`). Add a new domain here when its microservice gains an OpenAPI spec — both codegen steps below read from this single array.
+- **Per-service SDKs**: `library/shared/api-client/client.config.ts` runs `@hey-api/openapi-ts` against each service's `apps/backend/<service>/openapi/<service>.openapi.json`, emitting a typed `Sdk` class + `createClient` factory into `src/lib/<service>-client/`. These generated files **are committed to git** (unlike the gitignored OpenAPI specs they're generated from).
+- **`ApiClient` wrapper**: `src/client.ts` is itself generated — not hand-written. `scripts/generate-client.ts` renders the Handlebars template `scripts/templates/client.ts.hbs` (driven by `SERVICES`) into `src/client.ts`, producing a single `ApiClient` class with one `public readonly <service>Client: <Service>Sdk` field per service, each backed by its own `createClient({ baseUrl })` instance constructed from a shared `ApiClientConfig.baseUrl` passed to `new ApiClient(config)`.
+- **Regenerate everything**: `bun nx run api-client:api:generate` (or `bun run api:generate` at the root) runs all three steps in order — `openapi:generate` (regenerate every service's OpenAPI spec) → `client.config.ts` (hey-api SDK codegen) → `scripts/generate-client.ts` (re-render `client.ts`). Never hand-edit `src/client.ts` or anything under `src/lib/*-client/` — edit `services.ts` or the `.hbs` template instead and regenerate.
+- **`scripts/` vs `src/`**: only `src/` is built/published (`tsconfig.lib.json` includes `src/**/*.ts` only); `client.config.ts` and `scripts/**` are dev-only codegen tooling, type-checked separately via `tsconfig.scripts.json` and excluded from the `@nx/dependency-checks` lint rule (`eslint.config.mjs` `ignoredFiles`) since their deps (`@hey-api/openapi-ts`, `handlebars`, `prettier`) aren't part of the runtime package.
+- **Usage**: `import { ApiClient } from '@tc/api-client'; const api = new ApiClient({ baseUrl: ... }); await api.authClient.signIn({ body: { email, password } });`. The barrel (`src/index.ts`) also re-exports each service's full SDK under a namespace (`AuthClient`, `UsersClient`, etc.) for direct typed access without going through `ApiClient`.
+
 ## Dependency Direction
 
 ```
@@ -285,6 +300,7 @@ Libraries must not import from apps. Avoid circular deps between libraries. `@tc
 | `database`              | lib  | TypeORM, entities (`auth/` + `general/`), migrations                                                                                                                                                                         |
 | `utils`                 | lib  | Shared utilities                                                                                                                                                                                                             |
 | `common`                | lib  | Shared HTTP client (`HttpModule`/`HttpClient`) and S3 object storage (`StorageModule`/`StorageService`, AWS SDK)                                                                                                             |
+| `api-client`            | lib  | `library/shared/api-client` (tags `scope:shared`) — generated `hey-api` SDKs per backend service plus a hand-rolled `ApiClient` wrapper; see **Shared frontend API client** below                                            |
 
 ## Application Patterns
 
