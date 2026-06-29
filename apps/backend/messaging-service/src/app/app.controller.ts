@@ -1,8 +1,7 @@
-import { Body, Controller, Get, HttpStatus, Param, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, HttpStatus, Param, Post, UploadedFile } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { CurrentSession, Public } from '@tc/auth';
-import { ApiResource, ApiResourceExceptions } from '@tc/utils';
+import { ApiResourceFileUpload, ApiResource, ApiResourceExceptions } from '@tc/utils';
 import { AppService } from './app.service';
 import {
     CreateConversationResponseDto,
@@ -58,8 +57,7 @@ export class AppController {
     }
 
     @Post('trips/:tripId/messages/attachment')
-    @ApiConsumes('multipart/form-data')
-    @UseInterceptors(FileInterceptor('file'))
+    @ApiResourceFileUpload()
     @ApiResource({ type: UploadMessageAttachmentResponseDto, operationId: 'uploadTripMessageAttachment', status: HttpStatus.CREATED })
     @ApiResourceExceptions(HttpStatus.BAD_REQUEST, HttpStatus.NOT_FOUND, HttpStatus.UNAUTHORIZED, HttpStatus.UNSUPPORTED_MEDIA_TYPE)
     async uploadTripMessageAttachment(@CurrentSession('userId') userId: string, @Param('tripId') tripId: string, @UploadedFile() file: Express.Multer.File) {
@@ -89,8 +87,7 @@ export class AppController {
     }
 
     @Post(':conversationId/messages/attachment')
-    @ApiConsumes('multipart/form-data')
-    @UseInterceptors(FileInterceptor('file'))
+    @ApiResourceFileUpload()
     @ApiResource({ type: UploadMessageAttachmentResponseDto, operationId: 'uploadMessageAttachment', status: HttpStatus.CREATED })
     @ApiResourceExceptions(HttpStatus.BAD_REQUEST, HttpStatus.NOT_FOUND, HttpStatus.UNAUTHORIZED, HttpStatus.UNSUPPORTED_MEDIA_TYPE)
     async uploadMessageAttachment(

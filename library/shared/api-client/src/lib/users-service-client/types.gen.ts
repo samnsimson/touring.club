@@ -115,7 +115,9 @@ export type UpdateMyProfileResponses = {
 export type UpdateMyProfileResponse = UpdateMyProfileResponses[keyof UpdateMyProfileResponses];
 
 export type UploadMyAvatarData = {
-    body?: never;
+    body: {
+        file?: Blob | File;
+    };
     path?: never;
     query?: never;
     url: '/profiles/me/avatar';

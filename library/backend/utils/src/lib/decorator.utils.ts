@@ -1,5 +1,6 @@
-import { applyDecorators, HttpCode, HttpStatus, Type } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { applyDecorators, HttpCode, HttpStatus, Type, UseInterceptors } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 export interface ApiResourceOptions {
     operationId: string;
@@ -51,4 +52,28 @@ export const ApiResource = (options: ApiResourceOptions) => {
 export const ApiResourceExceptions = (...statuses: Array<HttpStatus>) => {
     const exceptions = statuses.map((status) => ApiResponse({ status, description: `Exception for status ${status}` }));
     return applyDecorators(...exceptions);
+};
+
+/**
+ * Adds single-file multipart upload support to a route handler.
+ * uses the @ApiConsumes decorator to declare the `multipart/form-data` content type.
+ * uses the @ApiBody decorator to describe the binary file field for Swagger/OpenAPI generation.
+ * uses the @UseInterceptors decorator with NestJS's @FileInterceptor to extract the file from the request.
+ * Example:
+ * ```ts
+ * @Post('me/avatar')
+ * @ApiResourceFileUpload()
+ * async uploadMyAvatar(@CurrentSession('userId') userId: string, @UploadedFile() file: Express.Multer.File) {
+ *     return this.appService.uploadAvatar(userId, file);
+ * }
+ * ```
+ * @param fieldName - The multipart form field name the file is sent under (passed to both @FileInterceptor and the OpenAPI schema). Defaults to `'file'`.
+ * @returns A decorator that adds single-file multipart upload support to a route handler.
+ */
+export const ApiResourceFileUpload = (fieldName = 'file') => {
+    return applyDecorators(
+        ApiConsumes('multipart/form-data'),
+        ApiBody({ schema: { type: 'object', properties: { [fieldName]: { type: 'string', format: 'binary' } } } }),
+        UseInterceptors(FileInterceptor(fieldName)),
+    );
 };

@@ -317,7 +317,9 @@ export type ArchiveTripResponses = {
 export type ArchiveTripResponse = ArchiveTripResponses[keyof ArchiveTripResponses];
 
 export type UploadTripCoverImageData = {
-    body?: never;
+    body: {
+        file?: Blob | File;
+    };
     path: {
         tripId: string;
     };

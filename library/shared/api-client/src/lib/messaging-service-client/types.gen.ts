@@ -187,7 +187,9 @@ export type SendTripMessageResponses = {
 export type SendTripMessageResponse = SendTripMessageResponses[keyof SendTripMessageResponses];
 
 export type UploadTripMessageAttachmentData = {
-    body?: never;
+    body: {
+        file?: Blob | File;
+    };
     path: {
         tripId: string;
     };
@@ -303,7 +305,9 @@ export type SendMessageResponses = {
 export type SendMessageResponse = SendMessageResponses[keyof SendMessageResponses];
 
 export type UploadMessageAttachmentData = {
-    body?: never;
+    body: {
+        file?: Blob | File;
+    };
     path: {
         conversationId: string;
     };

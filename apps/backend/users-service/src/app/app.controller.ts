@@ -1,8 +1,7 @@
-import { Body, Controller, Get, Headers, HttpStatus, Param, Patch, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, Headers, HttpStatus, Param, Patch, Post, UploadedFile } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { CurrentSession } from '@tc/auth';
-import { ApiResource, ApiResourceExceptions } from '@tc/utils';
+import { ApiResourceFileUpload, ApiResource, ApiResourceExceptions } from '@tc/utils';
 import { AppService } from './app.service';
 import {
     GetProfileResponseDto,
@@ -34,8 +33,7 @@ export class AppController {
     }
 
     @Post('me/avatar')
-    @ApiConsumes('multipart/form-data')
-    @UseInterceptors(FileInterceptor('file'))
+    @ApiResourceFileUpload()
     @ApiResource({ type: UploadAvatarResponseDto, operationId: 'uploadMyAvatar', status: HttpStatus.OK })
     @ApiResourceExceptions(HttpStatus.BAD_REQUEST, HttpStatus.UNAUTHORIZED, HttpStatus.UNSUPPORTED_MEDIA_TYPE)
     async uploadMyAvatar(@CurrentSession('userId') userId: string, @UploadedFile() file: Express.Multer.File) {
