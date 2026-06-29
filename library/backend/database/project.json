@@ -3,7 +3,7 @@
     "$schema": "../../../node_modules/nx/schemas/project-schema.json",
     "sourceRoot": "library/backend/database/src",
     "projectType": "library",
-    "tags": ["database", "shared"],
+    "tags": ["database", "shared", "scope:backend"],
     "targets": {
         "build": {
             "executor": "@nx/esbuild:esbuild",

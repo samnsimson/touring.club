@@ -3,7 +3,7 @@
     "$schema": "../../../node_modules/nx/schemas/project-schema.json",
     "sourceRoot": "apps/backend/auth-service/src",
     "projectType": "application",
-    "tags": ["auth-service"],
+    "tags": ["auth-service", "scope:backend"],
     "targets": {
         "build": {
             "executor": "nx:run-commands",

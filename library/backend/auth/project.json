@@ -3,7 +3,7 @@
     "$schema": "../../../node_modules/nx/schemas/project-schema.json",
     "sourceRoot": "library/backend/auth/src",
     "projectType": "library",
-    "tags": ["auth", "shared"],
+    "tags": ["auth", "shared", "scope:backend"],
     "targets": {
         "test": {
             "executor": "nx:run-commands",

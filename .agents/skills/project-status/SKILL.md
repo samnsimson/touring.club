@@ -122,7 +122,7 @@ Use this template:
 > **[One imperative sentence]**
 
 **Why now:** [1–2 sentences]
-**Suggested commands:** [optional — use the `nx-generate` skill; microservices: `bun nx generate @nx/nest:application --directory=apps/backend/<domain>-service --linter=eslint --name=<domain>-service --tags=<domain>-service --unitTestRunner=jest --useProjectJson=true --no-interactive`]
+**Suggested commands:** [optional — use the `nx-generate` skill; microservices: `bun nx generate @nx/nest:application --directory=apps/backend/<domain>-service --linter=eslint --name=<domain>-service --tags=<domain>-service,scope:backend --unitTestRunner=jest --useProjectJson=true --no-interactive`]
 ```
 
 Keep the brief under ~40 lines unless the user asks for depth.

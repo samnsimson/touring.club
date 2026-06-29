@@ -322,7 +322,7 @@ The `auth` library uses **Vitest** for adapter tests — place specs in `library
 7. **Comments** — only for non-obvious logic; code should be self-explanatory
 8. **Tests** — add only when they cover meaningful behavior. **All tests live under `__tests__/unit/`** — never colocate `*.spec.ts` under `src/`. Apps: Jest unit specs (`createAppUnitJestConfig`). Libraries: Jest (`createLibJestConfig`); Vitest for `auth` lib adapter tests. **E2e suites are out of scope pre-go-live** — see Testing scope note above; do not add `__tests__/e2e/`, e2e Jest configs, or `@tc/testing`-style helpers.
 9. **No secrets in code** — env vars via `@tc/config`; never commit `.env`
-10. **Module boundaries** — ESLint `@nx/enforce-module-boundaries` is enabled; respect project tags
+10. **Module boundaries** — ESLint `@nx/enforce-module-boundaries` enforces `scope:backend`/`scope:frontend`/`scope:shared` tags (set in each `project.json`): backend code may only depend on backend code, and the same rule is wired (pre-emptively) for `scope:frontend`/`scope:shared` once `apps/web`, `apps/mobile`, and `library/frontend`/`library/shared` exist. Tag any new project under `apps/backend/` or `library/backend/` with `scope:backend`.
 11. **Repositories** — extend `BaseRepository` in `apps/backend/<service>/src/app/repositories/`; inject via `@InjectDataSource()`; import `DataSource` types from `@tc/database`; never add direct `typeorm` to apps
 12. **Keep docs in sync** — when adding features, endpoints, services, entities, env vars, or patterns, update related markdown in the same change (see **Documentation sync** below)
 

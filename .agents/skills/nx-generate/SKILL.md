@@ -121,7 +121,7 @@ bun nx generate @nx/nest:application \
   --directory=apps/backend/<domain>-service \
   --linter=eslint \
   --name=<domain>-service \
-  --tags=<domain>-service \
+  --tags=<domain>-service,scope:backend \
   --unitTestRunner=jest \
   --useProjectJson=true \
   --no-interactive
@@ -130,8 +130,10 @@ bun nx generate @nx/nest:application \
 Example (users domain):
 
 ```bash
-bun nx generate @nx/nest:application --directory=apps/backend/users-service --linter=eslint --name=users-service --tags=users-service --unitTestRunner=jest --useProjectJson=true --no-interactive
+bun nx generate @nx/nest:application --directory=apps/backend/users-service --linter=eslint --name=users-service --tags=users-service,scope:backend --unitTestRunner=jest --useProjectJson=true --no-interactive
 ```
+
+The `scope:backend` tag is required — `@nx/enforce-module-boundaries` in the root `eslint.config.mjs` restricts `scope:backend` projects to only depend on other `scope:backend` projects (see AGENTS.md "Module boundaries").
 
 Do **not** improvise different flags for `@nx/nest:application` unless the user explicitly asks. After generation, wire workspace deps via `link-workspace-packages`, add env vars to `@tc/config`, follow `auth-service` / `users-service` patterns (Jest config from `jest/`, repositories under `src/app/repositories/`), and run `docs-sync` to update markdown. Do not scaffold `__tests__/e2e/` or an e2e Jest config — e2e is out of scope pre-go-live (see `AGENTS.md` "Testing scope").
 
