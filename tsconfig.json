@@ -38,6 +38,9 @@
         },
         {
             "path": "./apps/frontend/web"
+        },
+        {
+            "path": "./library/shared/api-client"
         }
     ]
 }

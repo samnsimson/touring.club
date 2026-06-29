@@ -1,0 +1,28 @@
+{
+    "name": "api-client",
+    "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+    "sourceRoot": "library/shared/api-client/src",
+    "projectType": "library",
+    "tags": ["scope:shared"],
+    "targets": {
+        "build": {
+            "executor": "@nx/esbuild:esbuild",
+            "outputs": ["{options.outputPath}"],
+            "options": {
+                "outputPath": "library/shared/api-client/dist",
+                "main": "library/shared/api-client/src/index.ts",
+                "tsConfig": "library/shared/api-client/tsconfig.lib.json",
+                "format": ["esm"],
+                "declarationRootDir": "library/shared/api-client/src"
+            }
+        },
+        "api:generate": {
+            "executor": "nx:run-commands",
+            "dependsOn": ["api-client:build"],
+            "options": {
+                "command": "bun library/shared/api-client/sciripts/client.config.ts",
+                "cwd": "{workspaceRoot}"
+            }
+        }
+    }
+}
