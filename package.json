@@ -14,6 +14,7 @@
         "start:notifications": "nx serve notifications-service",
         "start": "nx run-many --target=serve",
         "auth:generate": "nx run auth:generate",
+        "openapi:generate": "nx run-many --target=openapi:generate",
         "migration:run": "nx run database:migration:run",
         "migration:generate": "nx run database:migration:generate --name=Migration",
         "prepare": "husky"

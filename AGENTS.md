@@ -101,25 +101,27 @@ touring.club/
 
 **Where to create new files:**
 
-| Artifact                    | Location                                         | Generator                                                                                       |
-| --------------------------- | ------------------------------------------------ | ----------------------------------------------------------------------------------------------- |
-| New domain microservice     | `apps/backend/<domain>-service/`                 | See **Scaffold microservice** below                                                             |
-| New frontend client app     | `apps/frontend/<app-name>/`                      | See **Scaffold frontend app** below                                                             |
-| New shared library          | `library/backend/<lib-name>/`                    | `nx-generate` skill → `@nx/js:library`                                                          |
-| DTOs, controllers, services | `apps/backend/<service>/src/app/`                | Hand-written — domain logic stays in the service                                                |
-| App unit tests              | `apps/backend/<service>/__tests__/unit/`         | Hand-written Jest specs                                                                         |
-| Lib unit tests              | `library/backend/<lib>/__tests__/unit/`          | Hand-written Jest specs (Vitest for `auth` lib)                                                 |
-| App Jest config             | `apps/backend/<service>/jest.config.cts`         | `createAppUnitJestConfig` from `jest/`                                                          |
-| Lib Jest config             | `library/backend/<lib>/jest.config.cts`          | `createLibJestConfig` from `jest/`                                                              |
-| Auth DB entities            | `library/backend/database/src/entities/auth/`    | Better Auth generate (`auth:generate`)                                                          |
-| Other DB entities           | `library/backend/database/src/entities/general/` | Hand-written + TypeORM migrations                                                               |
-| Service repositories        | `apps/backend/<service>/src/app/repositories/`   | Extend `BaseRepository` from `@tc/database`                                                     |
-| DB migrations               | `library/backend/database/src/migrations/`       | `bun nx run database:migration:generate`                                                        |
-| DB CLI scripts              | `library/backend/database/scripts/`              | `database.datasource.ts`, bundled `run-migrations-entry.ts` → `dist/scripts/run-migrations.cjs` |
-| Env variables               | `library/backend/config/src/lib/env.schema.ts`   | Hand-written                                                                                    |
-| Shared utilities            | `library/backend/utils/src/lib/`                 | Hand-written                                                                                    |
-| Auth integration (shared)   | `library/backend/auth/src/lib/`                  | Hand-written                                                                                    |
-| Auth CLI scripts            | `library/backend/auth/scripts/`                  | `auth.cli.config.ts` for `auth:generate`                                                        |
+| Artifact                    | Location                                                             | Generator                                                                                       |
+| --------------------------- | -------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| New domain microservice     | `apps/backend/<domain>-service/`                                     | See **Scaffold microservice** below                                                             |
+| New frontend client app     | `apps/frontend/<app-name>/`                                          | See **Scaffold frontend app** below                                                             |
+| New shared library          | `library/backend/<lib-name>/`                                        | `nx-generate` skill → `@nx/js:library`                                                          |
+| DTOs, controllers, services | `apps/backend/<service>/src/app/`                                    | Hand-written — domain logic stays in the service                                                |
+| App unit tests              | `apps/backend/<service>/__tests__/unit/`                             | Hand-written Jest specs                                                                         |
+| Lib unit tests              | `library/backend/<lib>/__tests__/unit/`                              | Hand-written Jest specs (Vitest for `auth` lib)                                                 |
+| App Jest config             | `apps/backend/<service>/jest.config.cts`                             | `createAppUnitJestConfig` from `jest/`                                                          |
+| Lib Jest config             | `library/backend/<lib>/jest.config.cts`                              | `createLibJestConfig` from `jest/`                                                              |
+| Auth DB entities            | `library/backend/database/src/entities/auth/`                        | Better Auth generate (`auth:generate`)                                                          |
+| Other DB entities           | `library/backend/database/src/entities/general/`                     | Hand-written + TypeORM migrations                                                               |
+| Service repositories        | `apps/backend/<service>/src/app/repositories/`                       | Extend `BaseRepository` from `@tc/database`                                                     |
+| DB migrations               | `library/backend/database/src/migrations/`                           | `bun nx run database:migration:generate`                                                        |
+| DB CLI scripts              | `library/backend/database/scripts/`                                  | `database.datasource.ts`, bundled `run-migrations-entry.ts` → `dist/scripts/run-migrations.cjs` |
+| Env variables               | `library/backend/config/src/lib/env.schema.ts`                       | Hand-written                                                                                    |
+| Shared utilities            | `library/backend/utils/src/lib/`                                     | Hand-written                                                                                    |
+| Auth integration (shared)   | `library/backend/auth/src/lib/`                                      | Hand-written                                                                                    |
+| Auth CLI scripts            | `library/backend/auth/scripts/`                                      | `auth.cli.config.ts` for `auth:generate`                                                        |
+| OpenAPI CLI config          | `apps/backend/<service>/openapi.config.ts`                           | `openapi:generate` target (`@tc/core` `generateOpenApiDocument`)                                |
+| Generated OpenAPI specs     | `apps/backend/<service>/openapi/<service>.openapi.json` (gitignored) | `bun run openapi:generate` / `bun nx run <service>:openapi:generate`                            |
 
 Do **not** put domain business logic in `library/` or microservice-specific code that belongs in another service's app. Libraries hold **shared infrastructure**; each microservice owns its domain controllers, services, and DTOs. **CLI/tooling entrypoints** (migrations runner, TypeORM data source, Better Auth generate config) live under `library/backend/<lib>/scripts/` — not in `src/`.
 
@@ -402,6 +404,10 @@ bun run migration:generate                  # Generate migration (pass --name=..
 
 # Auth (entities only — then use migration:generate for schema)
 bun run auth:generate                         # Regenerate auth TypeORM entities in entities/auth/
+
+# OpenAPI
+bun run openapi:generate                      # Regenerate <service>.openapi.json for every backend service
+bun nx run auth-service:openapi:generate      # Regenerate it for a single service
 
 # Workspace
 bun nx show projects                          # List projects

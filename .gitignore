@@ -6,6 +6,9 @@ tmp
 .tmp
 out-tsc
 
+# generated OpenAPI specs
+apps/backend/*/openapi
+
 # dependencies
 node_modules
 

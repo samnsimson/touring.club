@@ -80,6 +80,14 @@
                     "coverageReporters": ["text", "html"]
                 }
             }
+        },
+        "openapi:generate": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "bun apps/backend/users-service/openapi.config.ts",
+                "cwd": "{workspaceRoot}"
+            },
+            "dependsOn": ["core:build"]
         }
     }
 }
