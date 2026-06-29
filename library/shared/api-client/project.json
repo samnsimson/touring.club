@@ -20,7 +20,11 @@
             "executor": "nx:run-commands",
             "dependsOn": ["api-client:build"],
             "options": {
-                "commands": ["bun nx run-many --target=openapi:generate", "bun library/shared/api-client/sciripts/client.config.ts"],
+                "commands": [
+                    "bun nx run-many --target=openapi:generate",
+                    "bun library/shared/api-client/client.config.ts",
+                    "bun library/shared/api-client/scripts/generate-client.ts"
+                ],
                 "cwd": "{workspaceRoot}",
                 "parallel": false
             }

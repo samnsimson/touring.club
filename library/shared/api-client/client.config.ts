@@ -1,6 +1,5 @@
 import { createClient } from '@hey-api/openapi-ts';
-
-const SERVICES = ['auth-service', 'users-service', 'trips-service', 'messaging-service', 'notifications-service'] as const;
+import { SERVICES } from './src/services';
 
 createClient(
     SERVICES.map((service: string) => ({
