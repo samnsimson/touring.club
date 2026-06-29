@@ -29,6 +29,9 @@
         },
         {
             "path": "../../../library/backend/core/tsconfig.lib.json"
+        },
+        {
+            "path": "../../../library/backend/auth/tsconfig.lib.json"
         }
     ]
 }

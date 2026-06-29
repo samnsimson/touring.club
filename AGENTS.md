@@ -73,12 +73,14 @@ Reference implementation: `apps/backend/auth-service/` + `@tc/auth` (shared Bett
 ```
 touring.club/
 ├── apps/
-│   └── backend/             # Deployable NestJS microservices (one per domain)
-│       ├── auth-service/        # Auth API — sign-up, sign-in, verify-email, sessions
-│       ├── users-service/       # User profiles — GET/PATCH me, travel history, public profile
-│       ├── trips-service/       # Trips — create, discovery, membership
-│       ├── messaging-service/   # Direct and trip group chat — conversations and messages
-│       └── notifications-service/ # In-app notifications — list and mark read
+│   ├── backend/             # Deployable NestJS microservices (one per domain)
+│   │   ├── auth-service/        # Auth API — sign-up, sign-in, verify-email, sessions
+│   │   ├── users-service/       # User profiles — GET/PATCH me, travel history, public profile
+│   │   ├── trips-service/       # Trips — create, discovery, membership
+│   │   ├── messaging-service/   # Direct and trip group chat — conversations and messages
+│   │   └── notifications-service/ # In-app notifications — list and mark read
+│   └── frontend/            # Client apps (one per platform)
+│       └── web/                 # Next.js web frontend (App Router) — scaffolded shell, no product pages yet
 ├── library/
 │   └── backend/             # Shared infrastructure consumed by all backend services
 │       ├── auth/                # Better Auth config, guards, adapter (shared auth infra)
@@ -95,13 +97,14 @@ touring.club/
 └── package.json             # Root workspace: @touring.club/source
 ```
 
-`apps/backend/` and `library/backend/` are nested one level deeper than a typical Nx layout on purpose — it reserves `apps/web/`, `apps/mobile/`, `library/frontend/`, and `library/shared/` as siblings for the future Next.js/React Native clients, so the backend/frontend/shared boundary is visible in the folder tree itself, not just enforced by lint config.
+`apps/backend/` and `library/backend/` are nested one level deeper than a typical Nx layout on purpose — each platform gets its own grouping folder (`apps/backend/<domain>-service/`, `apps/frontend/<client-app>/`) so the backend/frontend/shared boundary is visible in the folder tree itself, not just enforced by lint config. `apps/frontend/web/` now holds a real Nx-generated Next.js app (`@nx/next:app`, App Router, tag `scope:frontend`) with the framework's default starter page; no product features have been built yet. `apps/frontend/mobile/` (React Native) and `library/frontend/`/`library/shared/` are reserved for future clients and shared frontend code — new frontend apps go under `apps/frontend/<app-name>/`, mirroring how new domains go under `apps/backend/<domain>-service/`.
 
 **Where to create new files:**
 
 | Artifact                    | Location                                         | Generator                                                                                       |
 | --------------------------- | ------------------------------------------------ | ----------------------------------------------------------------------------------------------- |
 | New domain microservice     | `apps/backend/<domain>-service/`                 | See **Scaffold microservice** below                                                             |
+| New frontend client app     | `apps/frontend/<app-name>/`                      | See **Scaffold frontend app** below                                                             |
 | New shared library          | `library/backend/<lib-name>/`                    | `nx-generate` skill → `@nx/js:library`                                                          |
 | DTOs, controllers, services | `apps/backend/<service>/src/app/`                | Hand-written — domain logic stays in the service                                                |
 | App unit tests              | `apps/backend/<service>/__tests__/unit/`         | Hand-written Jest specs                                                                         |
@@ -129,6 +132,16 @@ bun nx generate @nx/nest:application --directory=apps/backend/<domain>-service -
 ```
 
 Replace `<domain>-service` with the target name (e.g. `users-service`). Use these flags exactly — do not substitute other generator options unless the user asks.
+
+### Scaffold frontend app
+
+When creating a new frontend client app, invoke the `nx-generate` skill and run (web example):
+
+```bash
+bun nx generate @nx/next:application --directory=apps/frontend/<app-name> --linter=eslint --name=<app-name> --unitTestRunner=jest --e2eTestRunner=none --tags=<app-name>,scope:frontend --useProjectJson=true --no-interactive
+```
+
+Replace `<app-name>` with the target name (e.g. `web`). Use `@nx/next:application` for Next.js web clients; a future React Native client (`apps/frontend/mobile/`) would use the equivalent React Native generator instead. Always tag the project `scope:frontend` — `@nx/enforce-module-boundaries` in the root `eslint.config.mjs` restricts `scope:frontend` projects to only depend on `scope:frontend`/`scope:shared` code, never backend. Set `e2eTestRunner=none` — e2e is out of scope pre-go-live (see Testing scope note above).
 
 ## Package Naming & Imports
 
@@ -236,6 +249,7 @@ Libraries must not import from apps. Avoid circular deps between libraries. `@tc
 | `trips-service`         | app  | Trips microservice — organizer CRUD/lifecycle, public discovery, join/leave/approve membership, `POST /api/v1/trips/:tripId/cover-image` cover image upload via `@tc/common` `StorageService`                                |
 | `messaging-service`     | app  | Messaging microservice — direct conversations, trip group chat, send/list messages, attachment upload (`POST .../messages/attachment`) via `@tc/common` `StorageService`, `/conversations` WebSocket gateway (`message:new`) |
 | `notifications-service` | app  | Notifications microservice — list/create/mark-read notifications, `/notifications` WebSocket gateway (`notification:created`)                                                                                                |
+| `web`                   | app  | Next.js web frontend (App Router, `apps/frontend/web`, tags `web,scope:frontend`) — Nx-generated shell only, default starter page, no product pages yet                                                                      |
 | `auth`                  | lib  | Shared Better Auth integration (guards, adapter), shared JWT verification (`verifyAuthToken`) and WebSocket auth guard (`WsAuthGuard`)                                                                                       |
 | `core`                  | lib  | Bootstrap & Swagger                                                                                                                                                                                                          |
 | `config`                | lib  | Environment & config                                                                                                                                                                                                         |
@@ -324,7 +338,7 @@ The `auth` library uses **Vitest** for adapter tests — place specs in `library
 7. **Comments** — only for non-obvious logic; code should be self-explanatory
 8. **Tests** — add only when they cover meaningful behavior. **All tests live under `__tests__/unit/`** — never colocate `*.spec.ts` under `src/`. Apps: Jest unit specs (`createAppUnitJestConfig`). Libraries: Jest (`createLibJestConfig`); Vitest for `auth` lib adapter tests. **E2e suites are out of scope pre-go-live** — see Testing scope note above; do not add `__tests__/e2e/`, e2e Jest configs, or `@tc/testing`-style helpers.
 9. **No secrets in code** — env vars via `@tc/config`; never commit `.env`
-10. **Module boundaries** — ESLint `@nx/enforce-module-boundaries` enforces `scope:backend`/`scope:frontend`/`scope:shared` tags (set in each `project.json`): backend code may only depend on backend code, and the same rule is wired (pre-emptively) for `scope:frontend`/`scope:shared` once `apps/web`, `apps/mobile`, and `library/frontend`/`library/shared` exist. Tag any new project under `apps/backend/` or `library/backend/` with `scope:backend`.
+10. **Module boundaries** — ESLint `@nx/enforce-module-boundaries` enforces `scope:backend`/`scope:frontend`/`scope:shared` tags (set in each `project.json`): backend code may only depend on backend code, and `scope:frontend` code (e.g. `apps/frontend/web`, tagged `web,scope:frontend`) may only depend on `scope:frontend`/`scope:shared`. The same `scope:frontend`/`scope:shared` constraint is wired pre-emptively for `apps/frontend/mobile` and `library/frontend`/`library/shared` once those exist. Tag any new project under `apps/backend/` or `library/backend/` with `scope:backend`; tag frontend projects under `apps/frontend/` with `scope:frontend`.
 11. **Repositories** — extend `BaseRepository` in `apps/backend/<service>/src/app/repositories/`; inject via `@InjectDataSource()`; import `DataSource` types from `@tc/database`; never add direct `typeorm` to apps
 12. **Keep docs in sync** — when adding features, endpoints, services, entities, env vars, or patterns, update related markdown in the same change (see **Documentation sync** below)
 

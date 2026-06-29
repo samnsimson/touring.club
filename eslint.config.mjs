@@ -21,7 +21,7 @@ export default [
                             sourceTag: 'scope:backend',
                             onlyDependOnLibsWithTags: ['scope:backend'],
                         },
-                        // Frontend apps/libs (apps/web, apps/mobile, library/frontend/*) may depend on frontend or shared code, never backend.
+                        // Frontend apps/libs (apps/frontend/web, apps/frontend/mobile, library/frontend/*) may depend on frontend or shared code, never backend.
                         {
                             sourceTag: 'scope:frontend',
                             onlyDependOnLibsWithTags: ['scope:frontend', 'scope:shared'],

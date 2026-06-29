@@ -67,6 +67,17 @@
                 }
             },
             "exclude": ["infra/**/*"]
+        },
+        {
+            "plugin": "@nx/next/plugin",
+            "options": {
+                "startTargetName": "start",
+                "buildTargetName": "build",
+                "devTargetName": "dev",
+                "serveStaticTargetName": "serve-static",
+                "buildDepsTargetName": "build-deps",
+                "watchDepsTargetName": "watch-deps"
+            }
         }
     ],
     "targetDefaults": {
@@ -84,6 +95,14 @@
                 "esbuildOptions": {
                     "keepNames": true
                 }
+            }
+        }
+    },
+    "generators": {
+        "@nx/next": {
+            "application": {
+                "style": "css",
+                "linter": "eslint"
             }
         }
     }

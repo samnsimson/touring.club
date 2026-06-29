@@ -137,6 +137,30 @@ The `scope:backend` tag is required — `@nx/enforce-module-boundaries` in the r
 
 Do **not** improvise different flags for `@nx/nest:application` unless the user explicitly asks. After generation, wire workspace deps via `link-workspace-packages`, add env vars to `@tc/config`, follow `auth-service` / `users-service` patterns (Jest config from `jest/`, repositories under `src/app/repositories/`), and run `docs-sync` to update markdown. Do not scaffold `__tests__/e2e/` or an e2e Jest config — e2e is out of scope pre-go-live (see `AGENTS.md` "Testing scope").
 
+#### New frontend client apps (required command)
+
+When scaffolding a **new frontend client app**, place it under `apps/frontend/<app-name>/` — mirrors how each backend domain gets its own folder under `apps/backend/<domain>-service/`. Prefix with `bun`. For a Next.js web client:
+
+```bash
+bun nx generate @nx/next:application \
+  --directory=apps/frontend/<app-name> \
+  --linter=eslint \
+  --name=<app-name> \
+  --unitTestRunner=jest \
+  --e2eTestRunner=none \
+  --tags=<app-name>,scope:frontend \
+  --useProjectJson=true \
+  --no-interactive
+```
+
+Example (web):
+
+```bash
+bun nx generate @nx/next:application --directory=apps/frontend/web --linter=eslint --name=web --unitTestRunner=jest --e2eTestRunner=none --tags=web,scope:frontend --useProjectJson=true --no-interactive
+```
+
+The `scope:frontend` tag is required — `@nx/enforce-module-boundaries` restricts `scope:frontend` projects to only depend on `scope:frontend`/`scope:shared` code, never backend (see AGENTS.md "Module boundaries"). Always set `--e2eTestRunner=none` — e2e is out of scope pre-go-live. A future React Native client (`apps/frontend/mobile/`) would use the equivalent React Native generator instead of `@nx/next:application`. `@nx/next` and `@nx/react` must be installed as devDependencies before the first Next.js app is generated (`@nx/react` provides the jest transform the generated `jest.config.cts` depends on).
+
 ### 6. Dry-Run to Verify File Placement
 
 **Always run with `--dry-run` first** to verify files will be created in the correct location:

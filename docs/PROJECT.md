@@ -216,7 +216,7 @@ Delivery channels:
 
 ### Repository Structure (target)
 
-The project uses an **Nx monorepo** with a **microservices backend**: one deployable NestJS service per domain. Shared infrastructure lives in `library/backend/`; domain logic lives in `apps/backend/<domain>-service/`. Backend, web, and mobile each get their own top-level subfolder under `apps/` and `library/` — this keeps the platform boundary visible in the folder tree, not just enforced by lint config.
+The project uses an **Nx monorepo** with a **microservices backend**: one deployable NestJS service per domain. Shared infrastructure lives in `library/backend/`; domain logic lives in `apps/backend/<domain>-service/`. Backend and frontend each get their own top-level subfolder under `apps/` and `library/`, and each frontend client app is its own folder under `apps/frontend/` (mirroring `apps/backend/<domain>-service/`) — this keeps the platform boundary visible in the folder tree, not just enforced by lint config.
 
 ```
 apps/
@@ -226,8 +226,9 @@ apps/
     trips-service                # Trip creation, discovery, membership
     messaging-service            # Direct and trip group chat
     notifications-service        # In-app and push notifications
-  web                            # Next.js (future)
-  mobile                         # React Native (future)
+  frontend/                      # One client app per platform
+    web                            # Next.js, App Router — scaffolded shell (Nx-generated, no product pages yet)
+    mobile                         # React Native (future)
 
 library/
   backend/                       # Shared infrastructure consumed by all backend services
@@ -271,10 +272,10 @@ Services communicate over HTTP (and WebSockets where needed) — e.g. `trips-ser
 
 ### Frontend
 
-| Client | Stack                    |
-| ------ | ------------------------ |
-| Web    | Next.js, TypeScript      |
-| Mobile | React Native, TypeScript |
+| Client | Stack                    | Status                                                                                                         |
+| ------ | ------------------------ | -------------------------------------------------------------------------------------------------------------- |
+| Web    | Next.js, TypeScript      | Scaffolded — `apps/frontend/web` (`@nx/next:app`, App Router, tag `scope:frontend`), default starter page only |
+| Mobile | React Native, TypeScript | Not started                                                                                                    |
 
 ### Database
 

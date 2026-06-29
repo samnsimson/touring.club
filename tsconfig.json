@@ -35,6 +35,9 @@
         },
         {
             "path": "./apps/backend/notifications-service"
+        },
+        {
+            "path": "./apps/frontend/web"
         }
     ]
 }
