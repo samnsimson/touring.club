@@ -17,11 +17,17 @@
     },
     "permissions": {
         "allow": [
+            "Read(./**)",
+            "Edit(./**)",
+            "Write(./**)",
             "Bash(ln -s ../.agents/skills .claude/skills)",
             "Bash(bun nx run-many *)",
             "Bash(bun nx show *)",
             "Bash(bun nx build *)",
-            "Bash(bun nx lint *)"
+            "Bash(bun nx lint *)",
+            "Bash(bun run *)",
+            "Bash(xargs *)",
+            "Bash(grep *)"
         ]
     }
 }
