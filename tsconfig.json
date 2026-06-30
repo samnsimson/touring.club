@@ -41,6 +41,15 @@
         },
         {
             "path": "./library/shared/api-client"
+        },
+        {
+            "path": "./library/frontend/ui"
+        },
+        {
+            "path": "./library/frontend/state"
+        },
+        {
+            "path": "./library/frontend/mocks"
         }
     ]
 }
