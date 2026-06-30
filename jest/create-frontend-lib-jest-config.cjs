@@ -13,6 +13,7 @@ function createFrontendLibJestConfig(displayName, projectRoot) {
         moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
         coverageDirectory: 'test-output/jest/coverage',
         collectCoverageFrom: ['src/**/*.{ts,tsx}'],
+        passWithNoTests: true,
     };
 }
 

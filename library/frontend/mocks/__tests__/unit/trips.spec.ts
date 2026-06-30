@@ -1,4 +1,5 @@
 import { getTripBySlug, getTripsByOrganizer, mockTrips } from '../../src/lib/trips';
+import type { Trip } from '../../src/lib/types';
 
 describe('trips mock data', () => {
     it('exposes a non-empty list of trips', () => {
@@ -17,6 +18,6 @@ describe('trips mock data', () => {
     it('filters trips by organizer', () => {
         const organizerId = mockTrips[0].organizerId;
         const trips = getTripsByOrganizer(organizerId);
-        expect(trips.every((trip) => trip.organizerId === organizerId)).toBe(true);
+        expect(trips.every((trip: Trip) => trip.organizerId === organizerId)).toBe(true);
     });
 });
