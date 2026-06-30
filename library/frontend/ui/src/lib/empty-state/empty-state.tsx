@@ -1,14 +1,14 @@
 import { Stack, Text, Heading } from '@chakra-ui/react';
 import type { ReactNode } from 'react';
 
-export interface EmptyStateProps {
+export interface AppEmptyStateProps {
     icon?: ReactNode;
     title: string;
     description?: string;
     action?: ReactNode;
 }
 
-export function EmptyState({ icon, title, description, action }: EmptyStateProps) {
+export function AppEmptyState({ icon, title, description, action }: AppEmptyStateProps) {
     return (
         <Stack align="center" textAlign="center" gap="3" py="16" px="6" color="gray.600">
             {icon}

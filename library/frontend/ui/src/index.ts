@@ -1,3 +1,4 @@
+export * from '@chakra-ui/react';
 export * from './lib/theme';
 export * from './lib/provider/provider';
 export * from './lib/avatar/user-avatar';
