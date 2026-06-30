@@ -1,4 +1,4 @@
-import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+import { CanActivate, ExecutionContext, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthHeaders } from '../auth.headers';
 import { verifyAuthToken } from '../auth.token';
@@ -7,7 +7,10 @@ import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-    constructor(private readonly reflector: Reflector) {}
+    /** `@Inject(Reflector)` is required here — esbuild's TS transform elides `Reflector` as a type-only
+     *  import since it's never used as a value, so `emitDecoratorMetadata` has no `design:paramtypes` to
+     *  resolve and DI silently leaves this param `undefined`. An explicit token sidesteps that. */
+    constructor(@Inject(Reflector) private readonly reflector: Reflector) {}
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const handler = context.getHandler();
