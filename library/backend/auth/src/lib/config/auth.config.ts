@@ -1,12 +1,12 @@
 import { betterAuth } from 'better-auth';
 import { usernameValidator } from '@tc/utils';
 import { typeormAdapter } from '@hedystia/better-auth-typeorm';
-import { AUTH_BASE_PATH, AUTH_BASE_URL } from './auth.constants';
+import { AUTH_BASE_PATH, AUTH_BASE_URL } from '../constants/auth.constants';
 import { AUTH_TYPEORM_ADAPTER_OPTIONS } from './auth.adapter.options';
 import { dataSource, env } from './auth.datasource';
-import { EmailService } from './email';
+import { EmailService } from '../email';
 import { admin, bearer, emailOTP, openAPI, username, jwt } from 'better-auth/plugins';
-import type { EmailSender } from './auth.contracts';
+import type { EmailSender } from '../contracts/auth.contract';
 
 export interface CreateAuthOptions {
     emailService?: EmailSender;

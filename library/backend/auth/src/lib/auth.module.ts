@@ -2,9 +2,9 @@ import { DynamicModule, MiddlewareConsumer, Module, NestModule, RequestMethod } 
 import { AuthModule as BetterAuthModule, AuthService } from '@thallesp/nestjs-better-auth';
 import { HttpClient } from '@tc/common';
 import { BetterAuthMiddleware } from './middleware/better-auth.middleware';
-import { AuthModuleOptions } from './auth.contracts';
-import { createAuth } from './auth.config';
-import { dataSource, env } from './auth.datasource';
+import { AuthModuleOptions } from './contracts/auth.contract';
+import { createAuth } from './config/auth.config';
+import { dataSource, env } from './config/auth.datasource';
 import { EmailService } from './email';
 import { AuthGuard } from './guard/auth.guard';
 

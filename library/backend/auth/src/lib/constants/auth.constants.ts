@@ -1,4 +1,4 @@
-import { env } from './auth.datasource';
+import { env } from '../config/auth.datasource';
 
 export const AUTH_BASE_URL = env.AUTH_APP_URL;
 export const AUTH_BASE_PATH = '/api/auth';

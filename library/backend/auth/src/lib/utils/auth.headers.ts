@@ -1,5 +1,5 @@
 import type { Request } from 'express';
-import { AUTH_ACCESS_TOKEN_COOKIE, AUTH_BETTER_AUTH_SESSION_COOKIES, AUTH_REFRESH_TOKEN_COOKIE } from './auth.constants';
+import { AUTH_ACCESS_TOKEN_COOKIE, AUTH_BETTER_AUTH_SESSION_COOKIES, AUTH_REFRESH_TOKEN_COOKIE } from '../constants/auth.constants';
 
 const bearerScheme = 'bearer ';
 
