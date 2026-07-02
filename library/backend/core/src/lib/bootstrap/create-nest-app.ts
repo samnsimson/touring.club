@@ -9,10 +9,12 @@ import { RootModule } from './root.module';
 import { Swagger } from '../swagger';
 import { NestFactory } from '@nestjs/core';
 
-export const createNestApplication = async ({ rootModule, globalPrefix = 'api', configure, swagger }: ApplicationBootstrapOptions) => {
+export const createNestApplication = async ({ rootModule, globalPrefix = 'api', configure, swagger, globalAuthGuard }: ApplicationBootstrapOptions) => {
     const env = validateEnv(process.env);
 
-    const app = await NestFactory.create<NestExpressApplication>(RootModule.init(rootModule));
+    const appRoot = RootModule.init(rootModule, { globalAuthGuard });
+    const app = await NestFactory.create<NestExpressApplication>(appRoot);
+
     app.setGlobalPrefix(globalPrefix);
     app.enableVersioning({ type: VersioningType.URI, defaultVersion: '1', prefix: 'v' });
     app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }));

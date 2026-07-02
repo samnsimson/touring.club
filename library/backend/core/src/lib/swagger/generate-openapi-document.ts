@@ -22,7 +22,7 @@ export const generateOpenApiDocument = async ({ rootModule, swagger, outputPath 
 
     try {
         const env = validateEnv(process.env);
-        const app = await NestFactory.create<NestExpressApplication>(RootModule.init(rootModule), { logger: false });
+        const app = await NestFactory.create<NestExpressApplication>(RootModule.init(rootModule, {}), { logger: false });
         await app.init();
 
         const document = Swagger.build(app, {

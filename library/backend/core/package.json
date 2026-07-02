@@ -22,7 +22,6 @@
         "@nestjs/platform-socket.io": "^11.0.0",
         "@nestjs/swagger": "^11.4.4",
         "@nestjs/typeorm": "^11.0.2",
-        "@tc/auth": "workspace:*",
         "@tc/common": "workspace:*",
         "@tc/config": "workspace:*",
         "@tc/database": "workspace:*",

@@ -41,7 +41,7 @@ describe('generateOpenApiDocument', () => {
             outputPath: 'apps/backend/auth-service/openapi/auth-service.openapi.json',
         });
 
-        expect(RootModule.init).toHaveBeenCalledWith(rootModule);
+        expect(RootModule.init).toHaveBeenCalledWith(rootModule, {});
         expect(NestFactory.create).toHaveBeenCalledWith('dynamic-module', { logger: false });
         expect(app.init).toHaveBeenCalledTimes(1);
         expect(Swagger.build).toHaveBeenCalledWith(
