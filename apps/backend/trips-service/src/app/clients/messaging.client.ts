@@ -19,11 +19,11 @@ export class MessagingClient {
         private readonly http: HttpClient,
     ) {}
 
-    async postTripSystemEvent(tripId: string, payload: PostTripSystemEventPayload): Promise<void> {
+    async postTripSystemEvent(tripId: string, payload: PostTripSystemEventPayload, authorization: string): Promise<void> {
         try {
             const baseUrl = this.config.get('MESSAGING_SERVICE_URL');
             const url = `${baseUrl}/api/v1/conversations/internal/trips/${encodeURIComponent(tripId)}/system-events`;
-            await this.http.post(url, payload);
+            await this.http.post(url, payload, { headers: { Authorization: authorization } });
         } catch (error) {
             this.logger.warn(`Failed to post trip system event for trip ${tripId}: ${error instanceof Error ? error.message : String(error)}`);
         }

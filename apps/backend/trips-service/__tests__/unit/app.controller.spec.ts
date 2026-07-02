@@ -147,14 +147,14 @@ describe('AppController', () => {
 
     it('joinTrip delegates to AppService', async () => {
         appService.joinTrip.mockResolvedValue(membershipResponse as never);
-        await expect(controller.joinTrip(participantId, 'trip-1')).resolves.toEqual(membershipResponse);
-        expect(appService.joinTrip).toHaveBeenCalledWith('participant-1', 'trip-1');
+        await expect(controller.joinTrip(participantId, 'trip-1', 'Bearer token')).resolves.toEqual(membershipResponse);
+        expect(appService.joinTrip).toHaveBeenCalledWith('participant-1', 'trip-1', 'Bearer token');
     });
 
     it('leaveTrip delegates to AppService', async () => {
         appService.leaveTrip.mockResolvedValue({ membership: { ...membershipResponse.membership, status: 'left' } } as never);
-        await expect(controller.leaveTrip(participantId, 'trip-1')).resolves.toMatchObject({ membership: { status: 'left' } });
-        expect(appService.leaveTrip).toHaveBeenCalledWith('participant-1', 'trip-1');
+        await expect(controller.leaveTrip(participantId, 'trip-1', 'Bearer token')).resolves.toMatchObject({ membership: { status: 'left' } });
+        expect(appService.leaveTrip).toHaveBeenCalledWith('participant-1', 'trip-1', 'Bearer token');
     });
 
     it('listTripMembers delegates to AppService', async () => {
@@ -165,8 +165,8 @@ describe('AppController', () => {
 
     it('approveMembership delegates to AppService', async () => {
         appService.approveMembership.mockResolvedValue(membershipResponse as never);
-        await expect(controller.approveMembership(organizerId, 'trip-1', 'membership-1')).resolves.toEqual(membershipResponse);
-        expect(appService.approveMembership).toHaveBeenCalledWith('organizer-1', 'trip-1', 'membership-1');
+        await expect(controller.approveMembership(organizerId, 'trip-1', 'membership-1', 'Bearer token')).resolves.toEqual(membershipResponse);
+        expect(appService.approveMembership).toHaveBeenCalledWith('organizer-1', 'trip-1', 'membership-1', 'Bearer token');
     });
 
     it('rejectMembership delegates to AppService', async () => {
@@ -177,7 +177,9 @@ describe('AppController', () => {
 
     it('removeMembership delegates to AppService', async () => {
         appService.removeMembership.mockResolvedValue({ membership: { ...membershipResponse.membership, status: 'removed' } } as never);
-        await expect(controller.removeMembership(organizerId, 'trip-1', 'membership-1')).resolves.toMatchObject({ membership: { status: 'removed' } });
-        expect(appService.removeMembership).toHaveBeenCalledWith('organizer-1', 'trip-1', 'membership-1');
+        await expect(controller.removeMembership(organizerId, 'trip-1', 'membership-1', 'Bearer token')).resolves.toMatchObject({
+            membership: { status: 'removed' },
+        });
+        expect(appService.removeMembership).toHaveBeenCalledWith('organizer-1', 'trip-1', 'membership-1', 'Bearer token');
     });
 });

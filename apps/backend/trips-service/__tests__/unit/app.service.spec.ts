@@ -369,38 +369,46 @@ describe('AppService', () => {
             trips.findPublishedById.mockResolvedValue({ ...baseTrip, status: 'published', visibility: 'public' });
             memberships.findByTripAndUser.mockResolvedValue(null);
             memberships.countActiveMembers.mockResolvedValue(0);
-            const result = await service.joinTrip('participant-1', 'trip-1');
+            const result = await service.joinTrip('participant-1', 'trip-1', 'Bearer token');
             expect(memberships.create).toHaveBeenCalledWith(expect.objectContaining({ trip: { id: 'trip-1' }, userId: 'participant-1', status: 'active' }));
-            expect(messaging.postTripSystemEvent).toHaveBeenCalledWith('trip-1', {
-                event: 'member_joined',
-                actorUserId: 'participant-1',
-                subjectUserId: 'participant-1',
-            });
+            expect(messaging.postTripSystemEvent).toHaveBeenCalledWith(
+                'trip-1',
+                {
+                    event: 'member_joined',
+                    actorUserId: 'participant-1',
+                    subjectUserId: 'participant-1',
+                },
+                'Bearer token',
+            );
             expect(result.membership.status).toBe('active');
         });
 
         it('creates a pending membership for a published private trip', async () => {
             trips.findPublishedById.mockResolvedValue({ ...baseTrip, status: 'published', visibility: 'private' });
             memberships.findByTripAndUser.mockResolvedValue(null);
-            const result = await service.joinTrip('participant-1', 'trip-1');
+            const result = await service.joinTrip('participant-1', 'trip-1', 'Bearer token');
             expect(memberships.create).toHaveBeenCalledWith(expect.objectContaining({ status: 'pending' }));
-            expect(messaging.postTripSystemEvent).toHaveBeenCalledWith('trip-1', {
-                event: 'join_requested',
-                actorUserId: 'participant-1',
-                subjectUserId: 'participant-1',
-            });
+            expect(messaging.postTripSystemEvent).toHaveBeenCalledWith(
+                'trip-1',
+                {
+                    event: 'join_requested',
+                    actorUserId: 'participant-1',
+                    subjectUserId: 'participant-1',
+                },
+                'Bearer token',
+            );
             expect(result.membership.status).toBe('pending');
         });
 
         it('rejects when the user is already a member', async () => {
             trips.findPublishedById.mockResolvedValue({ ...baseTrip, status: 'published' });
             memberships.findByTripAndUser.mockResolvedValue({ ...baseMembership, status: 'active' });
-            await expect(service.joinTrip('participant-1', 'trip-1')).rejects.toBeInstanceOf(ConflictException);
+            await expect(service.joinTrip('participant-1', 'trip-1', 'Bearer token')).rejects.toBeInstanceOf(ConflictException);
         });
 
         it('rejects when the organizer tries to join their own trip', async () => {
             trips.findPublishedById.mockResolvedValue({ ...baseTrip, status: 'published' });
-            await expect(service.joinTrip('organizer-1', 'trip-1')).rejects.toBeInstanceOf(BadRequestException);
+            await expect(service.joinTrip('organizer-1', 'trip-1', 'Bearer token')).rejects.toBeInstanceOf(BadRequestException);
         });
 
         it('reactivates a former member with a new membership status', async () => {
@@ -409,7 +417,7 @@ describe('AppService', () => {
                 .mockResolvedValueOnce({ ...baseMembership, status: 'left' })
                 .mockResolvedValueOnce({ ...baseMembership, status: 'active' });
             memberships.countActiveMembers.mockResolvedValue(0);
-            const result = await service.joinTrip('participant-1', 'trip-1');
+            const result = await service.joinTrip('participant-1', 'trip-1', 'Bearer token');
             expect(memberships.update).toHaveBeenCalledWith({ id: 'membership-1' }, { status: 'active' });
             expect(memberships.create).not.toHaveBeenCalled();
             expect(result.membership.status).toBe('active');
@@ -419,12 +427,12 @@ describe('AppService', () => {
             trips.findPublishedById.mockResolvedValue({ ...baseTrip, status: 'published', visibility: 'public', capacity: 1 });
             memberships.findByTripAndUser.mockResolvedValue(null);
             memberships.countActiveMembers.mockResolvedValue(1);
-            await expect(service.joinTrip('participant-1', 'trip-1')).rejects.toBeInstanceOf(BadRequestException);
+            await expect(service.joinTrip('participant-1', 'trip-1', 'Bearer token')).rejects.toBeInstanceOf(BadRequestException);
         });
 
         it('throws when the trip is not joinable', async () => {
             trips.findPublishedById.mockResolvedValue(null);
-            await expect(service.joinTrip('participant-1', 'trip-1')).rejects.toBeInstanceOf(NotFoundException);
+            await expect(service.joinTrip('participant-1', 'trip-1', 'Bearer token')).rejects.toBeInstanceOf(NotFoundException);
         });
     });
 
@@ -433,24 +441,28 @@ describe('AppService', () => {
             memberships.findByTripAndUser
                 .mockResolvedValueOnce({ ...baseMembership, status: 'active' })
                 .mockResolvedValueOnce({ ...baseMembership, status: 'left' });
-            const result = await service.leaveTrip('participant-1', 'trip-1');
+            const result = await service.leaveTrip('participant-1', 'trip-1', 'Bearer token');
             expect(memberships.update).toHaveBeenCalledWith({ id: 'membership-1' }, { status: 'left' });
-            expect(messaging.postTripSystemEvent).toHaveBeenCalledWith('trip-1', {
-                event: 'member_left',
-                actorUserId: 'participant-1',
-                subjectUserId: 'participant-1',
-            });
+            expect(messaging.postTripSystemEvent).toHaveBeenCalledWith(
+                'trip-1',
+                {
+                    event: 'member_left',
+                    actorUserId: 'participant-1',
+                    subjectUserId: 'participant-1',
+                },
+                'Bearer token',
+            );
             expect(result.membership.status).toBe('left');
         });
 
         it('throws when the membership is not open', async () => {
             memberships.findByTripAndUser.mockResolvedValue({ ...baseMembership, status: 'left' });
-            await expect(service.leaveTrip('participant-1', 'trip-1')).rejects.toBeInstanceOf(NotFoundException);
+            await expect(service.leaveTrip('participant-1', 'trip-1', 'Bearer token')).rejects.toBeInstanceOf(NotFoundException);
         });
 
         it('throws when the membership does not exist', async () => {
             memberships.findByTripAndUser.mockResolvedValue(null);
-            await expect(service.leaveTrip('participant-1', 'trip-1')).rejects.toBeInstanceOf(NotFoundException);
+            await expect(service.leaveTrip('participant-1', 'trip-1', 'Bearer token')).rejects.toBeInstanceOf(NotFoundException);
         });
     });
 
@@ -471,32 +483,39 @@ describe('AppService', () => {
                 .mockResolvedValueOnce({ ...baseMembership, status: 'pending' })
                 .mockResolvedValueOnce({ ...baseMembership, status: 'active' });
             memberships.countActiveMembers.mockResolvedValue(0);
-            const result = await service.approveMembership('organizer-1', 'trip-1', 'membership-1');
-            expect(messaging.postTripSystemEvent).toHaveBeenCalledWith('trip-1', {
-                event: 'member_approved',
-                actorUserId: 'organizer-1',
-                subjectUserId: 'participant-1',
-            });
-            expect(notifications.createNotification).toHaveBeenCalledWith(expect.objectContaining({ userId: 'participant-1', type: 'trip_approved' }));
+            const result = await service.approveMembership('organizer-1', 'trip-1', 'membership-1', 'Bearer token');
+            expect(messaging.postTripSystemEvent).toHaveBeenCalledWith(
+                'trip-1',
+                {
+                    event: 'member_approved',
+                    actorUserId: 'organizer-1',
+                    subjectUserId: 'participant-1',
+                },
+                'Bearer token',
+            );
+            expect(notifications.createNotification).toHaveBeenCalledWith(
+                expect.objectContaining({ userId: 'participant-1', type: 'trip_approved' }),
+                'Bearer token',
+            );
             expect(result.membership.status).toBe('active');
         });
 
         it('rejects approving a non-pending membership', async () => {
             trips.findByIdForOrganizer.mockResolvedValue({ ...baseTrip, status: 'published' });
             memberships.findByIdForTrip.mockResolvedValue({ ...baseMembership, status: 'active' });
-            await expect(service.approveMembership('organizer-1', 'trip-1', 'membership-1')).rejects.toBeInstanceOf(BadRequestException);
+            await expect(service.approveMembership('organizer-1', 'trip-1', 'membership-1', 'Bearer token')).rejects.toBeInstanceOf(BadRequestException);
         });
 
         it('rejects approval when the trip is at capacity', async () => {
             trips.findByIdForOrganizer.mockResolvedValue({ ...baseTrip, status: 'published', capacity: 1 });
             memberships.findByIdForTrip.mockResolvedValue({ ...baseMembership, status: 'pending' });
             memberships.countActiveMembers.mockResolvedValue(1);
-            await expect(service.approveMembership('organizer-1', 'trip-1', 'membership-1')).rejects.toBeInstanceOf(BadRequestException);
+            await expect(service.approveMembership('organizer-1', 'trip-1', 'membership-1', 'Bearer token')).rejects.toBeInstanceOf(BadRequestException);
         });
 
         it('throws when the membership does not exist', async () => {
             memberships.findByIdForTrip.mockResolvedValue(null);
-            await expect(service.approveMembership('organizer-1', 'trip-1', 'membership-1')).rejects.toBeInstanceOf(NotFoundException);
+            await expect(service.approveMembership('organizer-1', 'trip-1', 'membership-1', 'Bearer token')).rejects.toBeInstanceOf(NotFoundException);
         });
     });
 
@@ -521,19 +540,23 @@ describe('AppService', () => {
             memberships.findByIdForTrip
                 .mockResolvedValueOnce({ ...baseMembership, status: 'active' })
                 .mockResolvedValueOnce({ ...baseMembership, status: 'removed' });
-            const result = await service.removeMembership('organizer-1', 'trip-1', 'membership-1');
+            const result = await service.removeMembership('organizer-1', 'trip-1', 'membership-1', 'Bearer token');
             expect(memberships.update).toHaveBeenCalledWith({ id: 'membership-1' }, { status: 'removed' });
-            expect(messaging.postTripSystemEvent).toHaveBeenCalledWith('trip-1', {
-                event: 'member_removed',
-                actorUserId: 'organizer-1',
-                subjectUserId: 'participant-1',
-            });
+            expect(messaging.postTripSystemEvent).toHaveBeenCalledWith(
+                'trip-1',
+                {
+                    event: 'member_removed',
+                    actorUserId: 'organizer-1',
+                    subjectUserId: 'participant-1',
+                },
+                'Bearer token',
+            );
             expect(result.membership.status).toBe('removed');
         });
 
         it('rejects removing a non-active membership', async () => {
             memberships.findByIdForTrip.mockResolvedValue({ ...baseMembership, status: 'pending' });
-            await expect(service.removeMembership('organizer-1', 'trip-1', 'membership-1')).rejects.toBeInstanceOf(BadRequestException);
+            await expect(service.removeMembership('organizer-1', 'trip-1', 'membership-1', 'Bearer token')).rejects.toBeInstanceOf(BadRequestException);
         });
     });
 });

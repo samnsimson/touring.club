@@ -203,7 +203,7 @@ Libraries export through `src/index.ts`. Add new public APIs there; keep interna
 - `bootstrapApplication()` — standard NestJS boot (global prefix, versioning, validation pipe, cookies, Swagger, health routes)
 - `RootModule` wires `ConfigModule` + `DatabaseModule` around each app's module
 - **Every new service's `main.ts` should use `bootstrapApplication`**
-- `globalAuthGuard` — optional `ApplicationBootstrapOptions` field; pass a guard `Type` to register it globally via `RootModule` (`APP_GUARD`). Omit it to skip global auth (e.g. `auth-service` itself, which exposes its own public sign-in/sign-up routes). `@tc/core` does not depend on `@tc/auth` — pass the guard class in from the consuming service instead of importing one from `@tc/core`
+- `globalAuthGuard` — optional `ApplicationBootstrapOptions` field; pass a guard `Type` to register it globally via `RootModule` (`APP_GUARD`). All 5 services currently pass `HybridAuthGuard`; per-route exemptions go through `@Public()` from `@tc/auth`, not by omitting the guard. `@tc/core` does not depend on `@tc/auth` — pass the guard class in from the consuming service instead of importing one from `@tc/core`
 
 ### `@tc/database`
 
@@ -247,6 +247,24 @@ export class ProfileRepository extends BaseRepository<Profile> {
 - Adapter options in `auth.adapter.options.ts` — `generateMigrations: false` so `auth:generate` writes **entity files only**
 - After Better Auth plugin/config changes: `bun run auth:generate` → review entities → `bun run migration:generate --name=...` → `bun run migration:run`
 - **Not a domain service** — the auth microservice is `apps/backend/auth-service/`; `@tc/auth` provides integration other services import for token validation and guards
+
+#### Internal service-to-service calls (required pattern)
+
+When one microservice calls another directly (not through the gateway) on behalf of the current request — e.g. `trips-service` calling `messaging-service`/`notifications-service`, or `users-service` calling `trips-service` — forward the caller's `Authorization` header instead of inventing a separate service credential. Thread it from controller → service → HTTP client:
+
+```typescript
+// controller
+async approveMembership(@CurrentSession('userId') userId: string, @Param('tripId') tripId: string, @Headers('authorization') authorization: string) {
+    return this.appService.approveMembership(userId, tripId, authorization);
+}
+
+// client
+async createNotification(payload: CreateNotificationPayload, authorization: string): Promise<void> {
+    await this.http.post(url, payload, { headers: { Authorization: authorization } });
+}
+```
+
+The receiving service's own `HybridAuthGuard` validates the forwarded token exactly like a normal user request — the target endpoint must **not** be `@Public()`. Reference: `apps/backend/users-service/src/app/clients/trips.client.ts` `getTravelHistory()`, and `apps/backend/trips-service/src/app/clients/messaging.client.ts` / `notifications.client.ts`. Kong is not involved in this — it stays routing/CORS only and does not verify JWTs (Better Auth signs with EdDSA by default, which Kong OSS's `jwt` plugin can't verify or fetch dynamically via JWKS).
 
 ### `@tc/utils`
 

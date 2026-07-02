@@ -17,14 +17,16 @@ describe('NotificationsClient', () => {
         it('posts a notification to the notifications service', async () => {
             http.post.mockResolvedValue({ data: {} } as Awaited<ReturnType<HttpClient['post']>>);
             const payload = { userId: 'user-b', type: 'new_message' as const, title: 'New message' };
-            await client.createNotification(payload);
+            await client.createNotification(payload, 'Bearer token');
             expect(config.get).toHaveBeenCalledWith('NOTIFICATIONS_SERVICE_URL');
-            expect(http.post).toHaveBeenCalledWith('http://notifications-service:3004/api/v1/notifications/internal', payload);
+            expect(http.post).toHaveBeenCalledWith('http://notifications-service:3004/api/v1/notifications/internal', payload, {
+                headers: { Authorization: 'Bearer token' },
+            });
         });
 
         it('swallows http errors so the caller is not blocked', async () => {
             http.post.mockRejectedValue(new Error('network failure'));
-            await expect(client.createNotification({ userId: 'user-b', type: 'new_message', title: 'New message' })).resolves.toBeUndefined();
+            await expect(client.createNotification({ userId: 'user-b', type: 'new_message', title: 'New message' }, 'Bearer token')).resolves.toBeUndefined();
         });
     });
 });

@@ -250,7 +250,7 @@ describe('AppService', () => {
                 updatedAt: new Date(),
                 deletedAt: null,
             });
-            const result = await service.sendTripMessage('organizer-1', 'trip-1', { body: 'Welcome to the trip!' });
+            const result = await service.sendTripMessage('organizer-1', 'trip-1', { body: 'Welcome to the trip!' }, 'Bearer token');
             expect(messages.save).toHaveBeenCalledWith(expect.objectContaining({ body: 'Welcome to the trip!', senderId: 'organizer-1' }));
             expect(result.message.body).toBe('Welcome to the trip!');
         });
@@ -260,11 +260,16 @@ describe('AppService', () => {
         it('uploads an image attachment and broadcasts it in the trip conversation', async () => {
             conversations.findByTripId.mockResolvedValue(tripConversation);
             storage.upload.mockResolvedValue({ key: 'k', url: 'https://cdn.touring.club/conversations/conversation-trip-1/attachments/abc.png' });
-            const result = await service.uploadTripMessageAttachment('organizer-1', 'trip-1', {
-                buffer: Buffer.from('img'),
-                mimetype: 'image/png',
-                originalname: 'photo.png',
-            });
+            const result = await service.uploadTripMessageAttachment(
+                'organizer-1',
+                'trip-1',
+                {
+                    buffer: Buffer.from('img'),
+                    mimetype: 'image/png',
+                    originalname: 'photo.png',
+                },
+                'Bearer token',
+            );
             expect(messages.save).toHaveBeenCalledWith(
                 expect.objectContaining({ messageType: 'image', body: 'https://cdn.touring.club/conversations/conversation-trip-1/attachments/abc.png' }),
             );
@@ -290,7 +295,7 @@ describe('AppService', () => {
 
     describe('sendMessage', () => {
         it('stores a text message for a participant and broadcasts it over the gateway', async () => {
-            const result = await service.sendMessage('user-a', 'conversation-1', { body: 'Hello there!' });
+            const result = await service.sendMessage('user-a', 'conversation-1', { body: 'Hello there!' }, 'Bearer token');
             expect(messages.save).toHaveBeenCalledWith(expect.objectContaining({ body: 'Hello there!', senderId: 'user-a' }));
             expect(conversations.update).toHaveBeenCalledWith({ id: 'conversation-1' }, { updatedAt: expect.any(Date) });
             expect(gateway.emitNewMessage).toHaveBeenCalledWith('conversation-1', expect.objectContaining({ body: 'Hello there!' }));
@@ -302,27 +307,33 @@ describe('AppService', () => {
                 { id: 'participant-1', conversationId: 'conversation-1', userId: 'user-a', createdAt: new Date(), updatedAt: new Date(), deletedAt: null },
                 { id: 'participant-2', conversationId: 'conversation-1', userId: 'user-b', createdAt: new Date(), updatedAt: new Date(), deletedAt: null },
             ]);
-            await service.sendMessage('user-a', 'conversation-1', { body: 'Hello there!' });
+            await service.sendMessage('user-a', 'conversation-1', { body: 'Hello there!' }, 'Bearer token');
             expect(notifications.createNotification).toHaveBeenCalledTimes(1);
             expect(notifications.createNotification).toHaveBeenCalledWith(
                 expect.objectContaining({ userId: 'user-b', type: 'new_message', body: 'Hello there!' }),
+                'Bearer token',
             );
         });
 
         it('throws when the user is not a participant', async () => {
             participants.findByConversationAndUser.mockResolvedValue(null);
-            await expect(service.sendMessage('user-a', 'conversation-1', { body: 'Hello there!' })).rejects.toBeInstanceOf(NotFoundException);
+            await expect(service.sendMessage('user-a', 'conversation-1', { body: 'Hello there!' }, 'Bearer token')).rejects.toBeInstanceOf(NotFoundException);
         });
     });
 
     describe('uploadMessageAttachment', () => {
         it('throws when no file is provided', async () => {
-            await expect(service.uploadMessageAttachment('user-a', 'conversation-1', undefined)).rejects.toBeInstanceOf(BadRequestException);
+            await expect(service.uploadMessageAttachment('user-a', 'conversation-1', undefined, 'Bearer token')).rejects.toBeInstanceOf(BadRequestException);
         });
 
         it('throws when the file type is not allowed', async () => {
             await expect(
-                service.uploadMessageAttachment('user-a', 'conversation-1', { buffer: Buffer.from('x'), mimetype: 'application/zip', originalname: 'a.zip' }),
+                service.uploadMessageAttachment(
+                    'user-a',
+                    'conversation-1',
+                    { buffer: Buffer.from('x'), mimetype: 'application/zip', originalname: 'a.zip' },
+                    'Bearer token',
+                ),
             ).rejects.toBeInstanceOf(UnsupportedMediaTypeException);
             expect(storage.upload).not.toHaveBeenCalled();
         });
@@ -330,17 +341,27 @@ describe('AppService', () => {
         it('throws when the user is not a participant', async () => {
             participants.findByConversationAndUser.mockResolvedValue(null);
             await expect(
-                service.uploadMessageAttachment('user-a', 'conversation-1', { buffer: Buffer.from('img'), mimetype: 'image/png', originalname: 'a.png' }),
+                service.uploadMessageAttachment(
+                    'user-a',
+                    'conversation-1',
+                    { buffer: Buffer.from('img'), mimetype: 'image/png', originalname: 'a.png' },
+                    'Bearer token',
+                ),
             ).rejects.toBeInstanceOf(NotFoundException);
         });
 
         it('uploads an image attachment and stores it as an image message', async () => {
             storage.upload.mockResolvedValue({ key: 'k', url: 'https://cdn.touring.club/conversations/conversation-1/attachments/abc.png' });
-            const result = await service.uploadMessageAttachment('user-a', 'conversation-1', {
-                buffer: Buffer.from('img'),
-                mimetype: 'image/png',
-                originalname: 'photo.png',
-            });
+            const result = await service.uploadMessageAttachment(
+                'user-a',
+                'conversation-1',
+                {
+                    buffer: Buffer.from('img'),
+                    mimetype: 'image/png',
+                    originalname: 'photo.png',
+                },
+                'Bearer token',
+            );
             expect(storage.upload).toHaveBeenCalledWith(expect.objectContaining({ contentType: 'image/png' }));
             expect(messages.save).toHaveBeenCalledWith(
                 expect.objectContaining({ messageType: 'image', body: 'https://cdn.touring.club/conversations/conversation-1/attachments/abc.png' }),
@@ -350,11 +371,16 @@ describe('AppService', () => {
 
         it('uploads a document attachment and stores it as a file message', async () => {
             storage.upload.mockResolvedValue({ key: 'k', url: 'https://cdn.touring.club/conversations/conversation-1/attachments/abc.pdf' });
-            const result = await service.uploadMessageAttachment('user-a', 'conversation-1', {
-                buffer: Buffer.from('doc'),
-                mimetype: 'application/pdf',
-                originalname: 'itinerary.pdf',
-            });
+            const result = await service.uploadMessageAttachment(
+                'user-a',
+                'conversation-1',
+                {
+                    buffer: Buffer.from('doc'),
+                    mimetype: 'application/pdf',
+                    originalname: 'itinerary.pdf',
+                },
+                'Bearer token',
+            );
             expect(messages.save).toHaveBeenCalledWith(expect.objectContaining({ messageType: 'file' }));
             expect(result.message.messageType).toBe('file');
         });
