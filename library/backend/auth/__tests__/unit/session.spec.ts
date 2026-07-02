@@ -1,8 +1,10 @@
 import { UnauthorizedException } from '@nestjs/common';
 import { describe, expect, it } from 'vitest';
 import { ExecutionContext } from '@nestjs/common';
-import { resolveSessionUserId } from '../../src/lib/guard/auth.request';
+import { AuthUtils } from '../../src/lib/utils/auth.utils';
 import { currentSessionFactory } from '../../src/lib/decorators/current-session.decorator';
+
+const resolveSessionUserId = AuthUtils.resolveSessionUserId;
 
 function createContext(session: unknown): ExecutionContext {
     return {

@@ -203,6 +203,7 @@ Libraries export through `src/index.ts`. Add new public APIs there; keep interna
 - `bootstrapApplication()` — standard NestJS boot (global prefix, versioning, validation pipe, cookies, Swagger, health routes)
 - `RootModule` wires `ConfigModule` + `DatabaseModule` around each app's module
 - **Every new service's `main.ts` should use `bootstrapApplication`**
+- `globalAuthGuard` — optional `ApplicationBootstrapOptions` field; pass a guard `Type` to register it globally via `RootModule` (`APP_GUARD`). Omit it to skip global auth (e.g. `auth-service` itself, which exposes its own public sign-in/sign-up routes). `@tc/core` does not depend on `@tc/auth` — pass the guard class in from the consuming service instead of importing one from `@tc/core`
 
 ### `@tc/database`
 
@@ -377,7 +378,7 @@ The `auth` library uses **Vitest** for adapter tests — place specs in `library
 ## Coding Standards
 
 1. **TypeScript strict mode** — no `any` unless unavoidable; use definite assignment (`!`) on DTO fields
-2. **ESM** — libraries use `"type": "module"`; respect existing import style
+2. **ESM** — libraries use `"type": "module"`; respect existing import style. `isolatedModules` is off workspace-wide, so type-only exports/re-exports don't need the `export type` keyword (e.g. `export { ApplicationBootstrapOptions } from './contract'`) — esbuild resolves the full module graph and elides them automatically
 3. **NestJS conventions** — modules, controllers, services, DTOs; inject dependencies via constructor
 4. **Prefer classes over standalone functions** — use classes for reusable utilities, helpers, and service-style APIs; reserve functions for thin factories, hooks, and one-off entrypoints
 5. **Minimize scope** — smallest correct diff; don't refactor unrelated code
