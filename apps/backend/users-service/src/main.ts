@@ -1,3 +1,4 @@
+import { HybridAuthGuard } from '@tc/auth';
 import { AppModule } from './app/app.module';
 import { validateEnv } from '@tc/config';
 import { bootstrapApplication } from '@tc/core';
@@ -8,6 +9,7 @@ async function bootstrap() {
     await bootstrapApplication({
         globalPrefix: 'api',
         rootModule: AppModule,
+        globalAuthGuard: HybridAuthGuard,
         port: env.USERS_SERVICE_PORT ?? 3001,
         swagger: { title: 'Users Service', description: 'User profiles API' },
     });
