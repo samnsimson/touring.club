@@ -44,7 +44,7 @@ export const ApiResource = (options: ApiResourceOptions) => {
         HttpCode(options.status ?? HttpStatus.OK),
         ApiOperation({ operationId: options.operationId, summary: options.summary, description: options.description }),
         ApiResponse({ type: options.type, status: options.status ?? HttpStatus.OK, description: options.description }),
-        ...(options.protected ? [ApiBearerAuth(SWAGGER_BEARER_AUTH)] : []),
+        ApiBearerAuth(options.protected ? SWAGGER_BEARER_AUTH : undefined),
     );
 };
 
