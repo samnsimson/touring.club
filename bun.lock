@@ -244,6 +244,7 @@
       "version": "0.0.1",
       "dependencies": {
         "@hookform/resolvers": "^5.4.0",
+        "@tc/api-client": "workspace:*",
         "@tc/mocks": "workspace:*",
         "@tc/state": "workspace:*",
         "@tc/ui": "workspace:*",
@@ -308,7 +309,6 @@
         "@nestjs/platform-socket.io": "^11.0.0",
         "@nestjs/swagger": "^11.4.4",
         "@nestjs/typeorm": "^11.0.2",
-        "@tc/auth": "workspace:*",
         "@tc/common": "workspace:*",
         "@tc/config": "workspace:*",
         "@tc/database": "workspace:*",
