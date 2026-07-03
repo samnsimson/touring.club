@@ -7,5 +7,6 @@ import { AuthModule } from '@tc/auth';
     imports: [AuthModule.forRoot()],
     controllers: [AppController],
     providers: [AppService],
+    exports: [AuthModule],
 })
 export class AppModule {}

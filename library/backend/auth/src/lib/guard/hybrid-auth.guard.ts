@@ -12,7 +12,7 @@ export class HybridAuthGuard implements CanActivate {
 
     constructor(
         @Inject(Reflector) private readonly reflector: Reflector,
-        private readonly authService: AuthService<Auth>,
+        @Inject(AuthService) private readonly authService: AuthService<Auth>,
     ) {}
 
     async canActivate(context: ExecutionContext): Promise<boolean> {

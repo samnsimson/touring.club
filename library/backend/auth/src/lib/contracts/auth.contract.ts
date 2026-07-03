@@ -30,6 +30,8 @@ export type AuthJwtPayload = JWTPayload & {
     role?: string;
     banned?: boolean;
     banExpires?: Date | string;
+    /** The raw Better Auth session token embedded by the JWT plugin — required to look up the session via `authService.api.getSession()`, since that call expects the raw session token, not the signed JWT. */
+    token?: string;
 };
 
 export type AuthenticatedRequest = Request & {

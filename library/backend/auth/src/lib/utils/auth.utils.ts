@@ -50,8 +50,9 @@ export class AuthUtils {
     }
 
     static async guardStandaloneRequest(request: AuthenticatedRequest, token: string, authService: AuthService<Auth>): Promise<boolean> {
-        await AuthUtils.verifyAuthToken(token);
-        const headers = new Headers({ Authorization: `Bearer ${token}` });
+        const payload = await AuthUtils.verifyAuthToken(token);
+        if (!payload.token) throw new UnauthorizedException('Session expired or not valid');
+        const headers = new Headers({ Authorization: `Bearer ${payload.token}` });
         const sessionData = await authService.api.getSession({ headers });
         if (!sessionData) throw new UnauthorizedException('Session expired or not valid');
         Object.assign(request, { session: sessionData.session, user: sessionData.user });
