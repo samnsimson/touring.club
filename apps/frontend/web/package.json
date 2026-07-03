@@ -4,6 +4,7 @@
     "private": true,
     "dependencies": {
         "@hookform/resolvers": "^5.4.0",
+        "@tc/api-client": "workspace:*",
         "@tc/mocks": "workspace:*",
         "@tc/state": "workspace:*",
         "@tc/ui": "workspace:*",
