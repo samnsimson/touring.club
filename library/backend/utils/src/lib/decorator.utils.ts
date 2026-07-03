@@ -1,6 +1,8 @@
 import { applyDecorators, HttpCode, HttpStatus, Type, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+
+export const SWAGGER_BEARER_AUTH = 'bearer' as const;
 
 export interface ApiResourceOptions {
     operationId: string;
@@ -9,6 +11,8 @@ export interface ApiResourceOptions {
     description?: string;
     type?: Type<unknown>;
     tags?: string[];
+    /** Marks the route as requiring the bearer token in Swagger docs — shows the lock icon for this operation only. Omit (or leave `false`) for `@Public()` routes. */
+    protected?: boolean;
 }
 
 /**
@@ -24,6 +28,13 @@ export interface ApiResourceOptions {
  *     return this.appService.signUp(dto);
  * }
  * ```
+ * Pass `protected: true` for routes that require auth (i.e. not `@Public()`), to show the lock icon in Swagger docs:
+ * ```ts
+ * @ApiResource({ operationId: 'getMe', type: GetMeResponse, protected: true })
+ * async getMe(@CurrentSession('userId') userId: string) {
+ *     return this.appService.getMe(userId);
+ * }
+ * ```
  * @param options - The options for the resource.
  * @returns A decorator that adds a resource to the Swagger API.
  */
@@ -33,6 +44,7 @@ export const ApiResource = (options: ApiResourceOptions) => {
         HttpCode(options.status ?? HttpStatus.OK),
         ApiOperation({ operationId: options.operationId, summary: options.summary, description: options.description }),
         ApiResponse({ type: options.type, status: options.status ?? HttpStatus.OK, description: options.description }),
+        ...(options.protected ? [ApiBearerAuth(SWAGGER_BEARER_AUTH)] : []),
     );
 };
 

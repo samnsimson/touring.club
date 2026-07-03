@@ -1,6 +1,6 @@
 import { Env } from '@tc/config';
 
-export const SWAGGER_BEARER_AUTH = 'bearer' as const;
+export { SWAGGER_BEARER_AUTH } from '@tc/utils';
 
 export interface SwaggerConfigOptions {
     env?: Env['NODE_ENV'];

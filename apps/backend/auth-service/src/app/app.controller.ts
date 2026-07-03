@@ -29,28 +29,28 @@ export class AppController {
     constructor(private readonly appService: AppService) {}
 
     @Get('me')
-    @ApiResource({ type: GetMeResponse, operationId: 'getMe', status: HttpStatus.OK })
+    @ApiResource({ type: GetMeResponse, operationId: 'getMe', status: HttpStatus.OK, protected: true })
     @ApiResourceExceptions(HttpStatus.UNAUTHORIZED)
     async getMe(@Req() req: Request) {
         return this.appService.getMe(req);
     }
 
     @Patch('me')
-    @ApiResource({ type: UpdateProfileResponseDto, operationId: 'updateProfile', status: HttpStatus.OK })
+    @ApiResource({ type: UpdateProfileResponseDto, operationId: 'updateProfile', status: HttpStatus.OK, protected: true })
     @ApiResourceExceptions(HttpStatus.BAD_REQUEST, HttpStatus.UNAUTHORIZED)
     async updateProfile(@Req() req: Request, @Body() dto: UpdateProfileDto) {
         return this.appService.updateProfile(req, dto);
     }
 
     @Post('change-password')
-    @ApiResource({ type: ChangePasswordResponseDto, operationId: 'changePassword', status: HttpStatus.OK })
+    @ApiResource({ type: ChangePasswordResponseDto, operationId: 'changePassword', status: HttpStatus.OK, protected: true })
     @ApiResourceExceptions(HttpStatus.BAD_REQUEST, HttpStatus.UNAUTHORIZED)
     async changePassword(@Req() req: Request, @Body() dto: ChangePasswordDto) {
         return this.appService.changePassword(req, dto);
     }
 
     @Post('sign-out')
-    @ApiResource({ type: SignOutResponseDto, operationId: 'signOut', status: HttpStatus.OK })
+    @ApiResource({ type: SignOutResponseDto, operationId: 'signOut', status: HttpStatus.OK, protected: true })
     @ApiResourceExceptions(HttpStatus.UNAUTHORIZED)
     async signOut(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
         return this.appService.signOut(req, res);

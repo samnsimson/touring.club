@@ -267,7 +267,8 @@ The receiving service's own `HybridAuthGuard` validates the forwarded token exac
 ### `@tc/utils`
 
 - `DatabaseUtils` — DataSource factory with `SnakeNamingStrategy`
-- `ApiResource` / `ApiResourceExceptions` — Swagger decorator helpers for controllers
+- `ApiResource` / `ApiResourceExceptions` — Swagger decorator helpers for controllers. `ApiResource({ ..., protected: true })` applies `@ApiBearerAuth('bearer')` so the route shows the lock icon in Swagger docs — pass it on every handler that isn't `@Public()`; omit (or leave `false`) on `@Public()` routes. Backing constant `SWAGGER_BEARER_AUTH` lives in `@tc/utils` and is re-exported from `@tc/core` for the `Swagger.build()` `DocumentBuilder.addBearerAuth()` call
+- Services with multipart file upload endpoints (`users-service`, `trips-service`, `messaging-service`) need `"multer"` added to `tsconfig.app.json`'s `compilerOptions.types` array (alongside `"node"`) — otherwise `tsc` can't resolve `@types/multer`'s `Express.Multer.File` global augmentation even though the package is installed; webpack's build may still succeed while a plain `tsc --noEmit` fails
 - `usernameValidator` and other small pure utilities
 - **Put reusable non-domain helpers here** (not in `common` unless truly generic)
 
@@ -374,7 +375,7 @@ The `auth` library uses **Vitest** for adapter tests — place specs in `library
 ### Controllers
 
 - Use `@ApiTags()` on the controller class
-- Use `@ApiResource()` and `@ApiResourceExceptions()` from `@tc/utils` on endpoints
+- Use `@ApiResource()` and `@ApiResourceExceptions()` from `@tc/utils` on endpoints; pass `protected: true` to `@ApiResource()` on any handler that isn't `@Public()` so Swagger UI shows the lock only where auth is actually required
 - DTOs: class-validator decorators + `@ApiProperty()` for Swagger
 - Place DTOs in `src/app/dto/`, export via `dto/index.ts`
 - `AuthGuard` is registered globally via `RootModule` — all routes require a valid JWT access token by default

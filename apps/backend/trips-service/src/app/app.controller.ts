@@ -27,14 +27,14 @@ export class AppController {
     constructor(private readonly appService: AppService) {}
 
     @Post()
-    @ApiResource({ type: CreateTripResponseDto, operationId: 'createTrip', status: HttpStatus.CREATED })
+    @ApiResource({ type: CreateTripResponseDto, operationId: 'createTrip', status: HttpStatus.CREATED, protected: true })
     @ApiResourceExceptions(HttpStatus.BAD_REQUEST, HttpStatus.UNAUTHORIZED)
     async createTrip(@CurrentSession('userId') userId: string, @Body() dto: CreateTripDto) {
         return this.appService.createTrip(userId, dto);
     }
 
     @Get()
-    @ApiResource({ type: ListTripsResponseDto, operationId: 'listMyTrips', status: HttpStatus.OK })
+    @ApiResource({ type: ListTripsResponseDto, operationId: 'listMyTrips', status: HttpStatus.OK, protected: true })
     @ApiResourceExceptions(HttpStatus.UNAUTHORIZED)
     async listMyTrips(@CurrentSession('userId') userId: string) {
         return this.appService.listMyTrips(userId);
@@ -49,7 +49,7 @@ export class AppController {
     }
 
     @Get('users/:userId/travel-history')
-    @ApiResource({ type: TravelHistoryResponseDto, operationId: 'getUserTravelHistory', status: HttpStatus.OK })
+    @ApiResource({ type: TravelHistoryResponseDto, operationId: 'getUserTravelHistory', status: HttpStatus.OK, protected: true })
     @ApiResourceExceptions(HttpStatus.UNAUTHORIZED)
     async getTravelHistory(@Param('userId') userId: string) {
         return this.appService.getTravelHistory(userId);
@@ -64,21 +64,21 @@ export class AppController {
     }
 
     @Post(':tripId/publish')
-    @ApiResource({ type: GetTripResponseDto, operationId: 'publishTrip', status: HttpStatus.OK })
+    @ApiResource({ type: GetTripResponseDto, operationId: 'publishTrip', status: HttpStatus.OK, protected: true })
     @ApiResourceExceptions(HttpStatus.BAD_REQUEST, HttpStatus.NOT_FOUND, HttpStatus.UNAUTHORIZED)
     async publishTrip(@CurrentSession('userId') userId: string, @Param('tripId') tripId: string) {
         return this.appService.publishTrip(userId, tripId);
     }
 
     @Post(':tripId/cancel')
-    @ApiResource({ type: GetTripResponseDto, operationId: 'cancelTrip', status: HttpStatus.OK })
+    @ApiResource({ type: GetTripResponseDto, operationId: 'cancelTrip', status: HttpStatus.OK, protected: true })
     @ApiResourceExceptions(HttpStatus.BAD_REQUEST, HttpStatus.NOT_FOUND, HttpStatus.UNAUTHORIZED)
     async cancelTrip(@CurrentSession('userId') userId: string, @Param('tripId') tripId: string) {
         return this.appService.cancelTrip(userId, tripId);
     }
 
     @Post(':tripId/archive')
-    @ApiResource({ type: GetTripResponseDto, operationId: 'archiveTrip', status: HttpStatus.OK })
+    @ApiResource({ type: GetTripResponseDto, operationId: 'archiveTrip', status: HttpStatus.OK, protected: true })
     @ApiResourceExceptions(HttpStatus.BAD_REQUEST, HttpStatus.NOT_FOUND, HttpStatus.UNAUTHORIZED)
     async archiveTrip(@CurrentSession('userId') userId: string, @Param('tripId') tripId: string) {
         return this.appService.archiveTrip(userId, tripId);
@@ -86,35 +86,35 @@ export class AppController {
 
     @Post(':tripId/cover-image')
     @ApiResourceFileUpload()
-    @ApiResource({ type: UploadTripCoverImageResponseDto, operationId: 'uploadTripCoverImage', status: HttpStatus.OK })
+    @ApiResource({ type: UploadTripCoverImageResponseDto, operationId: 'uploadTripCoverImage', status: HttpStatus.OK, protected: true })
     @ApiResourceExceptions(HttpStatus.BAD_REQUEST, HttpStatus.NOT_FOUND, HttpStatus.UNAUTHORIZED, HttpStatus.UNSUPPORTED_MEDIA_TYPE)
     async uploadTripCoverImage(@CurrentSession('userId') userId: string, @Param('tripId') tripId: string, @UploadedFile() file: Express.Multer.File) {
         return this.appService.uploadCoverImage(userId, tripId, file);
     }
 
     @Post(':tripId/join')
-    @ApiResource({ type: JoinTripResponseDto, operationId: 'joinTrip', status: HttpStatus.OK })
+    @ApiResource({ type: JoinTripResponseDto, operationId: 'joinTrip', status: HttpStatus.OK, protected: true })
     @ApiResourceExceptions(HttpStatus.BAD_REQUEST, HttpStatus.CONFLICT, HttpStatus.NOT_FOUND, HttpStatus.UNAUTHORIZED)
     async joinTrip(@CurrentSession('userId') userId: string, @Param('tripId') tripId: string, @Headers('authorization') authorization: string) {
         return this.appService.joinTrip(userId, tripId, authorization);
     }
 
     @Post(':tripId/leave')
-    @ApiResource({ type: LeaveTripResponseDto, operationId: 'leaveTrip', status: HttpStatus.OK })
+    @ApiResource({ type: LeaveTripResponseDto, operationId: 'leaveTrip', status: HttpStatus.OK, protected: true })
     @ApiResourceExceptions(HttpStatus.NOT_FOUND, HttpStatus.UNAUTHORIZED)
     async leaveTrip(@CurrentSession('userId') userId: string, @Param('tripId') tripId: string, @Headers('authorization') authorization: string) {
         return this.appService.leaveTrip(userId, tripId, authorization);
     }
 
     @Get(':tripId/members')
-    @ApiResource({ type: ListTripMembersResponseDto, operationId: 'listTripMembers', status: HttpStatus.OK })
+    @ApiResource({ type: ListTripMembersResponseDto, operationId: 'listTripMembers', status: HttpStatus.OK, protected: true })
     @ApiResourceExceptions(HttpStatus.NOT_FOUND, HttpStatus.UNAUTHORIZED)
     async listTripMembers(@CurrentSession('userId') userId: string, @Param('tripId') tripId: string) {
         return this.appService.listTripMembers(userId, tripId);
     }
 
     @Post(':tripId/members/:membershipId/approve')
-    @ApiResource({ type: TripMembershipActionResponseDto, operationId: 'approveMembership', status: HttpStatus.OK })
+    @ApiResource({ type: TripMembershipActionResponseDto, operationId: 'approveMembership', status: HttpStatus.OK, protected: true })
     @ApiResourceExceptions(HttpStatus.BAD_REQUEST, HttpStatus.NOT_FOUND, HttpStatus.UNAUTHORIZED)
     async approveMembership(
         @CurrentSession('userId') userId: string,
@@ -126,14 +126,14 @@ export class AppController {
     }
 
     @Post(':tripId/members/:membershipId/reject')
-    @ApiResource({ type: TripMembershipActionResponseDto, operationId: 'rejectMembership', status: HttpStatus.OK })
+    @ApiResource({ type: TripMembershipActionResponseDto, operationId: 'rejectMembership', status: HttpStatus.OK, protected: true })
     @ApiResourceExceptions(HttpStatus.BAD_REQUEST, HttpStatus.NOT_FOUND, HttpStatus.UNAUTHORIZED)
     async rejectMembership(@CurrentSession('userId') userId: string, @Param('tripId') tripId: string, @Param('membershipId') membershipId: string) {
         return this.appService.rejectMembership(userId, tripId, membershipId);
     }
 
     @Delete(':tripId/members/:membershipId')
-    @ApiResource({ type: TripMembershipActionResponseDto, operationId: 'removeMembership', status: HttpStatus.OK })
+    @ApiResource({ type: TripMembershipActionResponseDto, operationId: 'removeMembership', status: HttpStatus.OK, protected: true })
     @ApiResourceExceptions(HttpStatus.BAD_REQUEST, HttpStatus.NOT_FOUND, HttpStatus.UNAUTHORIZED)
     async removeMembership(
         @CurrentSession('userId') userId: string,
@@ -145,14 +145,14 @@ export class AppController {
     }
 
     @Get(':tripId')
-    @ApiResource({ type: GetTripResponseDto, operationId: 'getTrip', status: HttpStatus.OK })
+    @ApiResource({ type: GetTripResponseDto, operationId: 'getTrip', status: HttpStatus.OK, protected: true })
     @ApiResourceExceptions(HttpStatus.NOT_FOUND, HttpStatus.UNAUTHORIZED)
     async getTrip(@CurrentSession('userId') userId: string, @Param('tripId') tripId: string) {
         return this.appService.getTrip(userId, tripId);
     }
 
     @Patch(':tripId')
-    @ApiResource({ type: UpdateTripResponseDto, operationId: 'updateTrip', status: HttpStatus.OK })
+    @ApiResource({ type: UpdateTripResponseDto, operationId: 'updateTrip', status: HttpStatus.OK, protected: true })
     @ApiResourceExceptions(HttpStatus.BAD_REQUEST, HttpStatus.NOT_FOUND, HttpStatus.UNAUTHORIZED)
     async updateTrip(@CurrentSession('userId') userId: string, @Param('tripId') tripId: string, @Body() dto: UpdateTripDto) {
         return this.appService.updateTrip(userId, tripId, dto);
