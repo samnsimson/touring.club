@@ -54,9 +54,9 @@ export class AppService {
         return { messages: messages.map((message) => MessageResponse.from(message)) };
     }
 
-    async sendTripMessage(userId: string, tripId: string, dto: SendMessageDto) {
+    async sendTripMessage(userId: string, tripId: string, dto: SendMessageDto, authorization: string) {
         const conversation = await this.ensureTripConversation(tripId, userId);
-        return this.sendMessage(userId, conversation.id, dto);
+        return this.sendMessage(userId, conversation.id, dto, authorization);
     }
 
     async listMessages(userId: string, conversationId: string) {
@@ -65,21 +65,31 @@ export class AppService {
         return { messages: messages.map((message) => MessageResponse.from(message)) };
     }
 
-    async sendMessage(userId: string, conversationId: string, dto: SendMessageDto) {
+    async sendMessage(userId: string, conversationId: string, dto: SendMessageDto, authorization: string) {
         await this.requireParticipant(conversationId, userId);
-        return this.persistAndBroadcastMessage(conversationId, userId, 'text', dto.body);
+        return this.persistAndBroadcastMessage(conversationId, userId, 'text', dto.body, authorization);
     }
 
-    async uploadMessageAttachment(userId: string, conversationId: string, file: { buffer: Buffer; mimetype: string; originalname: string } | undefined) {
+    async uploadMessageAttachment(
+        userId: string,
+        conversationId: string,
+        file: { buffer: Buffer; mimetype: string; originalname: string } | undefined,
+        authorization: string,
+    ) {
         await this.requireParticipant(conversationId, userId);
         const { messageType, url } = await this.uploadAttachment(conversationId, file);
-        return this.persistAndBroadcastMessage(conversationId, userId, messageType, url);
+        return this.persistAndBroadcastMessage(conversationId, userId, messageType, url, authorization);
     }
 
-    async uploadTripMessageAttachment(userId: string, tripId: string, file: { buffer: Buffer; mimetype: string; originalname: string } | undefined) {
+    async uploadTripMessageAttachment(
+        userId: string,
+        tripId: string,
+        file: { buffer: Buffer; mimetype: string; originalname: string } | undefined,
+        authorization: string,
+    ) {
         const conversation = await this.ensureTripConversation(tripId, userId);
         const { messageType, url } = await this.uploadAttachment(conversation.id, file);
-        return this.persistAndBroadcastMessage(conversation.id, userId, messageType, url);
+        return this.persistAndBroadcastMessage(conversation.id, userId, messageType, url, authorization);
     }
 
     private async uploadAttachment(conversationId: string, file: { buffer: Buffer; mimetype: string; originalname: string } | undefined) {
@@ -102,7 +112,7 @@ export class AppService {
         return { messageType, url };
     }
 
-    private async persistAndBroadcastMessage(conversationId: string, senderId: string, messageType: MessageType, body: string) {
+    private async persistAndBroadcastMessage(conversationId: string, senderId: string, messageType: MessageType, body: string, authorization: string) {
         const message = await this.messages.save(
             this.messages.create({
                 conversation: { id: conversationId } as Conversation,
@@ -114,15 +124,15 @@ export class AppService {
         await this.conversations.update({ id: conversationId }, { updatedAt: new Date() });
         const response = MessageResponse.from(message);
         this.gateway.emitNewMessage(conversationId, response);
-        await this.notifyRecipients(conversationId, senderId, body);
+        await this.notifyRecipients(conversationId, senderId, body, authorization);
         return { message: response };
     }
 
-    private async notifyRecipients(conversationId: string, senderId: string, body: string): Promise<void> {
+    private async notifyRecipients(conversationId: string, senderId: string, body: string, authorization: string): Promise<void> {
         const participants = await this.participants.findByConversationId(conversationId);
         const recipients = participants.filter((participant) => participant.userId !== senderId);
         for (const recipient of recipients) {
-            await this.notifications.createNotification({ userId: recipient.userId, type: 'new_message', title: 'New message', body });
+            await this.notifications.createNotification({ userId: recipient.userId, type: 'new_message', title: 'New message', body }, authorization);
         }
     }
 

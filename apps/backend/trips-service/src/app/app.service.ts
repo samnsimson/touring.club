@@ -131,7 +131,7 @@ export class AppService {
         return { trip: TripResponse.from(trip) };
     }
 
-    async joinTrip(userId: string, tripId: string) {
+    async joinTrip(userId: string, tripId: string, authorization: string) {
         const trip = await this.requireJoinableTrip(tripId);
         if (trip.organizerId === userId) throw new BadRequestException('Organizers cannot join their own trip');
 
@@ -143,20 +143,20 @@ export class AppService {
             if (OPEN_MEMBERSHIP_STATUSES.includes(existing.status)) throw new ConflictException('Already a member of this trip');
             await this.memberships.update({ id: existing.id }, { status });
             const membership = await this.memberships.findByTripAndUser(tripId, userId);
-            await this.emitMembershipSystemEvent(tripId, status === 'active' ? 'member_joined' : 'join_requested', userId, userId);
+            await this.emitMembershipSystemEvent(tripId, status === 'active' ? 'member_joined' : 'join_requested', userId, userId, authorization);
             return { membership: membership ? TripMembershipResponse.from(membership) : null };
         }
 
         const membership = await this.memberships.save(this.memberships.create({ trip: { id: tripId } as Trip, userId, status }));
-        await this.emitMembershipSystemEvent(tripId, status === 'active' ? 'member_joined' : 'join_requested', userId, userId);
+        await this.emitMembershipSystemEvent(tripId, status === 'active' ? 'member_joined' : 'join_requested', userId, userId, authorization);
         return { membership: TripMembershipResponse.from(membership) };
     }
 
-    async leaveTrip(userId: string, tripId: string) {
+    async leaveTrip(userId: string, tripId: string, authorization: string) {
         const membership = await this.requireOpenMembership(tripId, userId);
         await this.memberships.update({ id: membership.id }, { status: 'left' });
         const updated = await this.memberships.findByTripAndUser(tripId, userId);
-        await this.emitMembershipSystemEvent(tripId, 'member_left', userId, userId);
+        await this.emitMembershipSystemEvent(tripId, 'member_left', userId, userId, authorization);
         return { membership: updated ? TripMembershipResponse.from(updated) : null };
     }
 
@@ -166,20 +166,23 @@ export class AppService {
         return { members: members.map((member) => TripMembershipResponse.from(member)) };
     }
 
-    async approveMembership(organizerId: string, tripId: string, membershipId: string) {
+    async approveMembership(organizerId: string, tripId: string, membershipId: string, authorization: string) {
         const trip = await this.requireOwnedTrip(organizerId, tripId);
         const membership = await this.requireMembershipForTrip(tripId, membershipId);
         if (membership.status !== 'pending') throw new BadRequestException('Only pending requests can be approved');
         await this.assertTripHasCapacity(tripId, trip.capacity);
         await this.memberships.update({ id: membershipId }, { status: 'active' });
         const updated = await this.memberships.findByIdForTrip(membershipId, tripId);
-        await this.emitMembershipSystemEvent(tripId, 'member_approved', organizerId, membership.userId);
-        await this.notifications.createNotification({
-            userId: membership.userId,
-            type: 'trip_approved',
-            title: 'Your trip request was approved',
-            body: `You've been approved for ${trip.title}.`,
-        });
+        await this.emitMembershipSystemEvent(tripId, 'member_approved', organizerId, membership.userId, authorization);
+        await this.notifications.createNotification(
+            {
+                userId: membership.userId,
+                type: 'trip_approved',
+                title: 'Your trip request was approved',
+                body: `You've been approved for ${trip.title}.`,
+            },
+            authorization,
+        );
         return { membership: updated ? TripMembershipResponse.from(updated) : null };
     }
 
@@ -192,13 +195,13 @@ export class AppService {
         return { membership: updated ? TripMembershipResponse.from(updated) : null };
     }
 
-    async removeMembership(organizerId: string, tripId: string, membershipId: string) {
+    async removeMembership(organizerId: string, tripId: string, membershipId: string, authorization: string) {
         await this.requireOwnedTrip(organizerId, tripId);
         const membership = await this.requireMembershipForTrip(tripId, membershipId);
         if (membership.status !== 'active') throw new BadRequestException('Only active members can be removed');
         await this.memberships.update({ id: membershipId }, { status: 'removed' });
         const updated = await this.memberships.findByIdForTrip(membershipId, tripId);
-        await this.emitMembershipSystemEvent(tripId, 'member_removed', organizerId, membership.userId);
+        await this.emitMembershipSystemEvent(tripId, 'member_removed', organizerId, membership.userId, authorization);
         return { membership: updated ? TripMembershipResponse.from(updated) : null };
     }
 
@@ -242,7 +245,7 @@ export class AppService {
         if (endDate <= startDate) throw new BadRequestException('End date must be after start date');
     }
 
-    private async emitMembershipSystemEvent(tripId: string, event: TripSystemEventType, actorUserId: string, subjectUserId: string) {
-        await this.messaging.postTripSystemEvent(tripId, { event, actorUserId, subjectUserId });
+    private async emitMembershipSystemEvent(tripId: string, event: TripSystemEventType, actorUserId: string, subjectUserId: string, authorization: string) {
+        await this.messaging.postTripSystemEvent(tripId, { event, actorUserId, subjectUserId }, authorization);
     }
 }

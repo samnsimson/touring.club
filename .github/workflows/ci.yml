@@ -1,0 +1,52 @@
+name: CI
+
+on:
+    push:
+        branches: [main]
+    pull_request:
+
+concurrency:
+    group: ci-${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+env:
+    CI: true
+    NX_NO_CLOUD: true
+    NODE_ENV: test
+
+jobs:
+    ci:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
+            - uses: oven-sh/setup-bun@v2
+              with:
+                  bun-version: 1.2.21
+
+            - name: Install dependencies
+              run: bun install --frozen-lockfile
+
+            - name: Derive Nx SHAs
+              uses: nrwl/nx-set-shas@v4
+
+            - name: Lint affected
+              run: bun nx affected -t lint --base=$NX_BASE --head=$NX_HEAD
+
+            - name: Test affected
+              run: bun nx affected -t test --base=$NX_BASE --head=$NX_HEAD
+
+            - name: Build affected
+              run: bun nx affected -t build --base=$NX_BASE --head=$NX_HEAD
+
+    deploy:
+        needs: ci
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        runs-on: ubuntu-latest
+        steps:
+            - name: Deploy hook
+              run: |
+                  echo "CD hook: publish service artifacts and deploy to your target environment."
+                  echo "Extend this job with docker push, kubectl apply, or your deployment tool of choice."

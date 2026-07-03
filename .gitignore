@@ -52,9 +52,6 @@ test-output
 
 .nx/polygraph
 
-# Local Jenkins overrides
-infra/jenkins/.env
-
 # Next.js
 .next
 out

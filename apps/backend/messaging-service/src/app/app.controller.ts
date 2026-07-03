@@ -1,6 +1,6 @@
-import { Body, Controller, Get, HttpStatus, Param, Post, UploadedFile } from '@nestjs/common';
+import { Body, Controller, Get, Headers, HttpStatus, Param, Post, UploadedFile } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { CurrentSession, Public } from '@tc/auth';
+import { CurrentSession } from '@tc/auth';
 import { ApiResourceFileUpload, ApiResource, ApiResourceExceptions } from '@tc/utils';
 import { AppService } from './app.service';
 import {
@@ -52,22 +52,31 @@ export class AppController {
     @Post('trips/:tripId/messages')
     @ApiResource({ type: SendMessageResponseDto, operationId: 'sendTripMessage', status: HttpStatus.CREATED })
     @ApiResourceExceptions(HttpStatus.BAD_REQUEST, HttpStatus.NOT_FOUND, HttpStatus.UNAUTHORIZED)
-    async sendTripMessage(@CurrentSession('userId') userId: string, @Param('tripId') tripId: string, @Body() dto: SendMessageDto) {
-        return this.appService.sendTripMessage(userId, tripId, dto);
+    async sendTripMessage(
+        @CurrentSession('userId') userId: string,
+        @Param('tripId') tripId: string,
+        @Body() dto: SendMessageDto,
+        @Headers('authorization') authorization: string,
+    ) {
+        return this.appService.sendTripMessage(userId, tripId, dto, authorization);
     }
 
     @Post('trips/:tripId/messages/attachment')
     @ApiResourceFileUpload()
     @ApiResource({ type: UploadMessageAttachmentResponseDto, operationId: 'uploadTripMessageAttachment', status: HttpStatus.CREATED })
     @ApiResourceExceptions(HttpStatus.BAD_REQUEST, HttpStatus.NOT_FOUND, HttpStatus.UNAUTHORIZED, HttpStatus.UNSUPPORTED_MEDIA_TYPE)
-    async uploadTripMessageAttachment(@CurrentSession('userId') userId: string, @Param('tripId') tripId: string, @UploadedFile() file: Express.Multer.File) {
-        return this.appService.uploadTripMessageAttachment(userId, tripId, file);
+    async uploadTripMessageAttachment(
+        @CurrentSession('userId') userId: string,
+        @Param('tripId') tripId: string,
+        @UploadedFile() file: Express.Multer.File,
+        @Headers('authorization') authorization: string,
+    ) {
+        return this.appService.uploadTripMessageAttachment(userId, tripId, file, authorization);
     }
 
-    @Public()
     @Post('internal/trips/:tripId/system-events')
     @ApiResource({ type: PostTripSystemEventResponseDto, operationId: 'postTripSystemEvent', status: HttpStatus.CREATED })
-    @ApiResourceExceptions(HttpStatus.BAD_REQUEST, HttpStatus.NOT_FOUND)
+    @ApiResourceExceptions(HttpStatus.BAD_REQUEST, HttpStatus.NOT_FOUND, HttpStatus.UNAUTHORIZED)
     async postTripSystemEvent(@Param('tripId') tripId: string, @Body() dto: PostTripSystemEventDto) {
         return this.appService.postTripSystemEvent(tripId, dto);
     }
@@ -82,8 +91,13 @@ export class AppController {
     @Post(':conversationId/messages')
     @ApiResource({ type: SendMessageResponseDto, operationId: 'sendMessage', status: HttpStatus.CREATED })
     @ApiResourceExceptions(HttpStatus.BAD_REQUEST, HttpStatus.NOT_FOUND, HttpStatus.UNAUTHORIZED)
-    async sendMessage(@CurrentSession('userId') userId: string, @Param('conversationId') conversationId: string, @Body() dto: SendMessageDto) {
-        return this.appService.sendMessage(userId, conversationId, dto);
+    async sendMessage(
+        @CurrentSession('userId') userId: string,
+        @Param('conversationId') conversationId: string,
+        @Body() dto: SendMessageDto,
+        @Headers('authorization') authorization: string,
+    ) {
+        return this.appService.sendMessage(userId, conversationId, dto, authorization);
     }
 
     @Post(':conversationId/messages/attachment')
@@ -94,7 +108,8 @@ export class AppController {
         @CurrentSession('userId') userId: string,
         @Param('conversationId') conversationId: string,
         @UploadedFile() file: Express.Multer.File,
+        @Headers('authorization') authorization: string,
     ) {
-        return this.appService.uploadMessageAttachment(userId, conversationId, file);
+        return this.appService.uploadMessageAttachment(userId, conversationId, file, authorization);
     }
 }

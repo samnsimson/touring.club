@@ -27,7 +27,11 @@
             "Bash(bun nx lint *)",
             "Bash(bun run *)",
             "Bash(xargs *)",
-            "Bash(grep *)"
+            "Bash(grep *)",
+            "Bash(git add *)",
+            "Bash(git commit *)",
+            "Bash(git pull *)",
+            "Bash(git merge *)"
         ]
     }
 }

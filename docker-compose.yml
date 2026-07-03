@@ -42,44 +42,9 @@ services:
         networks:
             - touring-club
 
-    jenkins:
-        build:
-            context: ./infra/jenkins
-            dockerfile: Dockerfile
-        container_name: touring-club-jenkins
-        restart: unless-stopped
-        ports:
-            - '8080:8080'
-            - '50000:50000'
-        env_file:
-            - path: infra/jenkins/.env
-              required: false
-        environment:
-            CASC_JENKINS_CONFIG: /var/jenkins_home/casc_config
-            JAVA_OPTS: >-
-                -Djenkins.install.runSetupWizard=false
-                -Djava.awt.headless=true
-            JENKINS_ADMIN_PASSWORD: ${JENKINS_ADMIN_PASSWORD:-admin}
-            JENKINS_URL: ${JENKINS_URL:-http://localhost:8080/}
-            GITHUB_USERNAME: ${GITHUB_USERNAME:-samnsimson}
-            GITHUB_TOKEN: ${GITHUB_TOKEN:-}
-            BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-local-dev-better-auth-secret-32chars}
-            JENKINS_DATABASE_URL: postgresql://postgres:postgres@postgres:5432/touring_club
-        volumes:
-            - jenkins_home:/var/jenkins_home
-            - ./infra/jenkins/casc:/var/jenkins_home/casc_config:ro
-            - /var/run/docker.sock:/var/run/docker.sock
-            - .:/workspace:ro
-        depends_on:
-            postgres:
-                condition: service_healthy
-        networks:
-            - touring-club
-
 networks:
     touring-club:
         name: touring-club
 
 volumes:
     touring_club_postgres_data:
-    jenkins_home:
