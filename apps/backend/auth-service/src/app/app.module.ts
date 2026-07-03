@@ -1,12 +1,11 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { AuthModule } from '@tc/auth';
+import { AuthModule, HybridAuthGuard } from '@tc/auth';
 
 @Module({
-    imports: [AuthModule.forRoot()],
+    imports: [AuthModule.forRoot({ guard: HybridAuthGuard })],
     controllers: [AppController],
     providers: [AppService],
-    exports: [AuthModule],
 })
 export class AppModule {}

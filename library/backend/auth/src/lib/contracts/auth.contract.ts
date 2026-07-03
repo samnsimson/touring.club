@@ -1,8 +1,9 @@
-import { ModuleMetadata } from '@nestjs/common';
+import { ModuleMetadata, Type } from '@nestjs/common';
 import { JWTPayload } from 'jose';
 import { Socket } from 'socket.io';
 import { Request } from 'express';
 import type { SendEmailInput } from '../email/email.types';
+import { HybridAuthGuard, KongAuthGuard, StandaloneAuthGuard } from '../guard';
 
 export type EmailSender = {
     send(input: SendEmailInput): void;
@@ -14,6 +15,7 @@ export interface AuthConfig {
 
 export interface AuthModuleOptions {
     emailService?: EmailSender;
+    guard?: Type<HybridAuthGuard | StandaloneAuthGuard | KongAuthGuard>;
     imports?: ModuleMetadata['imports'];
     providers?: ModuleMetadata['providers'];
     exports?: ModuleMetadata['exports'];

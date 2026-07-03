@@ -1,4 +1,3 @@
-import { HybridAuthGuard } from '@tc/auth';
 import { AppModule } from './app/app.module';
 import { validateEnv } from '@tc/config';
 import { bootstrapApplication } from '@tc/core';
@@ -9,7 +8,6 @@ async function bootstrap() {
     await bootstrapApplication({
         globalPrefix: 'api',
         rootModule: AppModule,
-        globalAuthGuard: HybridAuthGuard,
         port: env.TRIPS_SERVICE_PORT ?? 3002,
         swagger: { title: 'Trips Service', description: 'Trip creation and management API' },
     });

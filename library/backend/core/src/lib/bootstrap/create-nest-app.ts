@@ -9,10 +9,10 @@ import { RootModule } from './root.module';
 import { Swagger } from '../swagger';
 import { NestFactory } from '@nestjs/core';
 
-export const createNestApplication = async ({ rootModule, globalPrefix = 'api', configure, swagger, globalAuthGuard }: ApplicationBootstrapOptions) => {
+export const createNestApplication = async ({ rootModule, globalPrefix = 'api', configure, swagger }: ApplicationBootstrapOptions) => {
     const env = validateEnv(process.env);
 
-    const appRoot = RootModule.init(rootModule, { globalAuthGuard });
+    const appRoot = RootModule.init(rootModule);
     const app = await NestFactory.create<NestExpressApplication>(appRoot);
 
     app.setGlobalPrefix(globalPrefix);

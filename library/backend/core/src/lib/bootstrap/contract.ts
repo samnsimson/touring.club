@@ -6,7 +6,6 @@ export interface ApplicationBootstrapOptions {
     rootModule: Type<unknown>;
     swagger?: SwaggerConfigOptions;
     globalPrefix?: string;
-    globalAuthGuard?: Type<unknown>;
     configure?: (app: NestExpressApplication) => void | Promise<void>;
     includeSwagger?: boolean;
     port: number;

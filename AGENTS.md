@@ -203,7 +203,7 @@ Libraries export through `src/index.ts`. Add new public APIs there; keep interna
 - `bootstrapApplication()` — standard NestJS boot (global prefix, versioning, validation pipe, cookies, Swagger, health routes)
 - `RootModule` wires `ConfigModule` + `DatabaseModule` around each app's module
 - **Every new service's `main.ts` should use `bootstrapApplication`**
-- `globalAuthGuard` — optional `ApplicationBootstrapOptions` field; pass a guard `Type` to register it globally via `RootModule` (`APP_GUARD`). All 5 services currently pass `HybridAuthGuard`; per-route exemptions go through `@Public()` from `@tc/auth`, not by omitting the guard. `@tc/core` does not depend on `@tc/auth` — pass the guard class in from the consuming service instead of importing one from `@tc/core`
+- `@tc/core` has no concept of a global auth guard — that's wired entirely through `@tc/auth`'s `AuthModule.forRoot({ guard: HybridAuthGuard })` (see `@tc/auth` below), since `AuthModule` is the module that actually provides `AuthService` and can resolve it for the guard. `@tc/core` still does not depend on `@tc/auth`
 
 ### `@tc/database`
 
@@ -243,10 +243,12 @@ export class ProfileRepository extends BaseRepository<Profile> {
 ### `@tc/auth`
 
 - Shared **auth infrastructure** consumed by all microservices — Better Auth instance (`auth.config.ts`), `AuthModule.forRoot()`, guards, middleware
+- `AuthModule.forRoot({ guard: HybridAuthGuard })` — pass a guard class (`HybridAuthGuard`, `KongAuthGuard`, or `StandaloneAuthGuard`) to register it globally via `APP_GUARD`, **inside `AuthModule` itself** (not `@tc/core`/`RootModule`) since `AuthModule` is what provides `AuthService`, which these guards need injected. All 5 services currently pass `HybridAuthGuard`. Per-route exemptions go through `@Public()` from `@tc/auth`, not by omitting the guard
 - Custom TypeORM adapter for Better Auth (with patched `@hedystia/better-auth-typeorm`)
 - Adapter options in `auth.adapter.options.ts` — `generateMigrations: false` so `auth:generate` writes **entity files only**
 - After Better Auth plugin/config changes: `bun run auth:generate` → review entities → `bun run migration:generate --name=...` → `bun run migration:run`
 - **Not a domain service** — the auth microservice is `apps/backend/auth-service/`; `@tc/auth` provides integration other services import for token validation and guards
+- Guards injecting `AuthService<Auth>` (a generic type) must use an explicit `@Inject(AuthService)` on that constructor param — `@tc/auth` is built with esbuild, whose decorator-metadata emission doesn't reliably resolve generic type arguments, so without `@Inject()` NestJS silently injects `undefined` and any call to `authService.api` throws at request time instead of at boot
 
 #### Internal service-to-service calls (required pattern)
 

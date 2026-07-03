@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { AuthModule } from '@tc/auth';
+import { AuthModule, HybridAuthGuard } from '@tc/auth';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConversationParticipantRepository, ConversationRepository, MessageRepository, TripMembershipRepository, TripRepository } from './repositories';
@@ -7,7 +7,7 @@ import { ConversationsGateway } from './gateways';
 import { NotificationsClient } from './clients';
 
 @Module({
-    imports: [AuthModule.forRoot()],
+    imports: [AuthModule.forRoot({ guard: HybridAuthGuard })],
     controllers: [AppController],
     providers: [
         AppService,
@@ -19,6 +19,5 @@ import { NotificationsClient } from './clients';
         ConversationsGateway,
         NotificationsClient,
     ],
-    exports: [AuthModule],
 })
 export class AppModule {}
