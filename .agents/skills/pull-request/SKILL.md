@@ -11,7 +11,7 @@ Goal: open **one PR** for the current branch with a consistent, reviewable descr
 
 1. **Always ask for the base branch** — every invocation, even if you think you know it. Never assume `main`/`master` silently; branch conventions change (release branches, `develop`, stacked PRs).
 2. **Never force-push or rewrite history** to prepare the PR unless explicitly asked.
-3. **Never push directly to the base branch itself.**
+3. **Never push directly to the base branch itself.** If the current branch _is_ the chosen base branch (or another protected/base-like branch — `main`, `master`, `develop`, `dev`, `staging`, `release/*`), never `git push -u origin <base-branch>` and never open a PR from it. Cut a new branch first (see Step 2).
 4. **Report the PR URL back to the user** when done — that's the deliverable.
 5. If `gh` is not installed/authenticated, say so explicitly and fall back to printing the push command + a compare URL — don't fabricate a PR link.
 
@@ -28,7 +28,32 @@ git branch -r
 git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null   # repo's actual default branch, if set
 ```
 
-### Step 2 — Survey the branch
+### Step 2 — Detect if invoked from a base branch, and cut a working branch if so
+
+```bash
+git branch --show-current
+```
+
+A PR must go **from** a working branch **to** a base branch — never base-to-base. Treat the current branch as a base branch if it equals the `<base-branch>` chosen in Step 1, or matches a common base/protected pattern regardless: `main`, `master`, `develop`, `dev`, `staging`, `release/*`.
+
+If the current branch is **not** a base branch, skip straight to Step 3.
+
+If it **is** a base branch:
+
+1. Check for changes to carry over — uncommitted working-tree changes (`git status`) and/or commits already made directly on the base branch that don't exist upstream (`git log origin/<base-branch>..HEAD --oneline`). If there's nothing to carry (clean tree, no local-only commits), stop and tell the user — there's nothing to open a PR for.
+2. Derive a branch name from the actual changes (diff/log), not the task description alone — same classification the `commit` skill uses:
+    - Format: `<type>/<kebab-case-description>`, matching this repo's dominant convention (`feat/…`, `fix/…`, `chore/…`, etc. — see `git branch -a` for examples like `feat/trip-membership`, `feat/notifications-service`).
+    - `<type>` is one of `feat`, `fix`, `refactor`, `chore`, `docs`, `test`, `perf` (same taxonomy as the `commit` skill).
+    - `<kebab-case-description>` is short (2-5 words) and specific to the change, e.g. `feat/trip-cover-image-upload`, `chore/pull-request-skill-base-branch-guard`.
+3. Create and switch to it from the current position (so any local-only commits/changes come along):
+    ```bash
+    git checkout -b <type>/<kebab-case-description>
+    ```
+4. Tell the user the new branch name before proceeding — don't silently branch and continue.
+
+Then continue to Step 3 using this new branch as `<current-branch>` for the rest of the workflow.
+
+### Step 3 — Survey the branch
 
 Run in parallel:
 
@@ -44,7 +69,7 @@ If the current branch has no commits ahead of `<base-branch>`, stop and tell the
 
 If there are uncommitted changes, ask whether to commit them first (use the `commit` skill) — don't silently leave them out of the PR.
 
-### Step 3 — Run the test report
+### Step 4 — Run the test report
 
 Before drafting the PR body, get real results — don't claim tests pass without running them:
 
@@ -56,15 +81,15 @@ Capture the pass/fail summary per project. If something fails, tell the user and
 
 If the branch touches areas covered by the `qa` skill (broad/cross-cutting changes), consider running the fuller `bun nx run-many -t lint test` instead and note that this ran the full suite, not just affected.
 
-### Step 4 — Push the branch
+### Step 5 — Push the branch
 
 ```bash
 git push -u origin <current-branch>
 ```
 
-Skip if already up to date with remote (check `git status` output from Step 2).
+Skip if already up to date with remote (check `git status` output from Step 3). Never target `<current-branch>` = a base branch here — if Step 2 applied, `<current-branch>` is the freshly created working branch, not the original base branch.
 
-### Step 5 — Draft the PR body
+### Step 6 — Draft the PR body
 
 Use this exact structure:
 
@@ -82,7 +107,7 @@ Use this exact structure:
 
 ## Test Report
 
-<Paste the real output summary from Step 3, e.g.:>
+<Paste the real output summary from Step 4, e.g.:>
 
 - ✅ `lint` — passed for N affected projects
 - ✅ `test` — passed for N affected projects (M tests)
@@ -103,11 +128,11 @@ Use this exact structure:
 
 Omit checklist items that are structurally not applicable to this diff (e.g. drop the migrations line if no entities changed) rather than leaving them unchecked and irrelevant — but don't drop items just because they're inconvenient.
 
-### Step 6 — Create the PR
+### Step 7 — Create the PR
 
 ```bash
 gh pr create --base <base-branch> --title "<type(scope): concise title, ≤70 chars>" --body "$(cat <<'EOF'
-<the drafted body from Step 5>
+<the drafted body from Step 6>
 EOF
 )"
 ```
@@ -129,13 +154,14 @@ git push -u origin <current-branch>
 
 And give them the manual compare URL shape: `https://github.com/<owner>/<repo>/compare/<base-branch>...<current-branch>?expand=1` — do not claim a PR was created if it wasn't.
 
-### Step 7 — Report back
+### Step 8 — Report back
 
-Give the user the PR URL (from `gh pr create` output) or the fallback compare URL. One or two sentences — no need to repeat the full body back to them, they can see it in the PR.
+Give the user the PR URL (from `gh pr create` output) or the fallback compare URL. If a new branch was cut in Step 2, mention its name in the same message. One or two sentences — no need to repeat the full body back to them, they can see it in the PR.
 
 ## What NOT to do
 
 - Don't skip Step 1 because the user "probably means main" — ask every time, per the rules above.
-- Don't write a Test Report section from memory/assumption — run the commands in Step 3.
+- Don't open a PR from a base branch straight to itself, or silently push commits made on `main`/`release`/etc. — cut a new branch per Step 2 first.
+- Don't write a Test Report section from memory/assumption — run the commands in Step 4.
 - Don't use `--admin` to bypass branch protection or merge the PR yourself — this skill only **opens** PRs.
 - Don't include unrelated commits in the PR — if `git log <base>...HEAD` shows commits that don't belong, flag it to the user before proceeding.
