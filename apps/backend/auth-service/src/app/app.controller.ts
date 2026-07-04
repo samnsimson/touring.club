@@ -29,28 +29,28 @@ export class AppController {
     constructor(private readonly appService: AppService) {}
 
     @Get('me')
-    @ApiResource({ type: GetMeResponse, operationId: 'auth.getMe', status: HttpStatus.OK, protected: true })
+    @ApiResource({ type: GetMeResponse, operationId: 'getMe', status: HttpStatus.OK, protected: true })
     @ApiResourceExceptions(HttpStatus.UNAUTHORIZED)
     async getMe(@Req() req: Request) {
         return this.appService.getMe(req);
     }
 
     @Patch('me')
-    @ApiResource({ type: UpdateProfileResponseDto, operationId: 'auth.updateProfile', status: HttpStatus.OK, protected: true })
+    @ApiResource({ type: UpdateProfileResponseDto, operationId: 'updateProfile', status: HttpStatus.OK, protected: true })
     @ApiResourceExceptions(HttpStatus.BAD_REQUEST, HttpStatus.UNAUTHORIZED)
     async updateProfile(@Req() req: Request, @Body() dto: UpdateProfileDto) {
         return this.appService.updateProfile(req, dto);
     }
 
     @Post('change-password')
-    @ApiResource({ type: ChangePasswordResponseDto, operationId: 'auth.changePassword', status: HttpStatus.OK, protected: true })
+    @ApiResource({ type: ChangePasswordResponseDto, operationId: 'changePassword', status: HttpStatus.OK, protected: true })
     @ApiResourceExceptions(HttpStatus.BAD_REQUEST, HttpStatus.UNAUTHORIZED)
     async changePassword(@Req() req: Request, @Body() dto: ChangePasswordDto) {
         return this.appService.changePassword(req, dto);
     }
 
     @Post('sign-out')
-    @ApiResource({ type: SignOutResponseDto, operationId: 'auth.signOut', status: HttpStatus.OK, protected: true })
+    @ApiResource({ type: SignOutResponseDto, operationId: 'signOut', status: HttpStatus.OK, protected: true })
     @ApiResourceExceptions(HttpStatus.UNAUTHORIZED)
     async signOut(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
         return this.appService.signOut(req, res);
@@ -58,7 +58,7 @@ export class AppController {
 
     @Public()
     @Post('sign-up')
-    @ApiResource({ type: SignUpResponse, operationId: 'auth.signUp', status: HttpStatus.CREATED })
+    @ApiResource({ type: SignUpResponse, operationId: 'signUp', status: HttpStatus.CREATED })
     @ApiResourceExceptions(HttpStatus.BAD_REQUEST, HttpStatus.CONFLICT)
     async signUp(@Body() dto: SignUpDto, @Res({ passthrough: true }) res: Response) {
         const response = await this.appService.signUp(dto);
@@ -69,7 +69,7 @@ export class AppController {
 
     @Public()
     @Post('sign-in')
-    @ApiResource({ type: SignInResponse, operationId: 'auth.signIn', status: HttpStatus.OK })
+    @ApiResource({ type: SignInResponse, operationId: 'signIn', status: HttpStatus.OK })
     @ApiResourceExceptions(HttpStatus.BAD_REQUEST, HttpStatus.UNAUTHORIZED)
     async signIn(@Body() dto: SignInDto, @Res({ passthrough: true }) res: Response) {
         const response = await this.appService.signIn(dto);
@@ -80,7 +80,7 @@ export class AppController {
 
     @Public()
     @Post('verify-email')
-    @ApiResource({ type: VerifyEmailResponse, operationId: 'auth.verifyEmail', status: HttpStatus.OK })
+    @ApiResource({ type: VerifyEmailResponse, operationId: 'verifyEmail', status: HttpStatus.OK })
     @ApiResourceExceptions(HttpStatus.BAD_REQUEST)
     async verifyEmail(@Body() dto: VerifyEmailDto, @Res({ passthrough: true }) res: Response) {
         const response = await this.appService.verifyEmail(dto);
@@ -90,7 +90,7 @@ export class AppController {
 
     @Public()
     @Post('forgot-password')
-    @ApiResource({ type: ForgotPasswordResponseDto, operationId: 'auth.forgotPassword', status: HttpStatus.OK })
+    @ApiResource({ type: ForgotPasswordResponseDto, operationId: 'forgotPassword', status: HttpStatus.OK })
     @ApiResourceExceptions(HttpStatus.BAD_REQUEST)
     async forgotPassword(@Body() dto: ForgotPasswordDto) {
         return this.appService.forgotPassword(dto);
@@ -98,7 +98,7 @@ export class AppController {
 
     @Public()
     @Post('reset-password')
-    @ApiResource({ type: ResetPasswordResponseDto, operationId: 'auth.resetPassword', status: HttpStatus.OK })
+    @ApiResource({ type: ResetPasswordResponseDto, operationId: 'resetPassword', status: HttpStatus.OK })
     @ApiResourceExceptions(HttpStatus.BAD_REQUEST)
     async resetPassword(@Body() dto: ResetPasswordDto) {
         return this.appService.resetPassword(dto);

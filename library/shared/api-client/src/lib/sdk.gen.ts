@@ -181,7 +181,7 @@ class HeyApiRegistry<T> {
     }
 }
 
-export class AuthServiceOpenapiAuth extends HeyApiClient {
+export class AuthService extends HeyApiClient {
     public getMe<ThrowOnError extends boolean = false>(
         options?: Options<GetAuthMeData, ThrowOnError>,
     ): RequestResult<GetAuthMeResponses, GetAuthMeErrors, ThrowOnError> {
@@ -286,21 +286,14 @@ export class AuthServiceOpenapiAuth extends HeyApiClient {
     }
 }
 
-export class ApiService extends HeyApiClient {
-    public static readonly __registry: HeyApiRegistry<ApiService> = new HeyApiRegistry<ApiService>();
-
-    constructor(args?: { client?: Client; key?: string }) {
-        super(args);
-        ApiService.__registry.set(this, args?.key);
-    }
-
-    public usersServiceOpenapiGetMyProfile<ThrowOnError extends boolean = false>(
+export class UsersService extends HeyApiClient {
+    public getMyProfile<ThrowOnError extends boolean = false>(
         options?: Options<GetProfilesMeData, ThrowOnError>,
     ): RequestResult<GetProfilesMeResponses, GetProfilesMeErrors, ThrowOnError> {
         return (options?.client ?? this.client).get<GetProfilesMeResponses, GetProfilesMeErrors, ThrowOnError>({ url: '/profiles/me', ...options });
     }
 
-    public usersServiceOpenapiUpdateMyProfile<ThrowOnError extends boolean = false>(
+    public updateMyProfile<ThrowOnError extends boolean = false>(
         options: Options<PatchProfilesMeData, ThrowOnError>,
     ): RequestResult<PatchProfilesMeResponses, PatchProfilesMeErrors, ThrowOnError> {
         return (options.client ?? this.client).patch<PatchProfilesMeResponses, PatchProfilesMeErrors, ThrowOnError>({
@@ -313,7 +306,7 @@ export class ApiService extends HeyApiClient {
         });
     }
 
-    public usersServiceOpenapiUploadMyAvatar<ThrowOnError extends boolean = false>(
+    public uploadMyAvatar<ThrowOnError extends boolean = false>(
         options: Options<PostProfilesMeAvatarData, ThrowOnError>,
     ): RequestResult<PostProfilesMeAvatarResponses, PostProfilesMeAvatarErrors, ThrowOnError> {
         return (options.client ?? this.client).post<PostProfilesMeAvatarResponses, PostProfilesMeAvatarErrors, ThrowOnError>({
@@ -327,7 +320,7 @@ export class ApiService extends HeyApiClient {
         });
     }
 
-    public usersServiceOpenapiGetMyTravelHistory<ThrowOnError extends boolean = false>(
+    public getMyTravelHistory<ThrowOnError extends boolean = false>(
         options: Options<GetProfilesMeTravelHistoryData, ThrowOnError>,
     ): RequestResult<GetProfilesMeTravelHistoryResponses, GetProfilesMeTravelHistoryErrors, ThrowOnError> {
         return (options.client ?? this.client).get<GetProfilesMeTravelHistoryResponses, GetProfilesMeTravelHistoryErrors, ThrowOnError>({
@@ -336,7 +329,7 @@ export class ApiService extends HeyApiClient {
         });
     }
 
-    public usersServiceOpenapiGetPublicProfile<ThrowOnError extends boolean = false>(
+    public getPublicProfile<ThrowOnError extends boolean = false>(
         options: Options<GetProfilesByUserIdData, ThrowOnError>,
     ): RequestResult<GetProfilesByUserIdResponses, GetProfilesByUserIdErrors, ThrowOnError> {
         return (options.client ?? this.client).get<GetProfilesByUserIdResponses, GetProfilesByUserIdErrors, ThrowOnError>({
@@ -344,14 +337,16 @@ export class ApiService extends HeyApiClient {
             ...options,
         });
     }
+}
 
-    public tripsServiceOpenapiListMyTrips<ThrowOnError extends boolean = false>(
+export class TripsService extends HeyApiClient {
+    public listMyTrips<ThrowOnError extends boolean = false>(
         options?: Options<GetTripsData, ThrowOnError>,
     ): RequestResult<GetTripsResponses, GetTripsErrors, ThrowOnError> {
         return (options?.client ?? this.client).get<GetTripsResponses, GetTripsErrors, ThrowOnError>({ url: '/trips', ...options });
     }
 
-    public tripsServiceOpenapiCreateTrip<ThrowOnError extends boolean = false>(
+    public createTrip<ThrowOnError extends boolean = false>(
         options: Options<PostTripsData, ThrowOnError>,
     ): RequestResult<PostTripsResponses, PostTripsErrors, ThrowOnError> {
         return (options.client ?? this.client).post<PostTripsResponses, PostTripsErrors, ThrowOnError>({
@@ -364,13 +359,13 @@ export class ApiService extends HeyApiClient {
         });
     }
 
-    public tripsServiceOpenapiDiscoverTrips<ThrowOnError extends boolean = false>(
+    public discoverTrips<ThrowOnError extends boolean = false>(
         options?: Options<GetTripsDiscoverData, ThrowOnError>,
     ): RequestResult<GetTripsDiscoverResponses, GetTripsDiscoverErrors, ThrowOnError> {
         return (options?.client ?? this.client).get<GetTripsDiscoverResponses, GetTripsDiscoverErrors, ThrowOnError>({ url: '/trips/discover', ...options });
     }
 
-    public tripsServiceOpenapiGetUserTravelHistory<ThrowOnError extends boolean = false>(
+    public getUserTravelHistory<ThrowOnError extends boolean = false>(
         options: Options<GetTripsUsersByUserIdTravelHistoryData, ThrowOnError>,
     ): RequestResult<GetTripsUsersByUserIdTravelHistoryResponses, GetTripsUsersByUserIdTravelHistoryErrors, ThrowOnError> {
         return (options.client ?? this.client).get<GetTripsUsersByUserIdTravelHistoryResponses, GetTripsUsersByUserIdTravelHistoryErrors, ThrowOnError>({
@@ -379,7 +374,7 @@ export class ApiService extends HeyApiClient {
         });
     }
 
-    public tripsServiceOpenapiGetPublicTrip<ThrowOnError extends boolean = false>(
+    public getPublicTrip<ThrowOnError extends boolean = false>(
         options: Options<GetTripsDiscoverByTripIdData, ThrowOnError>,
     ): RequestResult<GetTripsDiscoverByTripIdResponses, GetTripsDiscoverByTripIdErrors, ThrowOnError> {
         return (options.client ?? this.client).get<GetTripsDiscoverByTripIdResponses, GetTripsDiscoverByTripIdErrors, ThrowOnError>({
@@ -388,7 +383,7 @@ export class ApiService extends HeyApiClient {
         });
     }
 
-    public tripsServiceOpenapiPublishTrip<ThrowOnError extends boolean = false>(
+    public publishTrip<ThrowOnError extends boolean = false>(
         options: Options<PostTripsByTripIdPublishData, ThrowOnError>,
     ): RequestResult<PostTripsByTripIdPublishResponses, PostTripsByTripIdPublishErrors, ThrowOnError> {
         return (options.client ?? this.client).post<PostTripsByTripIdPublishResponses, PostTripsByTripIdPublishErrors, ThrowOnError>({
@@ -397,7 +392,7 @@ export class ApiService extends HeyApiClient {
         });
     }
 
-    public tripsServiceOpenapiCancelTrip<ThrowOnError extends boolean = false>(
+    public cancelTrip<ThrowOnError extends boolean = false>(
         options: Options<PostTripsByTripIdCancelData, ThrowOnError>,
     ): RequestResult<PostTripsByTripIdCancelResponses, PostTripsByTripIdCancelErrors, ThrowOnError> {
         return (options.client ?? this.client).post<PostTripsByTripIdCancelResponses, PostTripsByTripIdCancelErrors, ThrowOnError>({
@@ -406,7 +401,7 @@ export class ApiService extends HeyApiClient {
         });
     }
 
-    public tripsServiceOpenapiArchiveTrip<ThrowOnError extends boolean = false>(
+    public archiveTrip<ThrowOnError extends boolean = false>(
         options: Options<PostTripsByTripIdArchiveData, ThrowOnError>,
     ): RequestResult<PostTripsByTripIdArchiveResponses, PostTripsByTripIdArchiveErrors, ThrowOnError> {
         return (options.client ?? this.client).post<PostTripsByTripIdArchiveResponses, PostTripsByTripIdArchiveErrors, ThrowOnError>({
@@ -415,7 +410,7 @@ export class ApiService extends HeyApiClient {
         });
     }
 
-    public tripsServiceOpenapiUploadTripCoverImage<ThrowOnError extends boolean = false>(
+    public uploadTripCoverImage<ThrowOnError extends boolean = false>(
         options: Options<PostTripsByTripIdCoverImageData, ThrowOnError>,
     ): RequestResult<PostTripsByTripIdCoverImageResponses, PostTripsByTripIdCoverImageErrors, ThrowOnError> {
         return (options.client ?? this.client).post<PostTripsByTripIdCoverImageResponses, PostTripsByTripIdCoverImageErrors, ThrowOnError>({
@@ -429,7 +424,7 @@ export class ApiService extends HeyApiClient {
         });
     }
 
-    public tripsServiceOpenapiJoinTrip<ThrowOnError extends boolean = false>(
+    public joinTrip<ThrowOnError extends boolean = false>(
         options: Options<PostTripsByTripIdJoinData, ThrowOnError>,
     ): RequestResult<PostTripsByTripIdJoinResponses, PostTripsByTripIdJoinErrors, ThrowOnError> {
         return (options.client ?? this.client).post<PostTripsByTripIdJoinResponses, PostTripsByTripIdJoinErrors, ThrowOnError>({
@@ -438,7 +433,7 @@ export class ApiService extends HeyApiClient {
         });
     }
 
-    public tripsServiceOpenapiLeaveTrip<ThrowOnError extends boolean = false>(
+    public leaveTrip<ThrowOnError extends boolean = false>(
         options: Options<PostTripsByTripIdLeaveData, ThrowOnError>,
     ): RequestResult<PostTripsByTripIdLeaveResponses, PostTripsByTripIdLeaveErrors, ThrowOnError> {
         return (options.client ?? this.client).post<PostTripsByTripIdLeaveResponses, PostTripsByTripIdLeaveErrors, ThrowOnError>({
@@ -447,7 +442,7 @@ export class ApiService extends HeyApiClient {
         });
     }
 
-    public tripsServiceOpenapiListTripMembers<ThrowOnError extends boolean = false>(
+    public listTripMembers<ThrowOnError extends boolean = false>(
         options: Options<GetTripsByTripIdMembersData, ThrowOnError>,
     ): RequestResult<GetTripsByTripIdMembersResponses, GetTripsByTripIdMembersErrors, ThrowOnError> {
         return (options.client ?? this.client).get<GetTripsByTripIdMembersResponses, GetTripsByTripIdMembersErrors, ThrowOnError>({
@@ -456,7 +451,7 @@ export class ApiService extends HeyApiClient {
         });
     }
 
-    public tripsServiceOpenapiApproveMembership<ThrowOnError extends boolean = false>(
+    public approveMembership<ThrowOnError extends boolean = false>(
         options: Options<PostTripsByTripIdMembersByMembershipIdApproveData, ThrowOnError>,
     ): RequestResult<PostTripsByTripIdMembersByMembershipIdApproveResponses, PostTripsByTripIdMembersByMembershipIdApproveErrors, ThrowOnError> {
         return (options.client ?? this.client).post<
@@ -466,7 +461,7 @@ export class ApiService extends HeyApiClient {
         >({ url: '/trips/{tripId}/members/{membershipId}/approve', ...options });
     }
 
-    public tripsServiceOpenapiRejectMembership<ThrowOnError extends boolean = false>(
+    public rejectMembership<ThrowOnError extends boolean = false>(
         options: Options<PostTripsByTripIdMembersByMembershipIdRejectData, ThrowOnError>,
     ): RequestResult<PostTripsByTripIdMembersByMembershipIdRejectResponses, PostTripsByTripIdMembersByMembershipIdRejectErrors, ThrowOnError> {
         return (options.client ?? this.client).post<
@@ -476,7 +471,7 @@ export class ApiService extends HeyApiClient {
         >({ url: '/trips/{tripId}/members/{membershipId}/reject', ...options });
     }
 
-    public tripsServiceOpenapiRemoveMembership<ThrowOnError extends boolean = false>(
+    public removeMembership<ThrowOnError extends boolean = false>(
         options: Options<DeleteTripsByTripIdMembersByMembershipIdData, ThrowOnError>,
     ): RequestResult<DeleteTripsByTripIdMembersByMembershipIdResponses, DeleteTripsByTripIdMembersByMembershipIdErrors, ThrowOnError> {
         return (options.client ?? this.client).delete<
@@ -486,13 +481,13 @@ export class ApiService extends HeyApiClient {
         >({ url: '/trips/{tripId}/members/{membershipId}', ...options });
     }
 
-    public tripsServiceOpenapiGetTrip<ThrowOnError extends boolean = false>(
+    public getTrip<ThrowOnError extends boolean = false>(
         options: Options<GetTripsByTripIdData, ThrowOnError>,
     ): RequestResult<GetTripsByTripIdResponses, GetTripsByTripIdErrors, ThrowOnError> {
         return (options.client ?? this.client).get<GetTripsByTripIdResponses, GetTripsByTripIdErrors, ThrowOnError>({ url: '/trips/{tripId}', ...options });
     }
 
-    public tripsServiceOpenapiUpdateTrip<ThrowOnError extends boolean = false>(
+    public updateTrip<ThrowOnError extends boolean = false>(
         options: Options<PatchTripsByTripIdData, ThrowOnError>,
     ): RequestResult<PatchTripsByTripIdResponses, PatchTripsByTripIdErrors, ThrowOnError> {
         return (options.client ?? this.client).patch<PatchTripsByTripIdResponses, PatchTripsByTripIdErrors, ThrowOnError>({
@@ -504,14 +499,16 @@ export class ApiService extends HeyApiClient {
             },
         });
     }
+}
 
-    public messagingServiceOpenapiListConversations<ThrowOnError extends boolean = false>(
+export class MessagingService extends HeyApiClient {
+    public listConversations<ThrowOnError extends boolean = false>(
         options?: Options<GetConversationsData, ThrowOnError>,
     ): RequestResult<GetConversationsResponses, GetConversationsErrors, ThrowOnError> {
         return (options?.client ?? this.client).get<GetConversationsResponses, GetConversationsErrors, ThrowOnError>({ url: '/conversations', ...options });
     }
 
-    public messagingServiceOpenapiCreateDirectConversation<ThrowOnError extends boolean = false>(
+    public createDirectConversation<ThrowOnError extends boolean = false>(
         options: Options<PostConversationsData, ThrowOnError>,
     ): RequestResult<PostConversationsResponses, PostConversationsErrors, ThrowOnError> {
         return (options.client ?? this.client).post<PostConversationsResponses, PostConversationsErrors, ThrowOnError>({
@@ -524,7 +521,7 @@ export class ApiService extends HeyApiClient {
         });
     }
 
-    public messagingServiceOpenapiGetTripConversation<ThrowOnError extends boolean = false>(
+    public getTripConversation<ThrowOnError extends boolean = false>(
         options: Options<GetConversationsTripsByTripIdData, ThrowOnError>,
     ): RequestResult<GetConversationsTripsByTripIdResponses, GetConversationsTripsByTripIdErrors, ThrowOnError> {
         return (options.client ?? this.client).get<GetConversationsTripsByTripIdResponses, GetConversationsTripsByTripIdErrors, ThrowOnError>({
@@ -533,7 +530,7 @@ export class ApiService extends HeyApiClient {
         });
     }
 
-    public messagingServiceOpenapiListTripMessages<ThrowOnError extends boolean = false>(
+    public listTripMessages<ThrowOnError extends boolean = false>(
         options: Options<GetConversationsTripsByTripIdMessagesData, ThrowOnError>,
     ): RequestResult<GetConversationsTripsByTripIdMessagesResponses, GetConversationsTripsByTripIdMessagesErrors, ThrowOnError> {
         return (options.client ?? this.client).get<GetConversationsTripsByTripIdMessagesResponses, GetConversationsTripsByTripIdMessagesErrors, ThrowOnError>({
@@ -542,7 +539,7 @@ export class ApiService extends HeyApiClient {
         });
     }
 
-    public messagingServiceOpenapiSendTripMessage<ThrowOnError extends boolean = false>(
+    public sendTripMessage<ThrowOnError extends boolean = false>(
         options: Options<PostConversationsTripsByTripIdMessagesData, ThrowOnError>,
     ): RequestResult<PostConversationsTripsByTripIdMessagesResponses, PostConversationsTripsByTripIdMessagesErrors, ThrowOnError> {
         return (options.client ?? this.client).post<
@@ -559,7 +556,7 @@ export class ApiService extends HeyApiClient {
         });
     }
 
-    public messagingServiceOpenapiUploadTripMessageAttachment<ThrowOnError extends boolean = false>(
+    public uploadTripMessageAttachment<ThrowOnError extends boolean = false>(
         options: Options<PostConversationsTripsByTripIdMessagesAttachmentData, ThrowOnError>,
     ): RequestResult<PostConversationsTripsByTripIdMessagesAttachmentResponses, PostConversationsTripsByTripIdMessagesAttachmentErrors, ThrowOnError> {
         return (options.client ?? this.client).post<
@@ -577,7 +574,7 @@ export class ApiService extends HeyApiClient {
         });
     }
 
-    public messagingServiceOpenapiPostTripSystemEvent<ThrowOnError extends boolean = false>(
+    public postTripSystemEvent<ThrowOnError extends boolean = false>(
         options: Options<PostConversationsInternalTripsByTripIdSystemEventsData, ThrowOnError>,
     ): RequestResult<PostConversationsInternalTripsByTripIdSystemEventsResponses, PostConversationsInternalTripsByTripIdSystemEventsErrors, ThrowOnError> {
         return (options.client ?? this.client).post<
@@ -594,7 +591,7 @@ export class ApiService extends HeyApiClient {
         });
     }
 
-    public messagingServiceOpenapiListMessages<ThrowOnError extends boolean = false>(
+    public listMessages<ThrowOnError extends boolean = false>(
         options: Options<GetConversationsByConversationIdMessagesData, ThrowOnError>,
     ): RequestResult<GetConversationsByConversationIdMessagesResponses, GetConversationsByConversationIdMessagesErrors, ThrowOnError> {
         return (options.client ?? this.client).get<
@@ -604,7 +601,7 @@ export class ApiService extends HeyApiClient {
         >({ url: '/conversations/{conversationId}/messages', ...options });
     }
 
-    public messagingServiceOpenapiSendMessage<ThrowOnError extends boolean = false>(
+    public sendMessage<ThrowOnError extends boolean = false>(
         options: Options<PostConversationsByConversationIdMessagesData, ThrowOnError>,
     ): RequestResult<PostConversationsByConversationIdMessagesResponses, PostConversationsByConversationIdMessagesErrors, ThrowOnError> {
         return (options.client ?? this.client).post<
@@ -621,7 +618,7 @@ export class ApiService extends HeyApiClient {
         });
     }
 
-    public messagingServiceOpenapiUploadMessageAttachment<ThrowOnError extends boolean = false>(
+    public uploadMessageAttachment<ThrowOnError extends boolean = false>(
         options: Options<PostConversationsByConversationIdMessagesAttachmentData, ThrowOnError>,
     ): RequestResult<PostConversationsByConversationIdMessagesAttachmentResponses, PostConversationsByConversationIdMessagesAttachmentErrors, ThrowOnError> {
         return (options.client ?? this.client).post<
@@ -638,14 +635,16 @@ export class ApiService extends HeyApiClient {
             },
         });
     }
+}
 
-    public notificationsServiceOpenapiListNotifications<ThrowOnError extends boolean = false>(
+export class NotificationsService extends HeyApiClient {
+    public listNotifications<ThrowOnError extends boolean = false>(
         options?: Options<GetNotificationsData, ThrowOnError>,
     ): RequestResult<GetNotificationsResponses, GetNotificationsErrors, ThrowOnError> {
         return (options?.client ?? this.client).get<GetNotificationsResponses, GetNotificationsErrors, ThrowOnError>({ url: '/notifications', ...options });
     }
 
-    public notificationsServiceOpenapiCreateNotification<ThrowOnError extends boolean = false>(
+    public createNotification<ThrowOnError extends boolean = false>(
         options: Options<PostNotificationsInternalData, ThrowOnError>,
     ): RequestResult<PostNotificationsInternalResponses, PostNotificationsInternalErrors, ThrowOnError> {
         return (options.client ?? this.client).post<PostNotificationsInternalResponses, PostNotificationsInternalErrors, ThrowOnError>({
@@ -658,7 +657,7 @@ export class ApiService extends HeyApiClient {
         });
     }
 
-    public notificationsServiceOpenapiMarkNotificationRead<ThrowOnError extends boolean = false>(
+    public markNotificationRead<ThrowOnError extends boolean = false>(
         options: Options<PatchNotificationsByNotificationIdReadData, ThrowOnError>,
     ): RequestResult<PatchNotificationsByNotificationIdReadResponses, PatchNotificationsByNotificationIdReadErrors, ThrowOnError> {
         return (options.client ?? this.client).patch<
@@ -667,9 +666,38 @@ export class ApiService extends HeyApiClient {
             ThrowOnError
         >({ url: '/notifications/{notificationId}/read', ...options });
     }
+}
 
-    private _authServiceOpenapiAuth?: AuthServiceOpenapiAuth;
-    get authServiceOpenapiAuth(): AuthServiceOpenapiAuth {
-        return (this._authServiceOpenapiAuth ??= new AuthServiceOpenapiAuth({ client: this.client }));
+export class ApiService extends HeyApiClient {
+    public static readonly __registry: HeyApiRegistry<ApiService> = new HeyApiRegistry<ApiService>();
+
+    constructor(args?: { client?: Client; key?: string }) {
+        super(args);
+        ApiService.__registry.set(this, args?.key);
+    }
+
+    private _authService?: AuthService;
+    get authService(): AuthService {
+        return (this._authService ??= new AuthService({ client: this.client }));
+    }
+
+    private _usersService?: UsersService;
+    get usersService(): UsersService {
+        return (this._usersService ??= new UsersService({ client: this.client }));
+    }
+
+    private _tripsService?: TripsService;
+    get tripsService(): TripsService {
+        return (this._tripsService ??= new TripsService({ client: this.client }));
+    }
+
+    private _messagingService?: MessagingService;
+    get messagingService(): MessagingService {
+        return (this._messagingService ??= new MessagingService({ client: this.client }));
+    }
+
+    private _notificationsService?: NotificationsService;
+    get notificationsService(): NotificationsService {
+        return (this._notificationsService ??= new NotificationsService({ client: this.client }));
     }
 }

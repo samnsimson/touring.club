@@ -11,7 +11,9 @@ export class Swagger {
         config = config.setDescription(options.description ?? 'API description');
         config = config.setVersion(options.version ?? '1.0');
         config = config.addBearerAuth(this.bearerAuthScheme(), SWAGGER_BEARER_AUTH);
-        return SwaggerModule.createDocument(app, config.build());
+        return SwaggerModule.createDocument(app, config.build(), {
+            operationIdFactory: (_, methodKey) => methodKey,
+        });
     }
 
     static init(app: INestApplication, options: SwaggerConfigOptions) {

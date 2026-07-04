@@ -1,4 +1,4 @@
-import { createClient, OperationPath } from '@hey-api/openapi-ts';
+import { createClient } from '@hey-api/openapi-ts';
 
 const SERVICES = ['auth-service', 'users-service', 'trips-service', 'messaging-service', 'notifications-service'] as const;
 
@@ -13,9 +13,8 @@ createClient({
                 strategy: 'single',
                 containerName: 'ApiService',
                 nesting: (operation) => {
-                    console.log(operation);
-                    if (operation.operationId) return operation.operationId.split('.');
-                    return OperationPath.id()(operation);
+                    if (operation.operationId) return operation.operationId.split('_openapi_');
+                    return [operation.id];
                 },
             },
         },
