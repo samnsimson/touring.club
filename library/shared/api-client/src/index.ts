@@ -1,1 +1,3 @@
 export * from './lib';
+export * from './api-client.module';
+export * from './api-client.service';
