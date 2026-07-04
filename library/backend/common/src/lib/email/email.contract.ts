@@ -8,3 +8,11 @@ export type SendEmailInput = {
 export type EmailProvider = {
     send(input: SendEmailInput): Promise<void>;
 };
+
+export type EmailSender = {
+    send(input: SendEmailInput): void;
+};
+
+export interface EmailModuleOptions {
+    global?: boolean;
+}

@@ -1,4 +1,4 @@
-import type { EmailProvider, SendEmailInput } from './email.types';
+import type { EmailProvider, SendEmailInput } from './email.contract';
 
 export class ConsoleEmailProvider implements EmailProvider {
     async send(input: SendEmailInput): Promise<void> {

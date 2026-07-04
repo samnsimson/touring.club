@@ -1,19 +1,19 @@
 import { betterAuth } from 'better-auth';
 import { usernameValidator } from '@tc/utils';
+import { ConfigService } from '@tc/config';
+import { EmailSender, EmailService } from '@tc/common';
 import { typeormAdapter } from '@hedystia/better-auth-typeorm';
 import { AUTH_BASE_PATH, AUTH_BASE_URL } from '../constants/auth.constants';
 import { AUTH_TYPEORM_ADAPTER_OPTIONS } from './auth.adapter.options';
 import { dataSource, env } from './auth.datasource';
-import { EmailService } from '../email';
 import { admin, bearer, emailOTP, openAPI, username, jwt } from 'better-auth/plugins';
-import type { EmailSender } from '../contracts/auth.contract';
 
 export interface CreateAuthOptions {
     emailService?: EmailSender;
 }
 
 export function createAuth(options: CreateAuthOptions = {}) {
-    const emailService = options.emailService ?? new EmailService(env);
+    const emailService = options.emailService ?? new EmailService(new ConfigService(env));
     return betterAuth({
         name: 'Touring Club',
         baseURL: AUTH_BASE_URL,

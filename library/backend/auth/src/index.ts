@@ -7,4 +7,3 @@ export * from './lib/middleware';
 export * from './lib/decorators';
 export * from './lib/guard/index';
 export * from './lib/auth.module';
-export * from './lib/email';

@@ -1,5 +1,5 @@
-import { HttpClient, isHttpError } from '@tc/common';
-import type { EmailProvider, SendEmailInput } from './email.types';
+import { HttpClient, isHttpError } from '../http';
+import type { EmailProvider, SendEmailInput } from './email.contract';
 
 export class ResendEmailProvider implements EmailProvider {
     constructor(
