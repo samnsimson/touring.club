@@ -85,13 +85,18 @@ export class Sdk extends HeyApiClient {
     }
 
     public getMe<ThrowOnError extends boolean = false>(options?: Options<GetMeData, ThrowOnError>): RequestResult<GetMeResponses, GetMeErrors, ThrowOnError> {
-        return (options?.client ?? this.client).get<GetMeResponses, GetMeErrors, ThrowOnError>({ url: '/auth/me', ...options });
+        return (options?.client ?? this.client).get<GetMeResponses, GetMeErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/auth/me',
+            ...options,
+        });
     }
 
     public updateProfile<ThrowOnError extends boolean = false>(
         options: Options<UpdateProfileData, ThrowOnError>,
     ): RequestResult<UpdateProfileResponses, UpdateProfileErrors, ThrowOnError> {
         return (options.client ?? this.client).patch<UpdateProfileResponses, UpdateProfileErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
             url: '/auth/me',
             ...options,
             headers: {
@@ -105,6 +110,7 @@ export class Sdk extends HeyApiClient {
         options: Options<ChangePasswordData, ThrowOnError>,
     ): RequestResult<ChangePasswordResponses, ChangePasswordErrors, ThrowOnError> {
         return (options.client ?? this.client).post<ChangePasswordResponses, ChangePasswordErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
             url: '/auth/change-password',
             ...options,
             headers: {
@@ -117,13 +123,18 @@ export class Sdk extends HeyApiClient {
     public signOut<ThrowOnError extends boolean = false>(
         options?: Options<SignOutData, ThrowOnError>,
     ): RequestResult<SignOutResponses, SignOutErrors, ThrowOnError> {
-        return (options?.client ?? this.client).post<SignOutResponses, SignOutErrors, ThrowOnError>({ url: '/auth/sign-out', ...options });
+        return (options?.client ?? this.client).post<SignOutResponses, SignOutErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/auth/sign-out',
+            ...options,
+        });
     }
 
     public signUp<ThrowOnError extends boolean = false>(
         options: Options<SignUpData, ThrowOnError>,
     ): RequestResult<SignUpResponses, SignUpErrors, ThrowOnError> {
         return (options.client ?? this.client).post<SignUpResponses, SignUpErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
             url: '/auth/sign-up',
             ...options,
             headers: {
@@ -137,6 +148,7 @@ export class Sdk extends HeyApiClient {
         options: Options<SignInData, ThrowOnError>,
     ): RequestResult<SignInResponses, SignInErrors, ThrowOnError> {
         return (options.client ?? this.client).post<SignInResponses, SignInErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
             url: '/auth/sign-in',
             ...options,
             headers: {
@@ -150,6 +162,7 @@ export class Sdk extends HeyApiClient {
         options: Options<VerifyEmailData, ThrowOnError>,
     ): RequestResult<VerifyEmailResponses, VerifyEmailErrors, ThrowOnError> {
         return (options.client ?? this.client).post<VerifyEmailResponses, VerifyEmailErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
             url: '/auth/verify-email',
             ...options,
             headers: {
@@ -163,6 +176,7 @@ export class Sdk extends HeyApiClient {
         options: Options<ForgotPasswordData, ThrowOnError>,
     ): RequestResult<ForgotPasswordResponses, ForgotPasswordErrors, ThrowOnError> {
         return (options.client ?? this.client).post<ForgotPasswordResponses, ForgotPasswordErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
             url: '/auth/forgot-password',
             ...options,
             headers: {
@@ -176,6 +190,7 @@ export class Sdk extends HeyApiClient {
         options: Options<ResetPasswordData, ThrowOnError>,
     ): RequestResult<ResetPasswordResponses, ResetPasswordErrors, ThrowOnError> {
         return (options.client ?? this.client).post<ResetPasswordResponses, ResetPasswordErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
             url: '/auth/reset-password',
             ...options,
             headers: {

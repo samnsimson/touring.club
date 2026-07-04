@@ -65,6 +65,10 @@ export type CreateNotificationErrors = {
      * Exception for status 400
      */
     400: unknown;
+    /**
+     * Exception for status 401
+     */
+    401: unknown;
 };
 
 export type CreateNotificationResponses = {

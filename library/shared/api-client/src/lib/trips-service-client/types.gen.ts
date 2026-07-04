@@ -354,6 +354,9 @@ export type UploadTripCoverImageResponse = UploadTripCoverImageResponses[keyof U
 
 export type JoinTripData = {
     body?: never;
+    headers: {
+        authorization: string;
+    };
     path: {
         tripId: string;
     };
@@ -388,6 +391,9 @@ export type JoinTripResponse = JoinTripResponses[keyof JoinTripResponses];
 
 export type LeaveTripData = {
     body?: never;
+    headers: {
+        authorization: string;
+    };
     path: {
         tripId: string;
     };
@@ -440,6 +446,9 @@ export type ListTripMembersResponse = ListTripMembersResponses[keyof ListTripMem
 
 export type ApproveMembershipData = {
     body?: never;
+    headers: {
+        authorization: string;
+    };
     path: {
         tripId: string;
         membershipId: string;
@@ -502,6 +511,9 @@ export type RejectMembershipResponse = RejectMembershipResponses[keyof RejectMem
 
 export type RemoveMembershipData = {
     body?: never;
+    headers: {
+        authorization: string;
+    };
     path: {
         tripId: string;
         membershipId: string;

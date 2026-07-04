@@ -111,13 +111,18 @@ export class Sdk extends HeyApiClient {
     public listMyTrips<ThrowOnError extends boolean = false>(
         options?: Options<ListMyTripsData, ThrowOnError>,
     ): RequestResult<ListMyTripsResponses, ListMyTripsErrors, ThrowOnError> {
-        return (options?.client ?? this.client).get<ListMyTripsResponses, ListMyTripsErrors, ThrowOnError>({ url: '/trips', ...options });
+        return (options?.client ?? this.client).get<ListMyTripsResponses, ListMyTripsErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/trips',
+            ...options,
+        });
     }
 
     public createTrip<ThrowOnError extends boolean = false>(
         options: Options<CreateTripData, ThrowOnError>,
     ): RequestResult<CreateTripResponses, CreateTripErrors, ThrowOnError> {
         return (options.client ?? this.client).post<CreateTripResponses, CreateTripErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
             url: '/trips',
             ...options,
             headers: {
@@ -130,13 +135,18 @@ export class Sdk extends HeyApiClient {
     public discoverTrips<ThrowOnError extends boolean = false>(
         options?: Options<DiscoverTripsData, ThrowOnError>,
     ): RequestResult<DiscoverTripsResponses, DiscoverTripsErrors, ThrowOnError> {
-        return (options?.client ?? this.client).get<DiscoverTripsResponses, DiscoverTripsErrors, ThrowOnError>({ url: '/trips/discover', ...options });
+        return (options?.client ?? this.client).get<DiscoverTripsResponses, DiscoverTripsErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/trips/discover',
+            ...options,
+        });
     }
 
     public getUserTravelHistory<ThrowOnError extends boolean = false>(
         options: Options<GetUserTravelHistoryData, ThrowOnError>,
     ): RequestResult<GetUserTravelHistoryResponses, GetUserTravelHistoryErrors, ThrowOnError> {
         return (options.client ?? this.client).get<GetUserTravelHistoryResponses, GetUserTravelHistoryErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
             url: '/trips/users/{userId}/travel-history',
             ...options,
         });
@@ -145,25 +155,41 @@ export class Sdk extends HeyApiClient {
     public getPublicTrip<ThrowOnError extends boolean = false>(
         options: Options<GetPublicTripData, ThrowOnError>,
     ): RequestResult<GetPublicTripResponses, GetPublicTripErrors, ThrowOnError> {
-        return (options.client ?? this.client).get<GetPublicTripResponses, GetPublicTripErrors, ThrowOnError>({ url: '/trips/discover/{tripId}', ...options });
+        return (options.client ?? this.client).get<GetPublicTripResponses, GetPublicTripErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/trips/discover/{tripId}',
+            ...options,
+        });
     }
 
     public publishTrip<ThrowOnError extends boolean = false>(
         options: Options<PublishTripData, ThrowOnError>,
     ): RequestResult<PublishTripResponses, PublishTripErrors, ThrowOnError> {
-        return (options.client ?? this.client).post<PublishTripResponses, PublishTripErrors, ThrowOnError>({ url: '/trips/{tripId}/publish', ...options });
+        return (options.client ?? this.client).post<PublishTripResponses, PublishTripErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/trips/{tripId}/publish',
+            ...options,
+        });
     }
 
     public cancelTrip<ThrowOnError extends boolean = false>(
         options: Options<CancelTripData, ThrowOnError>,
     ): RequestResult<CancelTripResponses, CancelTripErrors, ThrowOnError> {
-        return (options.client ?? this.client).post<CancelTripResponses, CancelTripErrors, ThrowOnError>({ url: '/trips/{tripId}/cancel', ...options });
+        return (options.client ?? this.client).post<CancelTripResponses, CancelTripErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/trips/{tripId}/cancel',
+            ...options,
+        });
     }
 
     public archiveTrip<ThrowOnError extends boolean = false>(
         options: Options<ArchiveTripData, ThrowOnError>,
     ): RequestResult<ArchiveTripResponses, ArchiveTripErrors, ThrowOnError> {
-        return (options.client ?? this.client).post<ArchiveTripResponses, ArchiveTripErrors, ThrowOnError>({ url: '/trips/{tripId}/archive', ...options });
+        return (options.client ?? this.client).post<ArchiveTripResponses, ArchiveTripErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/trips/{tripId}/archive',
+            ...options,
+        });
     }
 
     public uploadTripCoverImage<ThrowOnError extends boolean = false>(
@@ -171,6 +197,7 @@ export class Sdk extends HeyApiClient {
     ): RequestResult<UploadTripCoverImageResponses, UploadTripCoverImageErrors, ThrowOnError> {
         return (options.client ?? this.client).post<UploadTripCoverImageResponses, UploadTripCoverImageErrors, ThrowOnError>({
             ...formDataBodySerializer,
+            security: [{ scheme: 'bearer', type: 'http' }],
             url: '/trips/{tripId}/cover-image',
             ...options,
             headers: {
@@ -183,19 +210,28 @@ export class Sdk extends HeyApiClient {
     public joinTrip<ThrowOnError extends boolean = false>(
         options: Options<JoinTripData, ThrowOnError>,
     ): RequestResult<JoinTripResponses, JoinTripErrors, ThrowOnError> {
-        return (options.client ?? this.client).post<JoinTripResponses, JoinTripErrors, ThrowOnError>({ url: '/trips/{tripId}/join', ...options });
+        return (options.client ?? this.client).post<JoinTripResponses, JoinTripErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/trips/{tripId}/join',
+            ...options,
+        });
     }
 
     public leaveTrip<ThrowOnError extends boolean = false>(
         options: Options<LeaveTripData, ThrowOnError>,
     ): RequestResult<LeaveTripResponses, LeaveTripErrors, ThrowOnError> {
-        return (options.client ?? this.client).post<LeaveTripResponses, LeaveTripErrors, ThrowOnError>({ url: '/trips/{tripId}/leave', ...options });
+        return (options.client ?? this.client).post<LeaveTripResponses, LeaveTripErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/trips/{tripId}/leave',
+            ...options,
+        });
     }
 
     public listTripMembers<ThrowOnError extends boolean = false>(
         options: Options<ListTripMembersData, ThrowOnError>,
     ): RequestResult<ListTripMembersResponses, ListTripMembersErrors, ThrowOnError> {
         return (options.client ?? this.client).get<ListTripMembersResponses, ListTripMembersErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
             url: '/trips/{tripId}/members',
             ...options,
         });
@@ -205,6 +241,7 @@ export class Sdk extends HeyApiClient {
         options: Options<ApproveMembershipData, ThrowOnError>,
     ): RequestResult<ApproveMembershipResponses, ApproveMembershipErrors, ThrowOnError> {
         return (options.client ?? this.client).post<ApproveMembershipResponses, ApproveMembershipErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
             url: '/trips/{tripId}/members/{membershipId}/approve',
             ...options,
         });
@@ -214,6 +251,7 @@ export class Sdk extends HeyApiClient {
         options: Options<RejectMembershipData, ThrowOnError>,
     ): RequestResult<RejectMembershipResponses, RejectMembershipErrors, ThrowOnError> {
         return (options.client ?? this.client).post<RejectMembershipResponses, RejectMembershipErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
             url: '/trips/{tripId}/members/{membershipId}/reject',
             ...options,
         });
@@ -223,6 +261,7 @@ export class Sdk extends HeyApiClient {
         options: Options<RemoveMembershipData, ThrowOnError>,
     ): RequestResult<RemoveMembershipResponses, RemoveMembershipErrors, ThrowOnError> {
         return (options.client ?? this.client).delete<RemoveMembershipResponses, RemoveMembershipErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
             url: '/trips/{tripId}/members/{membershipId}',
             ...options,
         });
@@ -231,13 +270,18 @@ export class Sdk extends HeyApiClient {
     public getTrip<ThrowOnError extends boolean = false>(
         options: Options<GetTripData, ThrowOnError>,
     ): RequestResult<GetTripResponses, GetTripErrors, ThrowOnError> {
-        return (options.client ?? this.client).get<GetTripResponses, GetTripErrors, ThrowOnError>({ url: '/trips/{tripId}', ...options });
+        return (options.client ?? this.client).get<GetTripResponses, GetTripErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/trips/{tripId}',
+            ...options,
+        });
     }
 
     public updateTrip<ThrowOnError extends boolean = false>(
         options: Options<UpdateTripData, ThrowOnError>,
     ): RequestResult<UpdateTripResponses, UpdateTripErrors, ThrowOnError> {
         return (options.client ?? this.client).patch<UpdateTripResponses, UpdateTripErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
             url: '/trips/{tripId}',
             ...options,
             headers: {

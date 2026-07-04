@@ -69,13 +69,18 @@ export class Sdk extends HeyApiClient {
     public listNotifications<ThrowOnError extends boolean = false>(
         options?: Options<ListNotificationsData, ThrowOnError>,
     ): RequestResult<ListNotificationsResponses, ListNotificationsErrors, ThrowOnError> {
-        return (options?.client ?? this.client).get<ListNotificationsResponses, ListNotificationsErrors, ThrowOnError>({ url: '/notifications', ...options });
+        return (options?.client ?? this.client).get<ListNotificationsResponses, ListNotificationsErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/notifications',
+            ...options,
+        });
     }
 
     public createNotification<ThrowOnError extends boolean = false>(
         options: Options<CreateNotificationData, ThrowOnError>,
     ): RequestResult<CreateNotificationResponses, CreateNotificationErrors, ThrowOnError> {
         return (options.client ?? this.client).post<CreateNotificationResponses, CreateNotificationErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
             url: '/notifications/internal',
             ...options,
             headers: {
@@ -89,6 +94,7 @@ export class Sdk extends HeyApiClient {
         options: Options<MarkNotificationReadData, ThrowOnError>,
     ): RequestResult<MarkNotificationReadResponses, MarkNotificationReadErrors, ThrowOnError> {
         return (options.client ?? this.client).patch<MarkNotificationReadResponses, MarkNotificationReadErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
             url: '/notifications/{notificationId}/read',
             ...options,
         });

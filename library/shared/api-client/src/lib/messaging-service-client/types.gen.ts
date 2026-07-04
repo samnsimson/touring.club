@@ -158,6 +158,9 @@ export type ListTripMessagesResponse = ListTripMessagesResponses[keyof ListTripM
 
 export type SendTripMessageData = {
     body: SendMessageDto;
+    headers: {
+        authorization: string;
+    };
     path: {
         tripId: string;
     };
@@ -189,6 +192,9 @@ export type SendTripMessageResponse = SendTripMessageResponses[keyof SendTripMes
 export type UploadTripMessageAttachmentData = {
     body: {
         file?: Blob | File;
+    };
+    headers: {
+        authorization: string;
     };
     path: {
         tripId: string;
@@ -237,6 +243,10 @@ export type PostTripSystemEventErrors = {
      */
     400: unknown;
     /**
+     * Exception for status 401
+     */
+    401: unknown;
+    /**
      * Exception for status 404
      */
     404: unknown;
@@ -276,6 +286,9 @@ export type ListMessagesResponse = ListMessagesResponses[keyof ListMessagesRespo
 
 export type SendMessageData = {
     body: SendMessageDto;
+    headers: {
+        authorization: string;
+    };
     path: {
         conversationId: string;
     };
@@ -307,6 +320,9 @@ export type SendMessageResponse = SendMessageResponses[keyof SendMessageResponse
 export type UploadMessageAttachmentData = {
     body: {
         file?: Blob | File;
+    };
+    headers: {
+        authorization: string;
     };
     path: {
         conversationId: string;

@@ -90,13 +90,18 @@ export class Sdk extends HeyApiClient {
     public listConversations<ThrowOnError extends boolean = false>(
         options?: Options<ListConversationsData, ThrowOnError>,
     ): RequestResult<ListConversationsResponses, ListConversationsErrors, ThrowOnError> {
-        return (options?.client ?? this.client).get<ListConversationsResponses, ListConversationsErrors, ThrowOnError>({ url: '/conversations', ...options });
+        return (options?.client ?? this.client).get<ListConversationsResponses, ListConversationsErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/conversations',
+            ...options,
+        });
     }
 
     public createDirectConversation<ThrowOnError extends boolean = false>(
         options: Options<CreateDirectConversationData, ThrowOnError>,
     ): RequestResult<CreateDirectConversationResponses, CreateDirectConversationErrors, ThrowOnError> {
         return (options.client ?? this.client).post<CreateDirectConversationResponses, CreateDirectConversationErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
             url: '/conversations',
             ...options,
             headers: {
@@ -110,6 +115,7 @@ export class Sdk extends HeyApiClient {
         options: Options<GetTripConversationData, ThrowOnError>,
     ): RequestResult<GetTripConversationResponses, GetTripConversationErrors, ThrowOnError> {
         return (options.client ?? this.client).get<GetTripConversationResponses, GetTripConversationErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
             url: '/conversations/trips/{tripId}',
             ...options,
         });
@@ -119,6 +125,7 @@ export class Sdk extends HeyApiClient {
         options: Options<ListTripMessagesData, ThrowOnError>,
     ): RequestResult<ListTripMessagesResponses, ListTripMessagesErrors, ThrowOnError> {
         return (options.client ?? this.client).get<ListTripMessagesResponses, ListTripMessagesErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
             url: '/conversations/trips/{tripId}/messages',
             ...options,
         });
@@ -128,6 +135,7 @@ export class Sdk extends HeyApiClient {
         options: Options<SendTripMessageData, ThrowOnError>,
     ): RequestResult<SendTripMessageResponses, SendTripMessageErrors, ThrowOnError> {
         return (options.client ?? this.client).post<SendTripMessageResponses, SendTripMessageErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
             url: '/conversations/trips/{tripId}/messages',
             ...options,
             headers: {
@@ -142,6 +150,7 @@ export class Sdk extends HeyApiClient {
     ): RequestResult<UploadTripMessageAttachmentResponses, UploadTripMessageAttachmentErrors, ThrowOnError> {
         return (options.client ?? this.client).post<UploadTripMessageAttachmentResponses, UploadTripMessageAttachmentErrors, ThrowOnError>({
             ...formDataBodySerializer,
+            security: [{ scheme: 'bearer', type: 'http' }],
             url: '/conversations/trips/{tripId}/messages/attachment',
             ...options,
             headers: {
@@ -155,6 +164,7 @@ export class Sdk extends HeyApiClient {
         options: Options<PostTripSystemEventData, ThrowOnError>,
     ): RequestResult<PostTripSystemEventResponses, PostTripSystemEventErrors, ThrowOnError> {
         return (options.client ?? this.client).post<PostTripSystemEventResponses, PostTripSystemEventErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
             url: '/conversations/internal/trips/{tripId}/system-events',
             ...options,
             headers: {
@@ -168,6 +178,7 @@ export class Sdk extends HeyApiClient {
         options: Options<ListMessagesData, ThrowOnError>,
     ): RequestResult<ListMessagesResponses, ListMessagesErrors, ThrowOnError> {
         return (options.client ?? this.client).get<ListMessagesResponses, ListMessagesErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
             url: '/conversations/{conversationId}/messages',
             ...options,
         });
@@ -177,6 +188,7 @@ export class Sdk extends HeyApiClient {
         options: Options<SendMessageData, ThrowOnError>,
     ): RequestResult<SendMessageResponses, SendMessageErrors, ThrowOnError> {
         return (options.client ?? this.client).post<SendMessageResponses, SendMessageErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
             url: '/conversations/{conversationId}/messages',
             ...options,
             headers: {
@@ -191,6 +203,7 @@ export class Sdk extends HeyApiClient {
     ): RequestResult<UploadMessageAttachmentResponses, UploadMessageAttachmentErrors, ThrowOnError> {
         return (options.client ?? this.client).post<UploadMessageAttachmentResponses, UploadMessageAttachmentErrors, ThrowOnError>({
             ...formDataBodySerializer,
+            security: [{ scheme: 'bearer', type: 'http' }],
             url: '/conversations/{conversationId}/messages/attachment',
             ...options,
             headers: {

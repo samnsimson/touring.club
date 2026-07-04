@@ -75,13 +75,18 @@ export class Sdk extends HeyApiClient {
     public getMyProfile<ThrowOnError extends boolean = false>(
         options?: Options<GetMyProfileData, ThrowOnError>,
     ): RequestResult<GetMyProfileResponses, GetMyProfileErrors, ThrowOnError> {
-        return (options?.client ?? this.client).get<GetMyProfileResponses, GetMyProfileErrors, ThrowOnError>({ url: '/profiles/me', ...options });
+        return (options?.client ?? this.client).get<GetMyProfileResponses, GetMyProfileErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/profiles/me',
+            ...options,
+        });
     }
 
     public updateMyProfile<ThrowOnError extends boolean = false>(
         options: Options<UpdateMyProfileData, ThrowOnError>,
     ): RequestResult<UpdateMyProfileResponses, UpdateMyProfileErrors, ThrowOnError> {
         return (options.client ?? this.client).patch<UpdateMyProfileResponses, UpdateMyProfileErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
             url: '/profiles/me',
             ...options,
             headers: {
@@ -96,6 +101,7 @@ export class Sdk extends HeyApiClient {
     ): RequestResult<UploadMyAvatarResponses, UploadMyAvatarErrors, ThrowOnError> {
         return (options.client ?? this.client).post<UploadMyAvatarResponses, UploadMyAvatarErrors, ThrowOnError>({
             ...formDataBodySerializer,
+            security: [{ scheme: 'bearer', type: 'http' }],
             url: '/profiles/me/avatar',
             ...options,
             headers: {
@@ -109,6 +115,7 @@ export class Sdk extends HeyApiClient {
         options: Options<GetMyTravelHistoryData, ThrowOnError>,
     ): RequestResult<GetMyTravelHistoryResponses, GetMyTravelHistoryErrors, ThrowOnError> {
         return (options.client ?? this.client).get<GetMyTravelHistoryResponses, GetMyTravelHistoryErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
             url: '/profiles/me/travel-history',
             ...options,
         });
@@ -117,6 +124,10 @@ export class Sdk extends HeyApiClient {
     public getPublicProfile<ThrowOnError extends boolean = false>(
         options: Options<GetPublicProfileData, ThrowOnError>,
     ): RequestResult<GetPublicProfileResponses, GetPublicProfileErrors, ThrowOnError> {
-        return (options.client ?? this.client).get<GetPublicProfileResponses, GetPublicProfileErrors, ThrowOnError>({ url: '/profiles/{userId}', ...options });
+        return (options.client ?? this.client).get<GetPublicProfileResponses, GetPublicProfileErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/profiles/{userId}',
+            ...options,
+        });
     }
 }
