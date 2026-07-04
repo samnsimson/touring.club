@@ -197,6 +197,7 @@ Libraries export through `src/index.ts`. Add new public APIs there; keep interna
 - Zod `EnvSchema` and `validateEnv()` for all environment variables
 - `ConfigModule` / `ConfigService` for typed config access
 - **Add new env vars here first**, then reference via `ConfigService` or `validateEnv(process.env)`
+- `resolveEnvFilePath()` — `ConfigModule.forRoot()` uses this by default (unless `envFilePath` is explicitly passed) to compute a cascading dotenv lookup based on `NODE_ENV`: `.env.<NODE_ENV>.local` → `.env.local` → `.env.<NODE_ENV>` → `.env`. A variable already present in the real process environment (shell, container, CI) always wins over every file in that list. Only `.env.example` / `.env.*.example` templates are committed — every real `.env*` file is gitignored; copy the matching example and fill in real values. Bun's CLI also auto-loads these same files with its own precedence when running via `bun nx serve`/`bun run` — this cascade is what makes the compiled output (`node dist/main.js`, e.g. in a future container) behave the same way
 
 ### `@tc/core`
 

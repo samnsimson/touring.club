@@ -3,6 +3,7 @@ import { ConfigModule as NestConfigModule, ConfigService as NestConfigService } 
 import { CONFIG_ENV, ConfigModuleOptions } from './config.contract';
 import { ConfigService } from './config.service';
 import { Env, envKeys } from './env.schema';
+import { resolveEnvFilePath } from './resolve-env-file-path';
 import { validateEnv } from './validate-env';
 
 @Module({})
@@ -14,7 +15,7 @@ export class ConfigModule {
             imports: [
                 NestConfigModule.forRoot({
                     isGlobal: true,
-                    envFilePath: options.envFilePath,
+                    envFilePath: options.envFilePath ?? resolveEnvFilePath(),
                     expandVariables: true,
                     load: options.load,
                     validate: validateEnv,

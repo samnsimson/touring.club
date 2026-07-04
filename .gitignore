@@ -12,6 +12,18 @@ apps/backend/*/openapi
 # dependencies
 node_modules
 
+# env files — real values (local dev secrets, per-env overrides) never get committed;
+# only *.example templates should be tracked
+.env
+.env.local
+.env.*.local
+.env.development
+.env.staging
+.env.production
+.env.test
+!.env.example
+!.env.*.example
+
 # IDEs and editors
 /.idea
 .project
