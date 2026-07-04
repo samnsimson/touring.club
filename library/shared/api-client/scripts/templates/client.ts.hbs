@@ -6,9 +6,8 @@ import { Sdk as {{sdkImport}} } from './lib/{{service}}-client';
 import { createClient as {{createClientImport}} } from './lib/{{service}}-client/client';
 {{/each}}
 
-export interface ApiClientConfig {
-    baseUrl?: string;
-}
+import { baseClientConfig } from './utils/client.utils';
+import { ApiClientConfig } from './contract/client.contract';
 
 export class ApiClient {
 {{#each services}}
@@ -17,7 +16,7 @@ export class ApiClient {
 
     constructor(config: ApiClientConfig = {}) {
 {{#each services}}
-        this.{{field}} = new {{sdkImport}}({ client: {{createClientImport}}({ baseUrl: config.baseUrl }) });
+        this.{{field}} = new {{sdkImport}}({ client: {{createClientImport}}(baseClientConfig(config)) });
 {{/each}}
     }
 }

@@ -1,4 +1,5 @@
 export * from './client';
+export * from './contract/client.contract';
 export * as AuthClient from './lib/auth-service-client';
 export * as MessagingClient from './lib/messaging-service-client';
 export * as NotificationsClient from './lib/notifications-service-client';

@@ -1,31 +1,36 @@
-import { HttpClient } from '@tc/common';
+import { ApiClient } from '@tc/api-client';
 import { ConfigService } from '@tc/config';
 import { MessagingClient } from '../../src/app/clients/messaging.client';
+
+jest.mock('@tc/api-client');
 
 describe('MessagingClient', () => {
     let client: MessagingClient;
     let config: jest.Mocked<Pick<ConfigService, 'get'>>;
-    let http: jest.Mocked<Pick<HttpClient, 'post'>>;
+    let postTripSystemEvent: jest.Mock;
 
     beforeEach(() => {
         config = { get: jest.fn().mockReturnValue('http://messaging-service:3003') };
-        http = { post: jest.fn() };
-        client = new MessagingClient(config as ConfigService, http as HttpClient);
+        postTripSystemEvent = jest.fn();
+        (ApiClient as jest.Mock).mockImplementation(() => ({ messagingClient: { postTripSystemEvent } }));
+        client = new MessagingClient(config as ConfigService);
     });
 
     describe('postTripSystemEvent', () => {
         it('posts a system event to the messaging service', async () => {
-            http.post.mockResolvedValue({ data: {} } as Awaited<ReturnType<HttpClient['post']>>);
+            postTripSystemEvent.mockResolvedValue({ data: {} });
             const payload = { event: 'member_joined' as const, actorUserId: 'user-a', subjectUserId: 'user-b' };
             await client.postTripSystemEvent('trip-1', payload, 'Bearer token');
-            expect(config.get).toHaveBeenCalledWith('MESSAGING_SERVICE_URL');
-            expect(http.post).toHaveBeenCalledWith('http://messaging-service:3003/api/v1/conversations/internal/trips/trip-1/system-events', payload, {
+            expect(ApiClient).toHaveBeenCalledWith({ baseUrl: 'http://messaging-service:3003/api/v1' });
+            expect(postTripSystemEvent).toHaveBeenCalledWith({
+                path: { tripId: 'trip-1' },
+                body: payload,
                 headers: { Authorization: 'Bearer token' },
             });
         });
 
-        it('swallows http errors so trip operations are not blocked', async () => {
-            http.post.mockRejectedValue(new Error('network failure'));
+        it('swallows errors so trip operations are not blocked', async () => {
+            postTripSystemEvent.mockRejectedValue(new Error('network failure'));
             await expect(
                 client.postTripSystemEvent('trip-1', { event: 'member_left', actorUserId: 'user-a', subjectUserId: 'user-a' }, 'Bearer token'),
             ).resolves.toBeUndefined();

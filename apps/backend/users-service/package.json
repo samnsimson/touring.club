@@ -8,6 +8,7 @@
         "@nestjs/platform-express": "^11.0.0",
         "@nestjs/swagger": "^11.4.4",
         "@nestjs/typeorm": "^11.0.2",
+        "@tc/api-client": "workspace:*",
         "@tc/auth": "workspace:*",
         "@tc/common": "workspace:*",
         "@tc/config": "workspace:*",

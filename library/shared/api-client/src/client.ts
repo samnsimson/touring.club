@@ -10,9 +10,8 @@ import { createClient as createTripsClient } from './lib/trips-service-client/cl
 import { createClient as createMessagingClient } from './lib/messaging-service-client/client';
 import { createClient as createNotificationsClient } from './lib/notifications-service-client/client';
 
-export interface ApiClientConfig {
-    baseUrl?: string;
-}
+import { baseClientConfig } from './utils/client.utils';
+import { ApiClientConfig } from './contract/client.contract';
 
 export class ApiClient {
     public readonly authClient: AuthSdk;
@@ -22,10 +21,10 @@ export class ApiClient {
     public readonly notificationsClient: NotificationsSdk;
 
     constructor(config: ApiClientConfig = {}) {
-        this.authClient = new AuthSdk({ client: createAuthClient({ baseUrl: config.baseUrl }) });
-        this.usersClient = new UsersSdk({ client: createUsersClient({ baseUrl: config.baseUrl }) });
-        this.tripsClient = new TripsSdk({ client: createTripsClient({ baseUrl: config.baseUrl }) });
-        this.messagingClient = new MessagingSdk({ client: createMessagingClient({ baseUrl: config.baseUrl }) });
-        this.notificationsClient = new NotificationsSdk({ client: createNotificationsClient({ baseUrl: config.baseUrl }) });
+        this.authClient = new AuthSdk({ client: createAuthClient(baseClientConfig(config)) });
+        this.usersClient = new UsersSdk({ client: createUsersClient(baseClientConfig(config)) });
+        this.tripsClient = new TripsSdk({ client: createTripsClient(baseClientConfig(config)) });
+        this.messagingClient = new MessagingSdk({ client: createMessagingClient(baseClientConfig(config)) });
+        this.notificationsClient = new NotificationsSdk({ client: createNotificationsClient(baseClientConfig(config)) });
     }
 }
