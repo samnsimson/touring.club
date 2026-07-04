@@ -16,10 +16,10 @@ export default [
                     enforceBuildableLibDependency: true,
                     allow: ['^.*/eslint(\\.base)?\\.config\\.[cm]?[jt]s$'],
                     depConstraints: [
-                        // Backend services/libs (apps/backend/*, library/backend/*) may depend on backend or shared code, never frontend.
+                        // Backend services/libs (apps/backend/*, library/backend/*) may only depend on other backend code.
                         {
                             sourceTag: 'scope:backend',
-                            onlyDependOnLibsWithTags: ['scope:backend', 'scope:shared'],
+                            onlyDependOnLibsWithTags: ['scope:backend'],
                         },
                         // Frontend apps/libs (apps/frontend/web, apps/frontend/mobile, library/frontend/*) may depend on frontend or shared code, never backend.
                         {

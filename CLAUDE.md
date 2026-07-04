@@ -150,7 +150,7 @@ Example (users domain):
 bun nx generate @nx/nest:application --directory=apps/backend/users-service --linter=eslint --name=users-service --tags=users-service,scope:backend --unitTestRunner=jest --useProjectJson=true --no-interactive
 ```
 
-The `scope:backend` tag is required — `@nx/enforce-module-boundaries` in the root `eslint.config.mjs` restricts `scope:backend` projects to depend only on other `scope:backend` or `scope:shared` projects (see "Module boundaries" below).
+The `scope:backend` tag is required — `@nx/enforce-module-boundaries` in the root `eslint.config.mjs` restricts `scope:backend` projects to only depend on other `scope:backend` projects (see "Module boundaries" below).
 
 Do **not** improvise different flags for `@nx/nest:application` unless the user explicitly asks. After generation, wire workspace deps via `link-workspace-packages`, add env vars to `@tc/config`, follow `auth-service` / `users-service` patterns (Jest config from `jest/`, repositories under `src/app/repositories/`), and run `docs-sync` to update markdown. Do not scaffold `__tests__/e2e/` or an e2e Jest config — e2e is out of scope pre-go-live (see "Testing scope" above).
 
@@ -251,7 +251,7 @@ export class ProfileRepository extends BaseRepository<Profile> {
 
 #### Internal service-to-service calls (required pattern)
 
-When one microservice calls another directly (not through the gateway) on behalf of the current request — e.g. `trips-service` calling `messaging-service`/`notifications-service`, or `users-service` calling `trips-service` — use the generated `@tc/api-client` SDK, not `@tc/common`'s `HttpClient`. Construct an `ApiClient` scoped to the target service's direct URL (bypassing Kong), appending `/api/v1` since the generated SDK paths don't include the global prefix (`app.setGlobalPrefix('api')` + URI versioning add it at runtime, but `generateOpenApiDocument` emits paths without it), and forward the caller's `Authorization` header instead of inventing a separate service credential. Thread it from controller → service → client:
+When one microservice calls another directly (not through the gateway) on behalf of the current request — e.g. `trips-service` calling `messaging-service`/`notifications-service`, or `users-service` calling `trips-service` — forward the caller's `Authorization` header instead of inventing a separate service credential. Thread it from controller → service → HTTP client:
 
 ```typescript
 // controller
@@ -260,21 +260,12 @@ async approveMembership(@CurrentSession('userId') userId: string, @Param('tripId
 }
 
 // client
-export class NotificationsClient {
-    private readonly api: ApiClient;
-
-    constructor(private readonly config: ConfigService) {
-        this.api = new ApiClient({ baseUrl: `${this.config.get('NOTIFICATIONS_SERVICE_URL')}/api/v1` });
-    }
-
-    async createNotification(payload: CreateNotificationPayload, authorization: string): Promise<void> {
-        const { error } = await this.api.notificationsClient.createNotification({ body: payload, headers: { Authorization: authorization } });
-        if (error) this.logger.warn(`Failed to create notification for user ${payload.userId}`);
-    }
+async createNotification(payload: CreateNotificationPayload, authorization: string): Promise<void> {
+    await this.http.post(url, payload, { headers: { Authorization: authorization } });
 }
 ```
 
-The receiving service's own `HybridAuthGuard` validates the forwarded token exactly like a normal user request — the target endpoint must **not** be `@Public()`. Reference: `apps/backend/users-service/src/app/clients/trips.client.ts` `getTravelHistory()`, and `apps/backend/trips-service/src/app/clients/messaging.client.ts` / `notifications.client.ts`. Kong is not involved in this — it stays routing/CORS only and does not verify JWTs (Better Auth signs with EdDSA by default, which Kong OSS's `jwt` plugin can't verify or fetch dynamically via JWKS). Since `@tc/api-client` is tagged `scope:shared`, `scope:backend` projects are allowed to depend on `scope:shared` (see "Module boundaries" below) specifically so these clients can import it.
+The receiving service's own `HybridAuthGuard` validates the forwarded token exactly like a normal user request — the target endpoint must **not** be `@Public()`. Reference: `apps/backend/users-service/src/app/clients/trips.client.ts` `getTravelHistory()`, and `apps/backend/trips-service/src/app/clients/messaging.client.ts` / `notifications.client.ts`. Kong is not involved in this — it stays routing/CORS only and does not verify JWTs (Better Auth signs with EdDSA by default, which Kong OSS's `jwt` plugin can't verify or fetch dynamically via JWKS).
 
 ### `@tc/utils`
 
@@ -306,7 +297,6 @@ The receiving service's own `HybridAuthGuard` validates the forwarded token exac
 - **`scripts/` vs `src/`**: only `src/` is built/published (`tsconfig.lib.json` includes `src/**/*.ts` only); `client.config.ts` and `scripts/**` are dev-only codegen tooling, type-checked separately via `tsconfig.scripts.json` and excluded from the `@nx/dependency-checks` lint rule (`eslint.config.mjs` `ignoredFiles`) since their deps (`@hey-api/openapi-ts`, `handlebars`, `prettier`) aren't part of the runtime package.
 - **Usage**: `import { ApiClient } from '@tc/api-client'; const api = new ApiClient({ baseUrl: ... }); await api.authClient.signIn({ body: { email, password } });`. The barrel (`src/index.ts`) also re-exports each service's full SDK under a namespace (`AuthClient`, `UsersClient`, etc.) for direct typed access without going through `ApiClient`.
 - **Frontend apps must always go through Kong** — `ApiClient` applies one shared `baseUrl` to every per-service SDK, and each service's OpenAPI paths are unique, non-overlapping prefixes (`/api/v1/auth`, `/api/v1/profiles`, `/api/v1/trips`, `/api/v1/conversations`, `/api/v1/notifications`) that `infra/kong/kong.yml` already routes 1:1 to the right backend. Never point a frontend app's `ApiClient` at an individual service port directly — always the Kong gateway URL, so there is exactly one client shape and one entry point regardless of how many microservices exist behind it. Kong is routing/CORS only (see "Internal service-to-service calls" above) — it does not verify auth, so this does not replace each service's own `HybridAuthGuard`.
-- **Backend services use it too, for interservice calls** — `apps/backend/users-service/src/app/clients/trips.client.ts`, `apps/backend/trips-service/src/app/clients/{messaging,notifications}.client.ts`, and `apps/backend/messaging-service/src/app/clients/notifications.client.ts` each construct their own `ApiClient` pointed directly at the callee's `*_SERVICE_URL` (bypassing Kong), not the gateway URL — see "Internal service-to-service calls" above. Because each hand-written client only needs one service's SDK, only the corresponding `ApiClient` field (e.g. `.notificationsClient`) is used; the other four fields on that instance are constructed but unused.
 - **Reference wiring** (`apps/frontend/web`): `NEXT_PUBLIC_API_GATEWAY_URL` in `apps/frontend/web/.env` (defaults to `http://localhost:8000`, the Kong `KONG_PROXY_LISTEN` port from `docker-compose.yml`) + `apps/frontend/web/src/api-client.ts` exporting a module-level singleton, `export const apiClient = new ApiClient({ baseUrl: process.env.NEXT_PUBLIC_API_GATEWAY_URL })`. Import `apiClient` from there rather than constructing a new `ApiClient` per call site. New frontend apps should follow the same pattern: one `NEXT_PUBLIC_`-prefixed (or platform-equivalent) gateway env var, one singleton instance.
 
 ## Dependency Direction
@@ -419,7 +409,7 @@ The `auth` library uses **Vitest** for adapter tests — place specs in `library
 7. **Comments** — only for non-obvious logic; code should be self-explanatory
 8. **Tests** — add only when they cover meaningful behavior. **All tests live under `__tests__/unit/`** — never colocate `*.spec.ts` under `src/`. Apps: Jest unit specs (`createAppUnitJestConfig`). Libraries: Jest (`createLibJestConfig`); Vitest for `auth` lib adapter tests. **E2e suites are out of scope pre-go-live** — see Testing scope note above; do not add `__tests__/e2e/`, e2e Jest configs, or `@tc/testing`-style helpers.
 9. **No secrets in code** — env vars via `@tc/config`; never commit `.env`
-10. **Module boundaries** — ESLint `@nx/enforce-module-boundaries` enforces `scope:backend`/`scope:frontend`/`scope:shared` tags (set in each `project.json`): backend code may depend on backend or shared code (never frontend) — this is what lets backend services import `@tc/api-client` for interservice calls — and `scope:frontend` code (e.g. `apps/frontend/web`, tagged `web,scope:frontend`) may only depend on `scope:frontend`/`scope:shared`. `scope:shared` itself stays leaf-level (only depends on other `scope:shared` code). Tag any new project under `apps/backend/` or `library/backend/` with `scope:backend`; tag frontend projects under `apps/frontend/` with `scope:frontend`.
+10. **Module boundaries** — ESLint `@nx/enforce-module-boundaries` enforces `scope:backend`/`scope:frontend`/`scope:shared` tags (set in each `project.json`): backend code may only depend on backend code, and `scope:frontend` code (e.g. `apps/frontend/web`, tagged `web,scope:frontend`) may only depend on `scope:frontend`/`scope:shared`. The same `scope:frontend`/`scope:shared` constraint is wired pre-emptively for `apps/frontend/mobile` and `library/frontend`/`library/shared` once those exist. Tag any new project under `apps/backend/` or `library/backend/` with `scope:backend`; tag frontend projects under `apps/frontend/` with `scope:frontend`.
 11. **Repositories** — extend `BaseRepository` in `apps/backend/<service>/src/app/repositories/`; inject via `@InjectDataSource()`; import `DataSource` types from `@tc/database`; never add direct `typeorm` to apps
 12. **Keep docs in sync** — when adding features, endpoints, services, entities, env vars, or patterns, update related markdown in the same change (see **Documentation sync** below)
 
