@@ -13,16 +13,18 @@ apps/backend/*/openapi
 node_modules
 
 # env files — real values (local dev secrets, per-env overrides) never get committed;
-# only *.example templates should be tracked
+# only *.example templates should be tracked. .env.test is the one exception: CI and local
+# unit test runs need it present with dummy, non-secret values (no real DB/API is touched),
+# so it's tracked deliberately — never put real secrets in it.
 .env
 .env.local
 .env.*.local
 .env.development
 .env.staging
 .env.production
-.env.test
 !.env.example
 !.env.*.example
+!.env.test
 
 # IDEs and editors
 /.idea
