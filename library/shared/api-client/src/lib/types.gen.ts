@@ -419,34 +419,34 @@ export type NotificationsServiceOpenapiMarkNotificationReadResponseDto = {
     notification: NotificationsServiceOpenapiNotificationResponse;
 };
 
-export type AuthServiceOpenapiGetMeData = {
+export type GetAuthMeData = {
     body?: never;
     path?: never;
     query?: never;
     url: '/auth/me';
 };
 
-export type AuthServiceOpenapiGetMeErrors = {
+export type GetAuthMeErrors = {
     /**
      * Exception for status 401
      */
     401: unknown;
 };
 
-export type AuthServiceOpenapiGetMeResponses = {
+export type GetAuthMeResponses = {
     200: AuthServiceOpenapiGetMeResponse;
 };
 
-export type AuthServiceOpenapiGetMeResponse2 = AuthServiceOpenapiGetMeResponses[keyof AuthServiceOpenapiGetMeResponses];
+export type GetAuthMeResponse = GetAuthMeResponses[keyof GetAuthMeResponses];
 
-export type AuthServiceOpenapiUpdateProfileData = {
+export type PatchAuthMeData = {
     body: AuthServiceOpenapiUpdateProfileDto;
     path?: never;
     query?: never;
     url: '/auth/me';
 };
 
-export type AuthServiceOpenapiUpdateProfileErrors = {
+export type PatchAuthMeErrors = {
     /**
      * Exception for status 400
      */
@@ -457,20 +457,20 @@ export type AuthServiceOpenapiUpdateProfileErrors = {
     401: unknown;
 };
 
-export type AuthServiceOpenapiUpdateProfileResponses = {
+export type PatchAuthMeResponses = {
     200: AuthServiceOpenapiUpdateProfileResponseDto;
 };
 
-export type AuthServiceOpenapiUpdateProfileResponse = AuthServiceOpenapiUpdateProfileResponses[keyof AuthServiceOpenapiUpdateProfileResponses];
+export type PatchAuthMeResponse = PatchAuthMeResponses[keyof PatchAuthMeResponses];
 
-export type AuthServiceOpenapiChangePasswordData = {
+export type PostAuthChangePasswordData = {
     body: AuthServiceOpenapiChangePasswordDto;
     path?: never;
     query?: never;
     url: '/auth/change-password';
 };
 
-export type AuthServiceOpenapiChangePasswordErrors = {
+export type PostAuthChangePasswordErrors = {
     /**
      * Exception for status 400
      */
@@ -481,40 +481,40 @@ export type AuthServiceOpenapiChangePasswordErrors = {
     401: unknown;
 };
 
-export type AuthServiceOpenapiChangePasswordResponses = {
+export type PostAuthChangePasswordResponses = {
     200: AuthServiceOpenapiChangePasswordResponseDto;
 };
 
-export type AuthServiceOpenapiChangePasswordResponse = AuthServiceOpenapiChangePasswordResponses[keyof AuthServiceOpenapiChangePasswordResponses];
+export type PostAuthChangePasswordResponse = PostAuthChangePasswordResponses[keyof PostAuthChangePasswordResponses];
 
-export type AuthServiceOpenapiSignOutData = {
+export type PostAuthSignOutData = {
     body?: never;
     path?: never;
     query?: never;
     url: '/auth/sign-out';
 };
 
-export type AuthServiceOpenapiSignOutErrors = {
+export type PostAuthSignOutErrors = {
     /**
      * Exception for status 401
      */
     401: unknown;
 };
 
-export type AuthServiceOpenapiSignOutResponses = {
+export type PostAuthSignOutResponses = {
     200: AuthServiceOpenapiSignOutResponseDto;
 };
 
-export type AuthServiceOpenapiSignOutResponse = AuthServiceOpenapiSignOutResponses[keyof AuthServiceOpenapiSignOutResponses];
+export type PostAuthSignOutResponse = PostAuthSignOutResponses[keyof PostAuthSignOutResponses];
 
-export type AuthServiceOpenapiSignUpData = {
+export type PostAuthSignUpData = {
     body: AuthServiceOpenapiSignUpDto;
     path?: never;
     query?: never;
     url: '/auth/sign-up';
 };
 
-export type AuthServiceOpenapiSignUpErrors = {
+export type PostAuthSignUpErrors = {
     /**
      * Exception for status 400
      */
@@ -525,20 +525,20 @@ export type AuthServiceOpenapiSignUpErrors = {
     409: unknown;
 };
 
-export type AuthServiceOpenapiSignUpResponses = {
+export type PostAuthSignUpResponses = {
     201: AuthServiceOpenapiSignUpResponse;
 };
 
-export type AuthServiceOpenapiSignUpResponse2 = AuthServiceOpenapiSignUpResponses[keyof AuthServiceOpenapiSignUpResponses];
+export type PostAuthSignUpResponse = PostAuthSignUpResponses[keyof PostAuthSignUpResponses];
 
-export type AuthServiceOpenapiSignInData = {
+export type PostAuthSignInData = {
     body: AuthServiceOpenapiSignInDto;
     path?: never;
     query?: never;
     url: '/auth/sign-in';
 };
 
-export type AuthServiceOpenapiSignInErrors = {
+export type PostAuthSignInErrors = {
     /**
      * Exception for status 400
      */
@@ -549,100 +549,100 @@ export type AuthServiceOpenapiSignInErrors = {
     401: unknown;
 };
 
-export type AuthServiceOpenapiSignInResponses = {
+export type PostAuthSignInResponses = {
     200: AuthServiceOpenapiSignInResponse;
 };
 
-export type AuthServiceOpenapiSignInResponse2 = AuthServiceOpenapiSignInResponses[keyof AuthServiceOpenapiSignInResponses];
+export type PostAuthSignInResponse = PostAuthSignInResponses[keyof PostAuthSignInResponses];
 
-export type AuthServiceOpenapiVerifyEmailData = {
+export type PostAuthVerifyEmailData = {
     body: AuthServiceOpenapiVerifyEmailDto;
     path?: never;
     query?: never;
     url: '/auth/verify-email';
 };
 
-export type AuthServiceOpenapiVerifyEmailErrors = {
+export type PostAuthVerifyEmailErrors = {
     /**
      * Exception for status 400
      */
     400: unknown;
 };
 
-export type AuthServiceOpenapiVerifyEmailResponses = {
+export type PostAuthVerifyEmailResponses = {
     200: AuthServiceOpenapiVerifyEmailResponse;
 };
 
-export type AuthServiceOpenapiVerifyEmailResponse2 = AuthServiceOpenapiVerifyEmailResponses[keyof AuthServiceOpenapiVerifyEmailResponses];
+export type PostAuthVerifyEmailResponse = PostAuthVerifyEmailResponses[keyof PostAuthVerifyEmailResponses];
 
-export type AuthServiceOpenapiForgotPasswordData = {
+export type PostAuthForgotPasswordData = {
     body: AuthServiceOpenapiForgotPasswordDto;
     path?: never;
     query?: never;
     url: '/auth/forgot-password';
 };
 
-export type AuthServiceOpenapiForgotPasswordErrors = {
+export type PostAuthForgotPasswordErrors = {
     /**
      * Exception for status 400
      */
     400: unknown;
 };
 
-export type AuthServiceOpenapiForgotPasswordResponses = {
+export type PostAuthForgotPasswordResponses = {
     200: AuthServiceOpenapiForgotPasswordResponseDto;
 };
 
-export type AuthServiceOpenapiForgotPasswordResponse = AuthServiceOpenapiForgotPasswordResponses[keyof AuthServiceOpenapiForgotPasswordResponses];
+export type PostAuthForgotPasswordResponse = PostAuthForgotPasswordResponses[keyof PostAuthForgotPasswordResponses];
 
-export type AuthServiceOpenapiResetPasswordData = {
+export type PostAuthResetPasswordData = {
     body: AuthServiceOpenapiResetPasswordDto;
     path?: never;
     query?: never;
     url: '/auth/reset-password';
 };
 
-export type AuthServiceOpenapiResetPasswordErrors = {
+export type PostAuthResetPasswordErrors = {
     /**
      * Exception for status 400
      */
     400: unknown;
 };
 
-export type AuthServiceOpenapiResetPasswordResponses = {
+export type PostAuthResetPasswordResponses = {
     200: AuthServiceOpenapiResetPasswordResponseDto;
 };
 
-export type AuthServiceOpenapiResetPasswordResponse = AuthServiceOpenapiResetPasswordResponses[keyof AuthServiceOpenapiResetPasswordResponses];
+export type PostAuthResetPasswordResponse = PostAuthResetPasswordResponses[keyof PostAuthResetPasswordResponses];
 
-export type UsersServiceOpenapiGetMyProfileData = {
+export type GetProfilesMeData = {
     body?: never;
     path?: never;
     query?: never;
     url: '/profiles/me';
 };
 
-export type UsersServiceOpenapiGetMyProfileErrors = {
+export type GetProfilesMeErrors = {
     /**
      * Exception for status 401
      */
     401: unknown;
 };
 
-export type UsersServiceOpenapiGetMyProfileResponses = {
+export type GetProfilesMeResponses = {
     200: UsersServiceOpenapiGetProfileResponseDto;
 };
 
-export type UsersServiceOpenapiGetMyProfileResponse = UsersServiceOpenapiGetMyProfileResponses[keyof UsersServiceOpenapiGetMyProfileResponses];
+export type GetProfilesMeResponse = GetProfilesMeResponses[keyof GetProfilesMeResponses];
 
-export type UsersServiceOpenapiUpdateMyProfileData = {
+export type PatchProfilesMeData = {
     body: UsersServiceOpenapiUpdateProfileDto;
     path?: never;
     query?: never;
     url: '/profiles/me';
 };
 
-export type UsersServiceOpenapiUpdateMyProfileErrors = {
+export type PatchProfilesMeErrors = {
     /**
      * Exception for status 400
      */
@@ -653,13 +653,13 @@ export type UsersServiceOpenapiUpdateMyProfileErrors = {
     401: unknown;
 };
 
-export type UsersServiceOpenapiUpdateMyProfileResponses = {
+export type PatchProfilesMeResponses = {
     200: UsersServiceOpenapiUpdateProfileResponseDto;
 };
 
-export type UsersServiceOpenapiUpdateMyProfileResponse = UsersServiceOpenapiUpdateMyProfileResponses[keyof UsersServiceOpenapiUpdateMyProfileResponses];
+export type PatchProfilesMeResponse = PatchProfilesMeResponses[keyof PatchProfilesMeResponses];
 
-export type UsersServiceOpenapiUploadMyAvatarData = {
+export type PostProfilesMeAvatarData = {
     body: {
         file?: Blob | File;
     };
@@ -668,7 +668,7 @@ export type UsersServiceOpenapiUploadMyAvatarData = {
     url: '/profiles/me/avatar';
 };
 
-export type UsersServiceOpenapiUploadMyAvatarErrors = {
+export type PostProfilesMeAvatarErrors = {
     /**
      * Exception for status 400
      */
@@ -683,13 +683,13 @@ export type UsersServiceOpenapiUploadMyAvatarErrors = {
     415: unknown;
 };
 
-export type UsersServiceOpenapiUploadMyAvatarResponses = {
+export type PostProfilesMeAvatarResponses = {
     200: UsersServiceOpenapiUploadAvatarResponseDto;
 };
 
-export type UsersServiceOpenapiUploadMyAvatarResponse = UsersServiceOpenapiUploadMyAvatarResponses[keyof UsersServiceOpenapiUploadMyAvatarResponses];
+export type PostProfilesMeAvatarResponse = PostProfilesMeAvatarResponses[keyof PostProfilesMeAvatarResponses];
 
-export type UsersServiceOpenapiGetMyTravelHistoryData = {
+export type GetProfilesMeTravelHistoryData = {
     body?: never;
     headers: {
         authorization: string;
@@ -699,21 +699,20 @@ export type UsersServiceOpenapiGetMyTravelHistoryData = {
     url: '/profiles/me/travel-history';
 };
 
-export type UsersServiceOpenapiGetMyTravelHistoryErrors = {
+export type GetProfilesMeTravelHistoryErrors = {
     /**
      * Exception for status 401
      */
     401: unknown;
 };
 
-export type UsersServiceOpenapiGetMyTravelHistoryResponses = {
+export type GetProfilesMeTravelHistoryResponses = {
     200: UsersServiceOpenapiTravelHistoryResponse;
 };
 
-export type UsersServiceOpenapiGetMyTravelHistoryResponse =
-    UsersServiceOpenapiGetMyTravelHistoryResponses[keyof UsersServiceOpenapiGetMyTravelHistoryResponses];
+export type GetProfilesMeTravelHistoryResponse = GetProfilesMeTravelHistoryResponses[keyof GetProfilesMeTravelHistoryResponses];
 
-export type UsersServiceOpenapiGetPublicProfileData = {
+export type GetProfilesByUserIdData = {
     body?: never;
     headers: {
         authorization: string;
@@ -725,7 +724,7 @@ export type UsersServiceOpenapiGetPublicProfileData = {
     url: '/profiles/{userId}';
 };
 
-export type UsersServiceOpenapiGetPublicProfileErrors = {
+export type GetProfilesByUserIdErrors = {
     /**
      * Exception for status 401
      */
@@ -736,40 +735,40 @@ export type UsersServiceOpenapiGetPublicProfileErrors = {
     404: unknown;
 };
 
-export type UsersServiceOpenapiGetPublicProfileResponses = {
+export type GetProfilesByUserIdResponses = {
     200: UsersServiceOpenapiGetPublicProfileResponseDto;
 };
 
-export type UsersServiceOpenapiGetPublicProfileResponse = UsersServiceOpenapiGetPublicProfileResponses[keyof UsersServiceOpenapiGetPublicProfileResponses];
+export type GetProfilesByUserIdResponse = GetProfilesByUserIdResponses[keyof GetProfilesByUserIdResponses];
 
-export type TripsServiceOpenapiListMyTripsData = {
+export type GetTripsData = {
     body?: never;
     path?: never;
     query?: never;
     url: '/trips';
 };
 
-export type TripsServiceOpenapiListMyTripsErrors = {
+export type GetTripsErrors = {
     /**
      * Exception for status 401
      */
     401: unknown;
 };
 
-export type TripsServiceOpenapiListMyTripsResponses = {
+export type GetTripsResponses = {
     200: TripsServiceOpenapiListTripsResponseDto;
 };
 
-export type TripsServiceOpenapiListMyTripsResponse = TripsServiceOpenapiListMyTripsResponses[keyof TripsServiceOpenapiListMyTripsResponses];
+export type GetTripsResponse = GetTripsResponses[keyof GetTripsResponses];
 
-export type TripsServiceOpenapiCreateTripData = {
+export type PostTripsData = {
     body: TripsServiceOpenapiCreateTripDto;
     path?: never;
     query?: never;
     url: '/trips';
 };
 
-export type TripsServiceOpenapiCreateTripErrors = {
+export type PostTripsErrors = {
     /**
      * Exception for status 400
      */
@@ -780,13 +779,13 @@ export type TripsServiceOpenapiCreateTripErrors = {
     401: unknown;
 };
 
-export type TripsServiceOpenapiCreateTripResponses = {
+export type PostTripsResponses = {
     201: TripsServiceOpenapiCreateTripResponseDto;
 };
 
-export type TripsServiceOpenapiCreateTripResponse = TripsServiceOpenapiCreateTripResponses[keyof TripsServiceOpenapiCreateTripResponses];
+export type PostTripsResponse = PostTripsResponses[keyof PostTripsResponses];
 
-export type TripsServiceOpenapiDiscoverTripsData = {
+export type GetTripsDiscoverData = {
     body?: never;
     path?: never;
     query?: {
@@ -799,20 +798,20 @@ export type TripsServiceOpenapiDiscoverTripsData = {
     url: '/trips/discover';
 };
 
-export type TripsServiceOpenapiDiscoverTripsErrors = {
+export type GetTripsDiscoverErrors = {
     /**
      * Exception for status 400
      */
     400: unknown;
 };
 
-export type TripsServiceOpenapiDiscoverTripsResponses = {
+export type GetTripsDiscoverResponses = {
     200: TripsServiceOpenapiDiscoverTripsResponseDto;
 };
 
-export type TripsServiceOpenapiDiscoverTripsResponse = TripsServiceOpenapiDiscoverTripsResponses[keyof TripsServiceOpenapiDiscoverTripsResponses];
+export type GetTripsDiscoverResponse = GetTripsDiscoverResponses[keyof GetTripsDiscoverResponses];
 
-export type TripsServiceOpenapiGetUserTravelHistoryData = {
+export type GetTripsUsersByUserIdTravelHistoryData = {
     body?: never;
     path: {
         userId: string;
@@ -821,21 +820,20 @@ export type TripsServiceOpenapiGetUserTravelHistoryData = {
     url: '/trips/users/{userId}/travel-history';
 };
 
-export type TripsServiceOpenapiGetUserTravelHistoryErrors = {
+export type GetTripsUsersByUserIdTravelHistoryErrors = {
     /**
      * Exception for status 401
      */
     401: unknown;
 };
 
-export type TripsServiceOpenapiGetUserTravelHistoryResponses = {
+export type GetTripsUsersByUserIdTravelHistoryResponses = {
     200: TripsServiceOpenapiTravelHistoryResponseDto;
 };
 
-export type TripsServiceOpenapiGetUserTravelHistoryResponse =
-    TripsServiceOpenapiGetUserTravelHistoryResponses[keyof TripsServiceOpenapiGetUserTravelHistoryResponses];
+export type GetTripsUsersByUserIdTravelHistoryResponse = GetTripsUsersByUserIdTravelHistoryResponses[keyof GetTripsUsersByUserIdTravelHistoryResponses];
 
-export type TripsServiceOpenapiGetPublicTripData = {
+export type GetTripsDiscoverByTripIdData = {
     body?: never;
     path: {
         tripId: string;
@@ -844,20 +842,20 @@ export type TripsServiceOpenapiGetPublicTripData = {
     url: '/trips/discover/{tripId}';
 };
 
-export type TripsServiceOpenapiGetPublicTripErrors = {
+export type GetTripsDiscoverByTripIdErrors = {
     /**
      * Exception for status 404
      */
     404: unknown;
 };
 
-export type TripsServiceOpenapiGetPublicTripResponses = {
+export type GetTripsDiscoverByTripIdResponses = {
     200: TripsServiceOpenapiGetTripResponseDto;
 };
 
-export type TripsServiceOpenapiGetPublicTripResponse = TripsServiceOpenapiGetPublicTripResponses[keyof TripsServiceOpenapiGetPublicTripResponses];
+export type GetTripsDiscoverByTripIdResponse = GetTripsDiscoverByTripIdResponses[keyof GetTripsDiscoverByTripIdResponses];
 
-export type TripsServiceOpenapiPublishTripData = {
+export type PostTripsByTripIdPublishData = {
     body?: never;
     path: {
         tripId: string;
@@ -866,7 +864,7 @@ export type TripsServiceOpenapiPublishTripData = {
     url: '/trips/{tripId}/publish';
 };
 
-export type TripsServiceOpenapiPublishTripErrors = {
+export type PostTripsByTripIdPublishErrors = {
     /**
      * Exception for status 400
      */
@@ -881,13 +879,13 @@ export type TripsServiceOpenapiPublishTripErrors = {
     404: unknown;
 };
 
-export type TripsServiceOpenapiPublishTripResponses = {
+export type PostTripsByTripIdPublishResponses = {
     200: TripsServiceOpenapiGetTripResponseDto;
 };
 
-export type TripsServiceOpenapiPublishTripResponse = TripsServiceOpenapiPublishTripResponses[keyof TripsServiceOpenapiPublishTripResponses];
+export type PostTripsByTripIdPublishResponse = PostTripsByTripIdPublishResponses[keyof PostTripsByTripIdPublishResponses];
 
-export type TripsServiceOpenapiCancelTripData = {
+export type PostTripsByTripIdCancelData = {
     body?: never;
     path: {
         tripId: string;
@@ -896,7 +894,7 @@ export type TripsServiceOpenapiCancelTripData = {
     url: '/trips/{tripId}/cancel';
 };
 
-export type TripsServiceOpenapiCancelTripErrors = {
+export type PostTripsByTripIdCancelErrors = {
     /**
      * Exception for status 400
      */
@@ -911,13 +909,13 @@ export type TripsServiceOpenapiCancelTripErrors = {
     404: unknown;
 };
 
-export type TripsServiceOpenapiCancelTripResponses = {
+export type PostTripsByTripIdCancelResponses = {
     200: TripsServiceOpenapiGetTripResponseDto;
 };
 
-export type TripsServiceOpenapiCancelTripResponse = TripsServiceOpenapiCancelTripResponses[keyof TripsServiceOpenapiCancelTripResponses];
+export type PostTripsByTripIdCancelResponse = PostTripsByTripIdCancelResponses[keyof PostTripsByTripIdCancelResponses];
 
-export type TripsServiceOpenapiArchiveTripData = {
+export type PostTripsByTripIdArchiveData = {
     body?: never;
     path: {
         tripId: string;
@@ -926,7 +924,7 @@ export type TripsServiceOpenapiArchiveTripData = {
     url: '/trips/{tripId}/archive';
 };
 
-export type TripsServiceOpenapiArchiveTripErrors = {
+export type PostTripsByTripIdArchiveErrors = {
     /**
      * Exception for status 400
      */
@@ -941,13 +939,13 @@ export type TripsServiceOpenapiArchiveTripErrors = {
     404: unknown;
 };
 
-export type TripsServiceOpenapiArchiveTripResponses = {
+export type PostTripsByTripIdArchiveResponses = {
     200: TripsServiceOpenapiGetTripResponseDto;
 };
 
-export type TripsServiceOpenapiArchiveTripResponse = TripsServiceOpenapiArchiveTripResponses[keyof TripsServiceOpenapiArchiveTripResponses];
+export type PostTripsByTripIdArchiveResponse = PostTripsByTripIdArchiveResponses[keyof PostTripsByTripIdArchiveResponses];
 
-export type TripsServiceOpenapiUploadTripCoverImageData = {
+export type PostTripsByTripIdCoverImageData = {
     body: {
         file?: Blob | File;
     };
@@ -958,7 +956,7 @@ export type TripsServiceOpenapiUploadTripCoverImageData = {
     url: '/trips/{tripId}/cover-image';
 };
 
-export type TripsServiceOpenapiUploadTripCoverImageErrors = {
+export type PostTripsByTripIdCoverImageErrors = {
     /**
      * Exception for status 400
      */
@@ -977,14 +975,13 @@ export type TripsServiceOpenapiUploadTripCoverImageErrors = {
     415: unknown;
 };
 
-export type TripsServiceOpenapiUploadTripCoverImageResponses = {
+export type PostTripsByTripIdCoverImageResponses = {
     200: TripsServiceOpenapiUploadTripCoverImageResponseDto;
 };
 
-export type TripsServiceOpenapiUploadTripCoverImageResponse =
-    TripsServiceOpenapiUploadTripCoverImageResponses[keyof TripsServiceOpenapiUploadTripCoverImageResponses];
+export type PostTripsByTripIdCoverImageResponse = PostTripsByTripIdCoverImageResponses[keyof PostTripsByTripIdCoverImageResponses];
 
-export type TripsServiceOpenapiJoinTripData = {
+export type PostTripsByTripIdJoinData = {
     body?: never;
     headers: {
         authorization: string;
@@ -996,7 +993,7 @@ export type TripsServiceOpenapiJoinTripData = {
     url: '/trips/{tripId}/join';
 };
 
-export type TripsServiceOpenapiJoinTripErrors = {
+export type PostTripsByTripIdJoinErrors = {
     /**
      * Exception for status 400
      */
@@ -1015,13 +1012,13 @@ export type TripsServiceOpenapiJoinTripErrors = {
     409: unknown;
 };
 
-export type TripsServiceOpenapiJoinTripResponses = {
+export type PostTripsByTripIdJoinResponses = {
     200: TripsServiceOpenapiJoinTripResponseDto;
 };
 
-export type TripsServiceOpenapiJoinTripResponse = TripsServiceOpenapiJoinTripResponses[keyof TripsServiceOpenapiJoinTripResponses];
+export type PostTripsByTripIdJoinResponse = PostTripsByTripIdJoinResponses[keyof PostTripsByTripIdJoinResponses];
 
-export type TripsServiceOpenapiLeaveTripData = {
+export type PostTripsByTripIdLeaveData = {
     body?: never;
     headers: {
         authorization: string;
@@ -1033,7 +1030,7 @@ export type TripsServiceOpenapiLeaveTripData = {
     url: '/trips/{tripId}/leave';
 };
 
-export type TripsServiceOpenapiLeaveTripErrors = {
+export type PostTripsByTripIdLeaveErrors = {
     /**
      * Exception for status 401
      */
@@ -1044,13 +1041,13 @@ export type TripsServiceOpenapiLeaveTripErrors = {
     404: unknown;
 };
 
-export type TripsServiceOpenapiLeaveTripResponses = {
+export type PostTripsByTripIdLeaveResponses = {
     200: TripsServiceOpenapiLeaveTripResponseDto;
 };
 
-export type TripsServiceOpenapiLeaveTripResponse = TripsServiceOpenapiLeaveTripResponses[keyof TripsServiceOpenapiLeaveTripResponses];
+export type PostTripsByTripIdLeaveResponse = PostTripsByTripIdLeaveResponses[keyof PostTripsByTripIdLeaveResponses];
 
-export type TripsServiceOpenapiListTripMembersData = {
+export type GetTripsByTripIdMembersData = {
     body?: never;
     path: {
         tripId: string;
@@ -1059,7 +1056,7 @@ export type TripsServiceOpenapiListTripMembersData = {
     url: '/trips/{tripId}/members';
 };
 
-export type TripsServiceOpenapiListTripMembersErrors = {
+export type GetTripsByTripIdMembersErrors = {
     /**
      * Exception for status 401
      */
@@ -1070,13 +1067,13 @@ export type TripsServiceOpenapiListTripMembersErrors = {
     404: unknown;
 };
 
-export type TripsServiceOpenapiListTripMembersResponses = {
+export type GetTripsByTripIdMembersResponses = {
     200: TripsServiceOpenapiListTripMembersResponseDto;
 };
 
-export type TripsServiceOpenapiListTripMembersResponse = TripsServiceOpenapiListTripMembersResponses[keyof TripsServiceOpenapiListTripMembersResponses];
+export type GetTripsByTripIdMembersResponse = GetTripsByTripIdMembersResponses[keyof GetTripsByTripIdMembersResponses];
 
-export type TripsServiceOpenapiApproveMembershipData = {
+export type PostTripsByTripIdMembersByMembershipIdApproveData = {
     body?: never;
     headers: {
         authorization: string;
@@ -1089,7 +1086,7 @@ export type TripsServiceOpenapiApproveMembershipData = {
     url: '/trips/{tripId}/members/{membershipId}/approve';
 };
 
-export type TripsServiceOpenapiApproveMembershipErrors = {
+export type PostTripsByTripIdMembersByMembershipIdApproveErrors = {
     /**
      * Exception for status 400
      */
@@ -1104,13 +1101,14 @@ export type TripsServiceOpenapiApproveMembershipErrors = {
     404: unknown;
 };
 
-export type TripsServiceOpenapiApproveMembershipResponses = {
+export type PostTripsByTripIdMembersByMembershipIdApproveResponses = {
     200: TripsServiceOpenapiTripMembershipActionResponseDto;
 };
 
-export type TripsServiceOpenapiApproveMembershipResponse = TripsServiceOpenapiApproveMembershipResponses[keyof TripsServiceOpenapiApproveMembershipResponses];
+export type PostTripsByTripIdMembersByMembershipIdApproveResponse =
+    PostTripsByTripIdMembersByMembershipIdApproveResponses[keyof PostTripsByTripIdMembersByMembershipIdApproveResponses];
 
-export type TripsServiceOpenapiRejectMembershipData = {
+export type PostTripsByTripIdMembersByMembershipIdRejectData = {
     body?: never;
     path: {
         tripId: string;
@@ -1120,7 +1118,7 @@ export type TripsServiceOpenapiRejectMembershipData = {
     url: '/trips/{tripId}/members/{membershipId}/reject';
 };
 
-export type TripsServiceOpenapiRejectMembershipErrors = {
+export type PostTripsByTripIdMembersByMembershipIdRejectErrors = {
     /**
      * Exception for status 400
      */
@@ -1135,13 +1133,14 @@ export type TripsServiceOpenapiRejectMembershipErrors = {
     404: unknown;
 };
 
-export type TripsServiceOpenapiRejectMembershipResponses = {
+export type PostTripsByTripIdMembersByMembershipIdRejectResponses = {
     200: TripsServiceOpenapiTripMembershipActionResponseDto;
 };
 
-export type TripsServiceOpenapiRejectMembershipResponse = TripsServiceOpenapiRejectMembershipResponses[keyof TripsServiceOpenapiRejectMembershipResponses];
+export type PostTripsByTripIdMembersByMembershipIdRejectResponse =
+    PostTripsByTripIdMembersByMembershipIdRejectResponses[keyof PostTripsByTripIdMembersByMembershipIdRejectResponses];
 
-export type TripsServiceOpenapiRemoveMembershipData = {
+export type DeleteTripsByTripIdMembersByMembershipIdData = {
     body?: never;
     headers: {
         authorization: string;
@@ -1154,7 +1153,7 @@ export type TripsServiceOpenapiRemoveMembershipData = {
     url: '/trips/{tripId}/members/{membershipId}';
 };
 
-export type TripsServiceOpenapiRemoveMembershipErrors = {
+export type DeleteTripsByTripIdMembersByMembershipIdErrors = {
     /**
      * Exception for status 400
      */
@@ -1169,13 +1168,14 @@ export type TripsServiceOpenapiRemoveMembershipErrors = {
     404: unknown;
 };
 
-export type TripsServiceOpenapiRemoveMembershipResponses = {
+export type DeleteTripsByTripIdMembersByMembershipIdResponses = {
     200: TripsServiceOpenapiTripMembershipActionResponseDto;
 };
 
-export type TripsServiceOpenapiRemoveMembershipResponse = TripsServiceOpenapiRemoveMembershipResponses[keyof TripsServiceOpenapiRemoveMembershipResponses];
+export type DeleteTripsByTripIdMembersByMembershipIdResponse =
+    DeleteTripsByTripIdMembersByMembershipIdResponses[keyof DeleteTripsByTripIdMembersByMembershipIdResponses];
 
-export type TripsServiceOpenapiGetTripData = {
+export type GetTripsByTripIdData = {
     body?: never;
     path: {
         tripId: string;
@@ -1184,7 +1184,7 @@ export type TripsServiceOpenapiGetTripData = {
     url: '/trips/{tripId}';
 };
 
-export type TripsServiceOpenapiGetTripErrors = {
+export type GetTripsByTripIdErrors = {
     /**
      * Exception for status 401
      */
@@ -1195,13 +1195,13 @@ export type TripsServiceOpenapiGetTripErrors = {
     404: unknown;
 };
 
-export type TripsServiceOpenapiGetTripResponses = {
+export type GetTripsByTripIdResponses = {
     200: TripsServiceOpenapiGetTripResponseDto;
 };
 
-export type TripsServiceOpenapiGetTripResponse = TripsServiceOpenapiGetTripResponses[keyof TripsServiceOpenapiGetTripResponses];
+export type GetTripsByTripIdResponse = GetTripsByTripIdResponses[keyof GetTripsByTripIdResponses];
 
-export type TripsServiceOpenapiUpdateTripData = {
+export type PatchTripsByTripIdData = {
     body: TripsServiceOpenapiUpdateTripDto;
     path: {
         tripId: string;
@@ -1210,7 +1210,7 @@ export type TripsServiceOpenapiUpdateTripData = {
     url: '/trips/{tripId}';
 };
 
-export type TripsServiceOpenapiUpdateTripErrors = {
+export type PatchTripsByTripIdErrors = {
     /**
      * Exception for status 400
      */
@@ -1225,41 +1225,40 @@ export type TripsServiceOpenapiUpdateTripErrors = {
     404: unknown;
 };
 
-export type TripsServiceOpenapiUpdateTripResponses = {
+export type PatchTripsByTripIdResponses = {
     200: TripsServiceOpenapiUpdateTripResponseDto;
 };
 
-export type TripsServiceOpenapiUpdateTripResponse = TripsServiceOpenapiUpdateTripResponses[keyof TripsServiceOpenapiUpdateTripResponses];
+export type PatchTripsByTripIdResponse = PatchTripsByTripIdResponses[keyof PatchTripsByTripIdResponses];
 
-export type MessagingServiceOpenapiListConversationsData = {
+export type GetConversationsData = {
     body?: never;
     path?: never;
     query?: never;
     url: '/conversations';
 };
 
-export type MessagingServiceOpenapiListConversationsErrors = {
+export type GetConversationsErrors = {
     /**
      * Exception for status 401
      */
     401: unknown;
 };
 
-export type MessagingServiceOpenapiListConversationsResponses = {
+export type GetConversationsResponses = {
     200: MessagingServiceOpenapiListConversationsResponseDto;
 };
 
-export type MessagingServiceOpenapiListConversationsResponse =
-    MessagingServiceOpenapiListConversationsResponses[keyof MessagingServiceOpenapiListConversationsResponses];
+export type GetConversationsResponse = GetConversationsResponses[keyof GetConversationsResponses];
 
-export type MessagingServiceOpenapiCreateDirectConversationData = {
+export type PostConversationsData = {
     body: MessagingServiceOpenapiCreateDirectConversationDto;
     path?: never;
     query?: never;
     url: '/conversations';
 };
 
-export type MessagingServiceOpenapiCreateDirectConversationErrors = {
+export type PostConversationsErrors = {
     /**
      * Exception for status 400
      */
@@ -1270,14 +1269,13 @@ export type MessagingServiceOpenapiCreateDirectConversationErrors = {
     401: unknown;
 };
 
-export type MessagingServiceOpenapiCreateDirectConversationResponses = {
+export type PostConversationsResponses = {
     201: MessagingServiceOpenapiCreateConversationResponseDto;
 };
 
-export type MessagingServiceOpenapiCreateDirectConversationResponse =
-    MessagingServiceOpenapiCreateDirectConversationResponses[keyof MessagingServiceOpenapiCreateDirectConversationResponses];
+export type PostConversationsResponse = PostConversationsResponses[keyof PostConversationsResponses];
 
-export type MessagingServiceOpenapiGetTripConversationData = {
+export type GetConversationsTripsByTripIdData = {
     body?: never;
     path: {
         tripId: string;
@@ -1286,7 +1284,7 @@ export type MessagingServiceOpenapiGetTripConversationData = {
     url: '/conversations/trips/{tripId}';
 };
 
-export type MessagingServiceOpenapiGetTripConversationErrors = {
+export type GetConversationsTripsByTripIdErrors = {
     /**
      * Exception for status 401
      */
@@ -1297,14 +1295,13 @@ export type MessagingServiceOpenapiGetTripConversationErrors = {
     404: unknown;
 };
 
-export type MessagingServiceOpenapiGetTripConversationResponses = {
+export type GetConversationsTripsByTripIdResponses = {
     200: MessagingServiceOpenapiCreateConversationResponseDto;
 };
 
-export type MessagingServiceOpenapiGetTripConversationResponse =
-    MessagingServiceOpenapiGetTripConversationResponses[keyof MessagingServiceOpenapiGetTripConversationResponses];
+export type GetConversationsTripsByTripIdResponse = GetConversationsTripsByTripIdResponses[keyof GetConversationsTripsByTripIdResponses];
 
-export type MessagingServiceOpenapiListTripMessagesData = {
+export type GetConversationsTripsByTripIdMessagesData = {
     body?: never;
     path: {
         tripId: string;
@@ -1313,7 +1310,7 @@ export type MessagingServiceOpenapiListTripMessagesData = {
     url: '/conversations/trips/{tripId}/messages';
 };
 
-export type MessagingServiceOpenapiListTripMessagesErrors = {
+export type GetConversationsTripsByTripIdMessagesErrors = {
     /**
      * Exception for status 401
      */
@@ -1324,14 +1321,14 @@ export type MessagingServiceOpenapiListTripMessagesErrors = {
     404: unknown;
 };
 
-export type MessagingServiceOpenapiListTripMessagesResponses = {
+export type GetConversationsTripsByTripIdMessagesResponses = {
     200: MessagingServiceOpenapiListMessagesResponseDto;
 };
 
-export type MessagingServiceOpenapiListTripMessagesResponse =
-    MessagingServiceOpenapiListTripMessagesResponses[keyof MessagingServiceOpenapiListTripMessagesResponses];
+export type GetConversationsTripsByTripIdMessagesResponse =
+    GetConversationsTripsByTripIdMessagesResponses[keyof GetConversationsTripsByTripIdMessagesResponses];
 
-export type MessagingServiceOpenapiSendTripMessageData = {
+export type PostConversationsTripsByTripIdMessagesData = {
     body: MessagingServiceOpenapiSendMessageDto;
     headers: {
         authorization: string;
@@ -1343,7 +1340,7 @@ export type MessagingServiceOpenapiSendTripMessageData = {
     url: '/conversations/trips/{tripId}/messages';
 };
 
-export type MessagingServiceOpenapiSendTripMessageErrors = {
+export type PostConversationsTripsByTripIdMessagesErrors = {
     /**
      * Exception for status 400
      */
@@ -1358,14 +1355,14 @@ export type MessagingServiceOpenapiSendTripMessageErrors = {
     404: unknown;
 };
 
-export type MessagingServiceOpenapiSendTripMessageResponses = {
+export type PostConversationsTripsByTripIdMessagesResponses = {
     201: MessagingServiceOpenapiSendMessageResponseDto;
 };
 
-export type MessagingServiceOpenapiSendTripMessageResponse =
-    MessagingServiceOpenapiSendTripMessageResponses[keyof MessagingServiceOpenapiSendTripMessageResponses];
+export type PostConversationsTripsByTripIdMessagesResponse =
+    PostConversationsTripsByTripIdMessagesResponses[keyof PostConversationsTripsByTripIdMessagesResponses];
 
-export type MessagingServiceOpenapiUploadTripMessageAttachmentData = {
+export type PostConversationsTripsByTripIdMessagesAttachmentData = {
     body: {
         file?: Blob | File;
     };
@@ -1379,7 +1376,7 @@ export type MessagingServiceOpenapiUploadTripMessageAttachmentData = {
     url: '/conversations/trips/{tripId}/messages/attachment';
 };
 
-export type MessagingServiceOpenapiUploadTripMessageAttachmentErrors = {
+export type PostConversationsTripsByTripIdMessagesAttachmentErrors = {
     /**
      * Exception for status 400
      */
@@ -1398,14 +1395,14 @@ export type MessagingServiceOpenapiUploadTripMessageAttachmentErrors = {
     415: unknown;
 };
 
-export type MessagingServiceOpenapiUploadTripMessageAttachmentResponses = {
+export type PostConversationsTripsByTripIdMessagesAttachmentResponses = {
     201: MessagingServiceOpenapiUploadMessageAttachmentResponseDto;
 };
 
-export type MessagingServiceOpenapiUploadTripMessageAttachmentResponse =
-    MessagingServiceOpenapiUploadTripMessageAttachmentResponses[keyof MessagingServiceOpenapiUploadTripMessageAttachmentResponses];
+export type PostConversationsTripsByTripIdMessagesAttachmentResponse =
+    PostConversationsTripsByTripIdMessagesAttachmentResponses[keyof PostConversationsTripsByTripIdMessagesAttachmentResponses];
 
-export type MessagingServiceOpenapiPostTripSystemEventData = {
+export type PostConversationsInternalTripsByTripIdSystemEventsData = {
     body: MessagingServiceOpenapiPostTripSystemEventDto;
     path: {
         tripId: string;
@@ -1414,7 +1411,7 @@ export type MessagingServiceOpenapiPostTripSystemEventData = {
     url: '/conversations/internal/trips/{tripId}/system-events';
 };
 
-export type MessagingServiceOpenapiPostTripSystemEventErrors = {
+export type PostConversationsInternalTripsByTripIdSystemEventsErrors = {
     /**
      * Exception for status 400
      */
@@ -1429,14 +1426,14 @@ export type MessagingServiceOpenapiPostTripSystemEventErrors = {
     404: unknown;
 };
 
-export type MessagingServiceOpenapiPostTripSystemEventResponses = {
+export type PostConversationsInternalTripsByTripIdSystemEventsResponses = {
     201: MessagingServiceOpenapiPostTripSystemEventResponseDto;
 };
 
-export type MessagingServiceOpenapiPostTripSystemEventResponse =
-    MessagingServiceOpenapiPostTripSystemEventResponses[keyof MessagingServiceOpenapiPostTripSystemEventResponses];
+export type PostConversationsInternalTripsByTripIdSystemEventsResponse =
+    PostConversationsInternalTripsByTripIdSystemEventsResponses[keyof PostConversationsInternalTripsByTripIdSystemEventsResponses];
 
-export type MessagingServiceOpenapiListMessagesData = {
+export type GetConversationsByConversationIdMessagesData = {
     body?: never;
     path: {
         conversationId: string;
@@ -1445,7 +1442,7 @@ export type MessagingServiceOpenapiListMessagesData = {
     url: '/conversations/{conversationId}/messages';
 };
 
-export type MessagingServiceOpenapiListMessagesErrors = {
+export type GetConversationsByConversationIdMessagesErrors = {
     /**
      * Exception for status 401
      */
@@ -1456,13 +1453,14 @@ export type MessagingServiceOpenapiListMessagesErrors = {
     404: unknown;
 };
 
-export type MessagingServiceOpenapiListMessagesResponses = {
+export type GetConversationsByConversationIdMessagesResponses = {
     200: MessagingServiceOpenapiListMessagesResponseDto;
 };
 
-export type MessagingServiceOpenapiListMessagesResponse = MessagingServiceOpenapiListMessagesResponses[keyof MessagingServiceOpenapiListMessagesResponses];
+export type GetConversationsByConversationIdMessagesResponse =
+    GetConversationsByConversationIdMessagesResponses[keyof GetConversationsByConversationIdMessagesResponses];
 
-export type MessagingServiceOpenapiSendMessageData = {
+export type PostConversationsByConversationIdMessagesData = {
     body: MessagingServiceOpenapiSendMessageDto;
     headers: {
         authorization: string;
@@ -1474,7 +1472,7 @@ export type MessagingServiceOpenapiSendMessageData = {
     url: '/conversations/{conversationId}/messages';
 };
 
-export type MessagingServiceOpenapiSendMessageErrors = {
+export type PostConversationsByConversationIdMessagesErrors = {
     /**
      * Exception for status 400
      */
@@ -1489,13 +1487,14 @@ export type MessagingServiceOpenapiSendMessageErrors = {
     404: unknown;
 };
 
-export type MessagingServiceOpenapiSendMessageResponses = {
+export type PostConversationsByConversationIdMessagesResponses = {
     201: MessagingServiceOpenapiSendMessageResponseDto;
 };
 
-export type MessagingServiceOpenapiSendMessageResponse = MessagingServiceOpenapiSendMessageResponses[keyof MessagingServiceOpenapiSendMessageResponses];
+export type PostConversationsByConversationIdMessagesResponse =
+    PostConversationsByConversationIdMessagesResponses[keyof PostConversationsByConversationIdMessagesResponses];
 
-export type MessagingServiceOpenapiUploadMessageAttachmentData = {
+export type PostConversationsByConversationIdMessagesAttachmentData = {
     body: {
         file?: Blob | File;
     };
@@ -1509,7 +1508,7 @@ export type MessagingServiceOpenapiUploadMessageAttachmentData = {
     url: '/conversations/{conversationId}/messages/attachment';
 };
 
-export type MessagingServiceOpenapiUploadMessageAttachmentErrors = {
+export type PostConversationsByConversationIdMessagesAttachmentErrors = {
     /**
      * Exception for status 400
      */
@@ -1528,42 +1527,41 @@ export type MessagingServiceOpenapiUploadMessageAttachmentErrors = {
     415: unknown;
 };
 
-export type MessagingServiceOpenapiUploadMessageAttachmentResponses = {
+export type PostConversationsByConversationIdMessagesAttachmentResponses = {
     201: MessagingServiceOpenapiUploadMessageAttachmentResponseDto;
 };
 
-export type MessagingServiceOpenapiUploadMessageAttachmentResponse =
-    MessagingServiceOpenapiUploadMessageAttachmentResponses[keyof MessagingServiceOpenapiUploadMessageAttachmentResponses];
+export type PostConversationsByConversationIdMessagesAttachmentResponse =
+    PostConversationsByConversationIdMessagesAttachmentResponses[keyof PostConversationsByConversationIdMessagesAttachmentResponses];
 
-export type NotificationsServiceOpenapiListNotificationsData = {
+export type GetNotificationsData = {
     body?: never;
     path?: never;
     query?: never;
     url: '/notifications';
 };
 
-export type NotificationsServiceOpenapiListNotificationsErrors = {
+export type GetNotificationsErrors = {
     /**
      * Exception for status 401
      */
     401: unknown;
 };
 
-export type NotificationsServiceOpenapiListNotificationsResponses = {
+export type GetNotificationsResponses = {
     200: NotificationsServiceOpenapiListNotificationsResponseDto;
 };
 
-export type NotificationsServiceOpenapiListNotificationsResponse =
-    NotificationsServiceOpenapiListNotificationsResponses[keyof NotificationsServiceOpenapiListNotificationsResponses];
+export type GetNotificationsResponse = GetNotificationsResponses[keyof GetNotificationsResponses];
 
-export type NotificationsServiceOpenapiCreateNotificationData = {
+export type PostNotificationsInternalData = {
     body: NotificationsServiceOpenapiCreateNotificationDto;
     path?: never;
     query?: never;
     url: '/notifications/internal';
 };
 
-export type NotificationsServiceOpenapiCreateNotificationErrors = {
+export type PostNotificationsInternalErrors = {
     /**
      * Exception for status 400
      */
@@ -1574,14 +1572,13 @@ export type NotificationsServiceOpenapiCreateNotificationErrors = {
     401: unknown;
 };
 
-export type NotificationsServiceOpenapiCreateNotificationResponses = {
+export type PostNotificationsInternalResponses = {
     201: NotificationsServiceOpenapiCreateNotificationResponseDto;
 };
 
-export type NotificationsServiceOpenapiCreateNotificationResponse =
-    NotificationsServiceOpenapiCreateNotificationResponses[keyof NotificationsServiceOpenapiCreateNotificationResponses];
+export type PostNotificationsInternalResponse = PostNotificationsInternalResponses[keyof PostNotificationsInternalResponses];
 
-export type NotificationsServiceOpenapiMarkNotificationReadData = {
+export type PatchNotificationsByNotificationIdReadData = {
     body?: never;
     path: {
         notificationId: string;
@@ -1590,7 +1587,7 @@ export type NotificationsServiceOpenapiMarkNotificationReadData = {
     url: '/notifications/{notificationId}/read';
 };
 
-export type NotificationsServiceOpenapiMarkNotificationReadErrors = {
+export type PatchNotificationsByNotificationIdReadErrors = {
     /**
      * Exception for status 401
      */
@@ -1601,9 +1598,9 @@ export type NotificationsServiceOpenapiMarkNotificationReadErrors = {
     404: unknown;
 };
 
-export type NotificationsServiceOpenapiMarkNotificationReadResponses = {
+export type PatchNotificationsByNotificationIdReadResponses = {
     200: NotificationsServiceOpenapiMarkNotificationReadResponseDto;
 };
 
-export type NotificationsServiceOpenapiMarkNotificationReadResponse =
-    NotificationsServiceOpenapiMarkNotificationReadResponses[keyof NotificationsServiceOpenapiMarkNotificationReadResponses];
+export type PatchNotificationsByNotificationIdReadResponse =
+    PatchNotificationsByNotificationIdReadResponses[keyof PatchNotificationsByNotificationIdReadResponses];

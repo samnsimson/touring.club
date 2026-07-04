@@ -3,138 +3,138 @@
 import { type Client, type ClientMeta, formDataBodySerializer, type Options as Options2, type RequestResult, type TDataShape } from './client';
 import { client } from './client.gen';
 import type {
-    AuthServiceOpenapiChangePasswordData,
-    AuthServiceOpenapiChangePasswordErrors,
-    AuthServiceOpenapiChangePasswordResponses,
-    AuthServiceOpenapiForgotPasswordData,
-    AuthServiceOpenapiForgotPasswordErrors,
-    AuthServiceOpenapiForgotPasswordResponses,
-    AuthServiceOpenapiGetMeData,
-    AuthServiceOpenapiGetMeErrors,
-    AuthServiceOpenapiGetMeResponses,
-    AuthServiceOpenapiResetPasswordData,
-    AuthServiceOpenapiResetPasswordErrors,
-    AuthServiceOpenapiResetPasswordResponses,
-    AuthServiceOpenapiSignInData,
-    AuthServiceOpenapiSignInErrors,
-    AuthServiceOpenapiSignInResponses,
-    AuthServiceOpenapiSignOutData,
-    AuthServiceOpenapiSignOutErrors,
-    AuthServiceOpenapiSignOutResponses,
-    AuthServiceOpenapiSignUpData,
-    AuthServiceOpenapiSignUpErrors,
-    AuthServiceOpenapiSignUpResponses,
-    AuthServiceOpenapiUpdateProfileData,
-    AuthServiceOpenapiUpdateProfileErrors,
-    AuthServiceOpenapiUpdateProfileResponses,
-    AuthServiceOpenapiVerifyEmailData,
-    AuthServiceOpenapiVerifyEmailErrors,
-    AuthServiceOpenapiVerifyEmailResponses,
-    MessagingServiceOpenapiCreateDirectConversationData,
-    MessagingServiceOpenapiCreateDirectConversationErrors,
-    MessagingServiceOpenapiCreateDirectConversationResponses,
-    MessagingServiceOpenapiGetTripConversationData,
-    MessagingServiceOpenapiGetTripConversationErrors,
-    MessagingServiceOpenapiGetTripConversationResponses,
-    MessagingServiceOpenapiListConversationsData,
-    MessagingServiceOpenapiListConversationsErrors,
-    MessagingServiceOpenapiListConversationsResponses,
-    MessagingServiceOpenapiListMessagesData,
-    MessagingServiceOpenapiListMessagesErrors,
-    MessagingServiceOpenapiListMessagesResponses,
-    MessagingServiceOpenapiListTripMessagesData,
-    MessagingServiceOpenapiListTripMessagesErrors,
-    MessagingServiceOpenapiListTripMessagesResponses,
-    MessagingServiceOpenapiPostTripSystemEventData,
-    MessagingServiceOpenapiPostTripSystemEventErrors,
-    MessagingServiceOpenapiPostTripSystemEventResponses,
-    MessagingServiceOpenapiSendMessageData,
-    MessagingServiceOpenapiSendMessageErrors,
-    MessagingServiceOpenapiSendMessageResponses,
-    MessagingServiceOpenapiSendTripMessageData,
-    MessagingServiceOpenapiSendTripMessageErrors,
-    MessagingServiceOpenapiSendTripMessageResponses,
-    MessagingServiceOpenapiUploadMessageAttachmentData,
-    MessagingServiceOpenapiUploadMessageAttachmentErrors,
-    MessagingServiceOpenapiUploadMessageAttachmentResponses,
-    MessagingServiceOpenapiUploadTripMessageAttachmentData,
-    MessagingServiceOpenapiUploadTripMessageAttachmentErrors,
-    MessagingServiceOpenapiUploadTripMessageAttachmentResponses,
-    NotificationsServiceOpenapiCreateNotificationData,
-    NotificationsServiceOpenapiCreateNotificationErrors,
-    NotificationsServiceOpenapiCreateNotificationResponses,
-    NotificationsServiceOpenapiListNotificationsData,
-    NotificationsServiceOpenapiListNotificationsErrors,
-    NotificationsServiceOpenapiListNotificationsResponses,
-    NotificationsServiceOpenapiMarkNotificationReadData,
-    NotificationsServiceOpenapiMarkNotificationReadErrors,
-    NotificationsServiceOpenapiMarkNotificationReadResponses,
-    TripsServiceOpenapiApproveMembershipData,
-    TripsServiceOpenapiApproveMembershipErrors,
-    TripsServiceOpenapiApproveMembershipResponses,
-    TripsServiceOpenapiArchiveTripData,
-    TripsServiceOpenapiArchiveTripErrors,
-    TripsServiceOpenapiArchiveTripResponses,
-    TripsServiceOpenapiCancelTripData,
-    TripsServiceOpenapiCancelTripErrors,
-    TripsServiceOpenapiCancelTripResponses,
-    TripsServiceOpenapiCreateTripData,
-    TripsServiceOpenapiCreateTripErrors,
-    TripsServiceOpenapiCreateTripResponses,
-    TripsServiceOpenapiDiscoverTripsData,
-    TripsServiceOpenapiDiscoverTripsErrors,
-    TripsServiceOpenapiDiscoverTripsResponses,
-    TripsServiceOpenapiGetPublicTripData,
-    TripsServiceOpenapiGetPublicTripErrors,
-    TripsServiceOpenapiGetPublicTripResponses,
-    TripsServiceOpenapiGetTripData,
-    TripsServiceOpenapiGetTripErrors,
-    TripsServiceOpenapiGetTripResponses,
-    TripsServiceOpenapiGetUserTravelHistoryData,
-    TripsServiceOpenapiGetUserTravelHistoryErrors,
-    TripsServiceOpenapiGetUserTravelHistoryResponses,
-    TripsServiceOpenapiJoinTripData,
-    TripsServiceOpenapiJoinTripErrors,
-    TripsServiceOpenapiJoinTripResponses,
-    TripsServiceOpenapiLeaveTripData,
-    TripsServiceOpenapiLeaveTripErrors,
-    TripsServiceOpenapiLeaveTripResponses,
-    TripsServiceOpenapiListMyTripsData,
-    TripsServiceOpenapiListMyTripsErrors,
-    TripsServiceOpenapiListMyTripsResponses,
-    TripsServiceOpenapiListTripMembersData,
-    TripsServiceOpenapiListTripMembersErrors,
-    TripsServiceOpenapiListTripMembersResponses,
-    TripsServiceOpenapiPublishTripData,
-    TripsServiceOpenapiPublishTripErrors,
-    TripsServiceOpenapiPublishTripResponses,
-    TripsServiceOpenapiRejectMembershipData,
-    TripsServiceOpenapiRejectMembershipErrors,
-    TripsServiceOpenapiRejectMembershipResponses,
-    TripsServiceOpenapiRemoveMembershipData,
-    TripsServiceOpenapiRemoveMembershipErrors,
-    TripsServiceOpenapiRemoveMembershipResponses,
-    TripsServiceOpenapiUpdateTripData,
-    TripsServiceOpenapiUpdateTripErrors,
-    TripsServiceOpenapiUpdateTripResponses,
-    TripsServiceOpenapiUploadTripCoverImageData,
-    TripsServiceOpenapiUploadTripCoverImageErrors,
-    TripsServiceOpenapiUploadTripCoverImageResponses,
-    UsersServiceOpenapiGetMyProfileData,
-    UsersServiceOpenapiGetMyProfileErrors,
-    UsersServiceOpenapiGetMyProfileResponses,
-    UsersServiceOpenapiGetMyTravelHistoryData,
-    UsersServiceOpenapiGetMyTravelHistoryErrors,
-    UsersServiceOpenapiGetMyTravelHistoryResponses,
-    UsersServiceOpenapiGetPublicProfileData,
-    UsersServiceOpenapiGetPublicProfileErrors,
-    UsersServiceOpenapiGetPublicProfileResponses,
-    UsersServiceOpenapiUpdateMyProfileData,
-    UsersServiceOpenapiUpdateMyProfileErrors,
-    UsersServiceOpenapiUpdateMyProfileResponses,
-    UsersServiceOpenapiUploadMyAvatarData,
-    UsersServiceOpenapiUploadMyAvatarErrors,
-    UsersServiceOpenapiUploadMyAvatarResponses,
+    DeleteTripsByTripIdMembersByMembershipIdData,
+    DeleteTripsByTripIdMembersByMembershipIdErrors,
+    DeleteTripsByTripIdMembersByMembershipIdResponses,
+    GetAuthMeData,
+    GetAuthMeErrors,
+    GetAuthMeResponses,
+    GetConversationsByConversationIdMessagesData,
+    GetConversationsByConversationIdMessagesErrors,
+    GetConversationsByConversationIdMessagesResponses,
+    GetConversationsData,
+    GetConversationsErrors,
+    GetConversationsResponses,
+    GetConversationsTripsByTripIdData,
+    GetConversationsTripsByTripIdErrors,
+    GetConversationsTripsByTripIdMessagesData,
+    GetConversationsTripsByTripIdMessagesErrors,
+    GetConversationsTripsByTripIdMessagesResponses,
+    GetConversationsTripsByTripIdResponses,
+    GetNotificationsData,
+    GetNotificationsErrors,
+    GetNotificationsResponses,
+    GetProfilesByUserIdData,
+    GetProfilesByUserIdErrors,
+    GetProfilesByUserIdResponses,
+    GetProfilesMeData,
+    GetProfilesMeErrors,
+    GetProfilesMeResponses,
+    GetProfilesMeTravelHistoryData,
+    GetProfilesMeTravelHistoryErrors,
+    GetProfilesMeTravelHistoryResponses,
+    GetTripsByTripIdData,
+    GetTripsByTripIdErrors,
+    GetTripsByTripIdMembersData,
+    GetTripsByTripIdMembersErrors,
+    GetTripsByTripIdMembersResponses,
+    GetTripsByTripIdResponses,
+    GetTripsData,
+    GetTripsDiscoverByTripIdData,
+    GetTripsDiscoverByTripIdErrors,
+    GetTripsDiscoverByTripIdResponses,
+    GetTripsDiscoverData,
+    GetTripsDiscoverErrors,
+    GetTripsDiscoverResponses,
+    GetTripsErrors,
+    GetTripsResponses,
+    GetTripsUsersByUserIdTravelHistoryData,
+    GetTripsUsersByUserIdTravelHistoryErrors,
+    GetTripsUsersByUserIdTravelHistoryResponses,
+    PatchAuthMeData,
+    PatchAuthMeErrors,
+    PatchAuthMeResponses,
+    PatchNotificationsByNotificationIdReadData,
+    PatchNotificationsByNotificationIdReadErrors,
+    PatchNotificationsByNotificationIdReadResponses,
+    PatchProfilesMeData,
+    PatchProfilesMeErrors,
+    PatchProfilesMeResponses,
+    PatchTripsByTripIdData,
+    PatchTripsByTripIdErrors,
+    PatchTripsByTripIdResponses,
+    PostAuthChangePasswordData,
+    PostAuthChangePasswordErrors,
+    PostAuthChangePasswordResponses,
+    PostAuthForgotPasswordData,
+    PostAuthForgotPasswordErrors,
+    PostAuthForgotPasswordResponses,
+    PostAuthResetPasswordData,
+    PostAuthResetPasswordErrors,
+    PostAuthResetPasswordResponses,
+    PostAuthSignInData,
+    PostAuthSignInErrors,
+    PostAuthSignInResponses,
+    PostAuthSignOutData,
+    PostAuthSignOutErrors,
+    PostAuthSignOutResponses,
+    PostAuthSignUpData,
+    PostAuthSignUpErrors,
+    PostAuthSignUpResponses,
+    PostAuthVerifyEmailData,
+    PostAuthVerifyEmailErrors,
+    PostAuthVerifyEmailResponses,
+    PostConversationsByConversationIdMessagesAttachmentData,
+    PostConversationsByConversationIdMessagesAttachmentErrors,
+    PostConversationsByConversationIdMessagesAttachmentResponses,
+    PostConversationsByConversationIdMessagesData,
+    PostConversationsByConversationIdMessagesErrors,
+    PostConversationsByConversationIdMessagesResponses,
+    PostConversationsData,
+    PostConversationsErrors,
+    PostConversationsInternalTripsByTripIdSystemEventsData,
+    PostConversationsInternalTripsByTripIdSystemEventsErrors,
+    PostConversationsInternalTripsByTripIdSystemEventsResponses,
+    PostConversationsResponses,
+    PostConversationsTripsByTripIdMessagesAttachmentData,
+    PostConversationsTripsByTripIdMessagesAttachmentErrors,
+    PostConversationsTripsByTripIdMessagesAttachmentResponses,
+    PostConversationsTripsByTripIdMessagesData,
+    PostConversationsTripsByTripIdMessagesErrors,
+    PostConversationsTripsByTripIdMessagesResponses,
+    PostNotificationsInternalData,
+    PostNotificationsInternalErrors,
+    PostNotificationsInternalResponses,
+    PostProfilesMeAvatarData,
+    PostProfilesMeAvatarErrors,
+    PostProfilesMeAvatarResponses,
+    PostTripsByTripIdArchiveData,
+    PostTripsByTripIdArchiveErrors,
+    PostTripsByTripIdArchiveResponses,
+    PostTripsByTripIdCancelData,
+    PostTripsByTripIdCancelErrors,
+    PostTripsByTripIdCancelResponses,
+    PostTripsByTripIdCoverImageData,
+    PostTripsByTripIdCoverImageErrors,
+    PostTripsByTripIdCoverImageResponses,
+    PostTripsByTripIdJoinData,
+    PostTripsByTripIdJoinErrors,
+    PostTripsByTripIdJoinResponses,
+    PostTripsByTripIdLeaveData,
+    PostTripsByTripIdLeaveErrors,
+    PostTripsByTripIdLeaveResponses,
+    PostTripsByTripIdMembersByMembershipIdApproveData,
+    PostTripsByTripIdMembersByMembershipIdApproveErrors,
+    PostTripsByTripIdMembersByMembershipIdApproveResponses,
+    PostTripsByTripIdMembersByMembershipIdRejectData,
+    PostTripsByTripIdMembersByMembershipIdRejectErrors,
+    PostTripsByTripIdMembersByMembershipIdRejectResponses,
+    PostTripsByTripIdPublishData,
+    PostTripsByTripIdPublishErrors,
+    PostTripsByTripIdPublishResponses,
+    PostTripsData,
+    PostTripsErrors,
+    PostTripsResponses,
 } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<
@@ -181,27 +181,17 @@ class HeyApiRegistry<T> {
     }
 }
 
-export class ApiService extends HeyApiClient {
-    public static readonly __registry: HeyApiRegistry<ApiService> = new HeyApiRegistry<ApiService>();
-
-    constructor(args?: { client?: Client; key?: string }) {
-        super(args);
-        ApiService.__registry.set(this, args?.key);
+export class AuthServiceOpenapiAuth extends HeyApiClient {
+    public getMe<ThrowOnError extends boolean = false>(
+        options?: Options<GetAuthMeData, ThrowOnError>,
+    ): RequestResult<GetAuthMeResponses, GetAuthMeErrors, ThrowOnError> {
+        return (options?.client ?? this.client).get<GetAuthMeResponses, GetAuthMeErrors, ThrowOnError>({ url: '/auth/me', ...options });
     }
 
-    public authServiceOpenapiGetMe<ThrowOnError extends boolean = false>(
-        options?: Options<AuthServiceOpenapiGetMeData, ThrowOnError>,
-    ): RequestResult<AuthServiceOpenapiGetMeResponses, AuthServiceOpenapiGetMeErrors, ThrowOnError> {
-        return (options?.client ?? this.client).get<AuthServiceOpenapiGetMeResponses, AuthServiceOpenapiGetMeErrors, ThrowOnError>({
-            url: '/auth/me',
-            ...options,
-        });
-    }
-
-    public authServiceOpenapiUpdateProfile<ThrowOnError extends boolean = false>(
-        options: Options<AuthServiceOpenapiUpdateProfileData, ThrowOnError>,
-    ): RequestResult<AuthServiceOpenapiUpdateProfileResponses, AuthServiceOpenapiUpdateProfileErrors, ThrowOnError> {
-        return (options.client ?? this.client).patch<AuthServiceOpenapiUpdateProfileResponses, AuthServiceOpenapiUpdateProfileErrors, ThrowOnError>({
+    public updateProfile<ThrowOnError extends boolean = false>(
+        options: Options<PatchAuthMeData, ThrowOnError>,
+    ): RequestResult<PatchAuthMeResponses, PatchAuthMeErrors, ThrowOnError> {
+        return (options.client ?? this.client).patch<PatchAuthMeResponses, PatchAuthMeErrors, ThrowOnError>({
             url: '/auth/me',
             ...options,
             headers: {
@@ -211,10 +201,10 @@ export class ApiService extends HeyApiClient {
         });
     }
 
-    public authServiceOpenapiChangePassword<ThrowOnError extends boolean = false>(
-        options: Options<AuthServiceOpenapiChangePasswordData, ThrowOnError>,
-    ): RequestResult<AuthServiceOpenapiChangePasswordResponses, AuthServiceOpenapiChangePasswordErrors, ThrowOnError> {
-        return (options.client ?? this.client).post<AuthServiceOpenapiChangePasswordResponses, AuthServiceOpenapiChangePasswordErrors, ThrowOnError>({
+    public changePassword<ThrowOnError extends boolean = false>(
+        options: Options<PostAuthChangePasswordData, ThrowOnError>,
+    ): RequestResult<PostAuthChangePasswordResponses, PostAuthChangePasswordErrors, ThrowOnError> {
+        return (options.client ?? this.client).post<PostAuthChangePasswordResponses, PostAuthChangePasswordErrors, ThrowOnError>({
             url: '/auth/change-password',
             ...options,
             headers: {
@@ -224,19 +214,16 @@ export class ApiService extends HeyApiClient {
         });
     }
 
-    public authServiceOpenapiSignOut<ThrowOnError extends boolean = false>(
-        options?: Options<AuthServiceOpenapiSignOutData, ThrowOnError>,
-    ): RequestResult<AuthServiceOpenapiSignOutResponses, AuthServiceOpenapiSignOutErrors, ThrowOnError> {
-        return (options?.client ?? this.client).post<AuthServiceOpenapiSignOutResponses, AuthServiceOpenapiSignOutErrors, ThrowOnError>({
-            url: '/auth/sign-out',
-            ...options,
-        });
+    public signOut<ThrowOnError extends boolean = false>(
+        options?: Options<PostAuthSignOutData, ThrowOnError>,
+    ): RequestResult<PostAuthSignOutResponses, PostAuthSignOutErrors, ThrowOnError> {
+        return (options?.client ?? this.client).post<PostAuthSignOutResponses, PostAuthSignOutErrors, ThrowOnError>({ url: '/auth/sign-out', ...options });
     }
 
-    public authServiceOpenapiSignUp<ThrowOnError extends boolean = false>(
-        options: Options<AuthServiceOpenapiSignUpData, ThrowOnError>,
-    ): RequestResult<AuthServiceOpenapiSignUpResponses, AuthServiceOpenapiSignUpErrors, ThrowOnError> {
-        return (options.client ?? this.client).post<AuthServiceOpenapiSignUpResponses, AuthServiceOpenapiSignUpErrors, ThrowOnError>({
+    public signUp<ThrowOnError extends boolean = false>(
+        options: Options<PostAuthSignUpData, ThrowOnError>,
+    ): RequestResult<PostAuthSignUpResponses, PostAuthSignUpErrors, ThrowOnError> {
+        return (options.client ?? this.client).post<PostAuthSignUpResponses, PostAuthSignUpErrors, ThrowOnError>({
             url: '/auth/sign-up',
             ...options,
             headers: {
@@ -246,10 +233,10 @@ export class ApiService extends HeyApiClient {
         });
     }
 
-    public authServiceOpenapiSignIn<ThrowOnError extends boolean = false>(
-        options: Options<AuthServiceOpenapiSignInData, ThrowOnError>,
-    ): RequestResult<AuthServiceOpenapiSignInResponses, AuthServiceOpenapiSignInErrors, ThrowOnError> {
-        return (options.client ?? this.client).post<AuthServiceOpenapiSignInResponses, AuthServiceOpenapiSignInErrors, ThrowOnError>({
+    public signIn<ThrowOnError extends boolean = false>(
+        options: Options<PostAuthSignInData, ThrowOnError>,
+    ): RequestResult<PostAuthSignInResponses, PostAuthSignInErrors, ThrowOnError> {
+        return (options.client ?? this.client).post<PostAuthSignInResponses, PostAuthSignInErrors, ThrowOnError>({
             url: '/auth/sign-in',
             ...options,
             headers: {
@@ -259,10 +246,10 @@ export class ApiService extends HeyApiClient {
         });
     }
 
-    public authServiceOpenapiVerifyEmail<ThrowOnError extends boolean = false>(
-        options: Options<AuthServiceOpenapiVerifyEmailData, ThrowOnError>,
-    ): RequestResult<AuthServiceOpenapiVerifyEmailResponses, AuthServiceOpenapiVerifyEmailErrors, ThrowOnError> {
-        return (options.client ?? this.client).post<AuthServiceOpenapiVerifyEmailResponses, AuthServiceOpenapiVerifyEmailErrors, ThrowOnError>({
+    public verifyEmail<ThrowOnError extends boolean = false>(
+        options: Options<PostAuthVerifyEmailData, ThrowOnError>,
+    ): RequestResult<PostAuthVerifyEmailResponses, PostAuthVerifyEmailErrors, ThrowOnError> {
+        return (options.client ?? this.client).post<PostAuthVerifyEmailResponses, PostAuthVerifyEmailErrors, ThrowOnError>({
             url: '/auth/verify-email',
             ...options,
             headers: {
@@ -272,10 +259,10 @@ export class ApiService extends HeyApiClient {
         });
     }
 
-    public authServiceOpenapiForgotPassword<ThrowOnError extends boolean = false>(
-        options: Options<AuthServiceOpenapiForgotPasswordData, ThrowOnError>,
-    ): RequestResult<AuthServiceOpenapiForgotPasswordResponses, AuthServiceOpenapiForgotPasswordErrors, ThrowOnError> {
-        return (options.client ?? this.client).post<AuthServiceOpenapiForgotPasswordResponses, AuthServiceOpenapiForgotPasswordErrors, ThrowOnError>({
+    public forgotPassword<ThrowOnError extends boolean = false>(
+        options: Options<PostAuthForgotPasswordData, ThrowOnError>,
+    ): RequestResult<PostAuthForgotPasswordResponses, PostAuthForgotPasswordErrors, ThrowOnError> {
+        return (options.client ?? this.client).post<PostAuthForgotPasswordResponses, PostAuthForgotPasswordErrors, ThrowOnError>({
             url: '/auth/forgot-password',
             ...options,
             headers: {
@@ -285,10 +272,10 @@ export class ApiService extends HeyApiClient {
         });
     }
 
-    public authServiceOpenapiResetPassword<ThrowOnError extends boolean = false>(
-        options: Options<AuthServiceOpenapiResetPasswordData, ThrowOnError>,
-    ): RequestResult<AuthServiceOpenapiResetPasswordResponses, AuthServiceOpenapiResetPasswordErrors, ThrowOnError> {
-        return (options.client ?? this.client).post<AuthServiceOpenapiResetPasswordResponses, AuthServiceOpenapiResetPasswordErrors, ThrowOnError>({
+    public resetPassword<ThrowOnError extends boolean = false>(
+        options: Options<PostAuthResetPasswordData, ThrowOnError>,
+    ): RequestResult<PostAuthResetPasswordResponses, PostAuthResetPasswordErrors, ThrowOnError> {
+        return (options.client ?? this.client).post<PostAuthResetPasswordResponses, PostAuthResetPasswordErrors, ThrowOnError>({
             url: '/auth/reset-password',
             ...options,
             headers: {
@@ -297,20 +284,26 @@ export class ApiService extends HeyApiClient {
             },
         });
     }
+}
+
+export class ApiService extends HeyApiClient {
+    public static readonly __registry: HeyApiRegistry<ApiService> = new HeyApiRegistry<ApiService>();
+
+    constructor(args?: { client?: Client; key?: string }) {
+        super(args);
+        ApiService.__registry.set(this, args?.key);
+    }
 
     public usersServiceOpenapiGetMyProfile<ThrowOnError extends boolean = false>(
-        options?: Options<UsersServiceOpenapiGetMyProfileData, ThrowOnError>,
-    ): RequestResult<UsersServiceOpenapiGetMyProfileResponses, UsersServiceOpenapiGetMyProfileErrors, ThrowOnError> {
-        return (options?.client ?? this.client).get<UsersServiceOpenapiGetMyProfileResponses, UsersServiceOpenapiGetMyProfileErrors, ThrowOnError>({
-            url: '/profiles/me',
-            ...options,
-        });
+        options?: Options<GetProfilesMeData, ThrowOnError>,
+    ): RequestResult<GetProfilesMeResponses, GetProfilesMeErrors, ThrowOnError> {
+        return (options?.client ?? this.client).get<GetProfilesMeResponses, GetProfilesMeErrors, ThrowOnError>({ url: '/profiles/me', ...options });
     }
 
     public usersServiceOpenapiUpdateMyProfile<ThrowOnError extends boolean = false>(
-        options: Options<UsersServiceOpenapiUpdateMyProfileData, ThrowOnError>,
-    ): RequestResult<UsersServiceOpenapiUpdateMyProfileResponses, UsersServiceOpenapiUpdateMyProfileErrors, ThrowOnError> {
-        return (options.client ?? this.client).patch<UsersServiceOpenapiUpdateMyProfileResponses, UsersServiceOpenapiUpdateMyProfileErrors, ThrowOnError>({
+        options: Options<PatchProfilesMeData, ThrowOnError>,
+    ): RequestResult<PatchProfilesMeResponses, PatchProfilesMeErrors, ThrowOnError> {
+        return (options.client ?? this.client).patch<PatchProfilesMeResponses, PatchProfilesMeErrors, ThrowOnError>({
             url: '/profiles/me',
             ...options,
             headers: {
@@ -321,9 +314,9 @@ export class ApiService extends HeyApiClient {
     }
 
     public usersServiceOpenapiUploadMyAvatar<ThrowOnError extends boolean = false>(
-        options: Options<UsersServiceOpenapiUploadMyAvatarData, ThrowOnError>,
-    ): RequestResult<UsersServiceOpenapiUploadMyAvatarResponses, UsersServiceOpenapiUploadMyAvatarErrors, ThrowOnError> {
-        return (options.client ?? this.client).post<UsersServiceOpenapiUploadMyAvatarResponses, UsersServiceOpenapiUploadMyAvatarErrors, ThrowOnError>({
+        options: Options<PostProfilesMeAvatarData, ThrowOnError>,
+    ): RequestResult<PostProfilesMeAvatarResponses, PostProfilesMeAvatarErrors, ThrowOnError> {
+        return (options.client ?? this.client).post<PostProfilesMeAvatarResponses, PostProfilesMeAvatarErrors, ThrowOnError>({
             ...formDataBodySerializer,
             url: '/profiles/me/avatar',
             ...options,
@@ -335,36 +328,33 @@ export class ApiService extends HeyApiClient {
     }
 
     public usersServiceOpenapiGetMyTravelHistory<ThrowOnError extends boolean = false>(
-        options: Options<UsersServiceOpenapiGetMyTravelHistoryData, ThrowOnError>,
-    ): RequestResult<UsersServiceOpenapiGetMyTravelHistoryResponses, UsersServiceOpenapiGetMyTravelHistoryErrors, ThrowOnError> {
-        return (options.client ?? this.client).get<UsersServiceOpenapiGetMyTravelHistoryResponses, UsersServiceOpenapiGetMyTravelHistoryErrors, ThrowOnError>({
+        options: Options<GetProfilesMeTravelHistoryData, ThrowOnError>,
+    ): RequestResult<GetProfilesMeTravelHistoryResponses, GetProfilesMeTravelHistoryErrors, ThrowOnError> {
+        return (options.client ?? this.client).get<GetProfilesMeTravelHistoryResponses, GetProfilesMeTravelHistoryErrors, ThrowOnError>({
             url: '/profiles/me/travel-history',
             ...options,
         });
     }
 
     public usersServiceOpenapiGetPublicProfile<ThrowOnError extends boolean = false>(
-        options: Options<UsersServiceOpenapiGetPublicProfileData, ThrowOnError>,
-    ): RequestResult<UsersServiceOpenapiGetPublicProfileResponses, UsersServiceOpenapiGetPublicProfileErrors, ThrowOnError> {
-        return (options.client ?? this.client).get<UsersServiceOpenapiGetPublicProfileResponses, UsersServiceOpenapiGetPublicProfileErrors, ThrowOnError>({
+        options: Options<GetProfilesByUserIdData, ThrowOnError>,
+    ): RequestResult<GetProfilesByUserIdResponses, GetProfilesByUserIdErrors, ThrowOnError> {
+        return (options.client ?? this.client).get<GetProfilesByUserIdResponses, GetProfilesByUserIdErrors, ThrowOnError>({
             url: '/profiles/{userId}',
             ...options,
         });
     }
 
     public tripsServiceOpenapiListMyTrips<ThrowOnError extends boolean = false>(
-        options?: Options<TripsServiceOpenapiListMyTripsData, ThrowOnError>,
-    ): RequestResult<TripsServiceOpenapiListMyTripsResponses, TripsServiceOpenapiListMyTripsErrors, ThrowOnError> {
-        return (options?.client ?? this.client).get<TripsServiceOpenapiListMyTripsResponses, TripsServiceOpenapiListMyTripsErrors, ThrowOnError>({
-            url: '/trips',
-            ...options,
-        });
+        options?: Options<GetTripsData, ThrowOnError>,
+    ): RequestResult<GetTripsResponses, GetTripsErrors, ThrowOnError> {
+        return (options?.client ?? this.client).get<GetTripsResponses, GetTripsErrors, ThrowOnError>({ url: '/trips', ...options });
     }
 
     public tripsServiceOpenapiCreateTrip<ThrowOnError extends boolean = false>(
-        options: Options<TripsServiceOpenapiCreateTripData, ThrowOnError>,
-    ): RequestResult<TripsServiceOpenapiCreateTripResponses, TripsServiceOpenapiCreateTripErrors, ThrowOnError> {
-        return (options.client ?? this.client).post<TripsServiceOpenapiCreateTripResponses, TripsServiceOpenapiCreateTripErrors, ThrowOnError>({
+        options: Options<PostTripsData, ThrowOnError>,
+    ): RequestResult<PostTripsResponses, PostTripsErrors, ThrowOnError> {
+        return (options.client ?? this.client).post<PostTripsResponses, PostTripsErrors, ThrowOnError>({
             url: '/trips',
             ...options,
             headers: {
@@ -375,68 +365,60 @@ export class ApiService extends HeyApiClient {
     }
 
     public tripsServiceOpenapiDiscoverTrips<ThrowOnError extends boolean = false>(
-        options?: Options<TripsServiceOpenapiDiscoverTripsData, ThrowOnError>,
-    ): RequestResult<TripsServiceOpenapiDiscoverTripsResponses, TripsServiceOpenapiDiscoverTripsErrors, ThrowOnError> {
-        return (options?.client ?? this.client).get<TripsServiceOpenapiDiscoverTripsResponses, TripsServiceOpenapiDiscoverTripsErrors, ThrowOnError>({
-            url: '/trips/discover',
+        options?: Options<GetTripsDiscoverData, ThrowOnError>,
+    ): RequestResult<GetTripsDiscoverResponses, GetTripsDiscoverErrors, ThrowOnError> {
+        return (options?.client ?? this.client).get<GetTripsDiscoverResponses, GetTripsDiscoverErrors, ThrowOnError>({ url: '/trips/discover', ...options });
+    }
+
+    public tripsServiceOpenapiGetUserTravelHistory<ThrowOnError extends boolean = false>(
+        options: Options<GetTripsUsersByUserIdTravelHistoryData, ThrowOnError>,
+    ): RequestResult<GetTripsUsersByUserIdTravelHistoryResponses, GetTripsUsersByUserIdTravelHistoryErrors, ThrowOnError> {
+        return (options.client ?? this.client).get<GetTripsUsersByUserIdTravelHistoryResponses, GetTripsUsersByUserIdTravelHistoryErrors, ThrowOnError>({
+            url: '/trips/users/{userId}/travel-history',
             ...options,
         });
     }
 
-    public tripsServiceOpenapiGetUserTravelHistory<ThrowOnError extends boolean = false>(
-        options: Options<TripsServiceOpenapiGetUserTravelHistoryData, ThrowOnError>,
-    ): RequestResult<TripsServiceOpenapiGetUserTravelHistoryResponses, TripsServiceOpenapiGetUserTravelHistoryErrors, ThrowOnError> {
-        return (options.client ?? this.client).get<
-            TripsServiceOpenapiGetUserTravelHistoryResponses,
-            TripsServiceOpenapiGetUserTravelHistoryErrors,
-            ThrowOnError
-        >({ url: '/trips/users/{userId}/travel-history', ...options });
-    }
-
     public tripsServiceOpenapiGetPublicTrip<ThrowOnError extends boolean = false>(
-        options: Options<TripsServiceOpenapiGetPublicTripData, ThrowOnError>,
-    ): RequestResult<TripsServiceOpenapiGetPublicTripResponses, TripsServiceOpenapiGetPublicTripErrors, ThrowOnError> {
-        return (options.client ?? this.client).get<TripsServiceOpenapiGetPublicTripResponses, TripsServiceOpenapiGetPublicTripErrors, ThrowOnError>({
+        options: Options<GetTripsDiscoverByTripIdData, ThrowOnError>,
+    ): RequestResult<GetTripsDiscoverByTripIdResponses, GetTripsDiscoverByTripIdErrors, ThrowOnError> {
+        return (options.client ?? this.client).get<GetTripsDiscoverByTripIdResponses, GetTripsDiscoverByTripIdErrors, ThrowOnError>({
             url: '/trips/discover/{tripId}',
             ...options,
         });
     }
 
     public tripsServiceOpenapiPublishTrip<ThrowOnError extends boolean = false>(
-        options: Options<TripsServiceOpenapiPublishTripData, ThrowOnError>,
-    ): RequestResult<TripsServiceOpenapiPublishTripResponses, TripsServiceOpenapiPublishTripErrors, ThrowOnError> {
-        return (options.client ?? this.client).post<TripsServiceOpenapiPublishTripResponses, TripsServiceOpenapiPublishTripErrors, ThrowOnError>({
+        options: Options<PostTripsByTripIdPublishData, ThrowOnError>,
+    ): RequestResult<PostTripsByTripIdPublishResponses, PostTripsByTripIdPublishErrors, ThrowOnError> {
+        return (options.client ?? this.client).post<PostTripsByTripIdPublishResponses, PostTripsByTripIdPublishErrors, ThrowOnError>({
             url: '/trips/{tripId}/publish',
             ...options,
         });
     }
 
     public tripsServiceOpenapiCancelTrip<ThrowOnError extends boolean = false>(
-        options: Options<TripsServiceOpenapiCancelTripData, ThrowOnError>,
-    ): RequestResult<TripsServiceOpenapiCancelTripResponses, TripsServiceOpenapiCancelTripErrors, ThrowOnError> {
-        return (options.client ?? this.client).post<TripsServiceOpenapiCancelTripResponses, TripsServiceOpenapiCancelTripErrors, ThrowOnError>({
+        options: Options<PostTripsByTripIdCancelData, ThrowOnError>,
+    ): RequestResult<PostTripsByTripIdCancelResponses, PostTripsByTripIdCancelErrors, ThrowOnError> {
+        return (options.client ?? this.client).post<PostTripsByTripIdCancelResponses, PostTripsByTripIdCancelErrors, ThrowOnError>({
             url: '/trips/{tripId}/cancel',
             ...options,
         });
     }
 
     public tripsServiceOpenapiArchiveTrip<ThrowOnError extends boolean = false>(
-        options: Options<TripsServiceOpenapiArchiveTripData, ThrowOnError>,
-    ): RequestResult<TripsServiceOpenapiArchiveTripResponses, TripsServiceOpenapiArchiveTripErrors, ThrowOnError> {
-        return (options.client ?? this.client).post<TripsServiceOpenapiArchiveTripResponses, TripsServiceOpenapiArchiveTripErrors, ThrowOnError>({
+        options: Options<PostTripsByTripIdArchiveData, ThrowOnError>,
+    ): RequestResult<PostTripsByTripIdArchiveResponses, PostTripsByTripIdArchiveErrors, ThrowOnError> {
+        return (options.client ?? this.client).post<PostTripsByTripIdArchiveResponses, PostTripsByTripIdArchiveErrors, ThrowOnError>({
             url: '/trips/{tripId}/archive',
             ...options,
         });
     }
 
     public tripsServiceOpenapiUploadTripCoverImage<ThrowOnError extends boolean = false>(
-        options: Options<TripsServiceOpenapiUploadTripCoverImageData, ThrowOnError>,
-    ): RequestResult<TripsServiceOpenapiUploadTripCoverImageResponses, TripsServiceOpenapiUploadTripCoverImageErrors, ThrowOnError> {
-        return (options.client ?? this.client).post<
-            TripsServiceOpenapiUploadTripCoverImageResponses,
-            TripsServiceOpenapiUploadTripCoverImageErrors,
-            ThrowOnError
-        >({
+        options: Options<PostTripsByTripIdCoverImageData, ThrowOnError>,
+    ): RequestResult<PostTripsByTripIdCoverImageResponses, PostTripsByTripIdCoverImageErrors, ThrowOnError> {
+        return (options.client ?? this.client).post<PostTripsByTripIdCoverImageResponses, PostTripsByTripIdCoverImageErrors, ThrowOnError>({
             ...formDataBodySerializer,
             url: '/trips/{tripId}/cover-image',
             ...options,
@@ -448,72 +430,72 @@ export class ApiService extends HeyApiClient {
     }
 
     public tripsServiceOpenapiJoinTrip<ThrowOnError extends boolean = false>(
-        options: Options<TripsServiceOpenapiJoinTripData, ThrowOnError>,
-    ): RequestResult<TripsServiceOpenapiJoinTripResponses, TripsServiceOpenapiJoinTripErrors, ThrowOnError> {
-        return (options.client ?? this.client).post<TripsServiceOpenapiJoinTripResponses, TripsServiceOpenapiJoinTripErrors, ThrowOnError>({
+        options: Options<PostTripsByTripIdJoinData, ThrowOnError>,
+    ): RequestResult<PostTripsByTripIdJoinResponses, PostTripsByTripIdJoinErrors, ThrowOnError> {
+        return (options.client ?? this.client).post<PostTripsByTripIdJoinResponses, PostTripsByTripIdJoinErrors, ThrowOnError>({
             url: '/trips/{tripId}/join',
             ...options,
         });
     }
 
     public tripsServiceOpenapiLeaveTrip<ThrowOnError extends boolean = false>(
-        options: Options<TripsServiceOpenapiLeaveTripData, ThrowOnError>,
-    ): RequestResult<TripsServiceOpenapiLeaveTripResponses, TripsServiceOpenapiLeaveTripErrors, ThrowOnError> {
-        return (options.client ?? this.client).post<TripsServiceOpenapiLeaveTripResponses, TripsServiceOpenapiLeaveTripErrors, ThrowOnError>({
+        options: Options<PostTripsByTripIdLeaveData, ThrowOnError>,
+    ): RequestResult<PostTripsByTripIdLeaveResponses, PostTripsByTripIdLeaveErrors, ThrowOnError> {
+        return (options.client ?? this.client).post<PostTripsByTripIdLeaveResponses, PostTripsByTripIdLeaveErrors, ThrowOnError>({
             url: '/trips/{tripId}/leave',
             ...options,
         });
     }
 
     public tripsServiceOpenapiListTripMembers<ThrowOnError extends boolean = false>(
-        options: Options<TripsServiceOpenapiListTripMembersData, ThrowOnError>,
-    ): RequestResult<TripsServiceOpenapiListTripMembersResponses, TripsServiceOpenapiListTripMembersErrors, ThrowOnError> {
-        return (options.client ?? this.client).get<TripsServiceOpenapiListTripMembersResponses, TripsServiceOpenapiListTripMembersErrors, ThrowOnError>({
+        options: Options<GetTripsByTripIdMembersData, ThrowOnError>,
+    ): RequestResult<GetTripsByTripIdMembersResponses, GetTripsByTripIdMembersErrors, ThrowOnError> {
+        return (options.client ?? this.client).get<GetTripsByTripIdMembersResponses, GetTripsByTripIdMembersErrors, ThrowOnError>({
             url: '/trips/{tripId}/members',
             ...options,
         });
     }
 
     public tripsServiceOpenapiApproveMembership<ThrowOnError extends boolean = false>(
-        options: Options<TripsServiceOpenapiApproveMembershipData, ThrowOnError>,
-    ): RequestResult<TripsServiceOpenapiApproveMembershipResponses, TripsServiceOpenapiApproveMembershipErrors, ThrowOnError> {
-        return (options.client ?? this.client).post<TripsServiceOpenapiApproveMembershipResponses, TripsServiceOpenapiApproveMembershipErrors, ThrowOnError>({
-            url: '/trips/{tripId}/members/{membershipId}/approve',
-            ...options,
-        });
+        options: Options<PostTripsByTripIdMembersByMembershipIdApproveData, ThrowOnError>,
+    ): RequestResult<PostTripsByTripIdMembersByMembershipIdApproveResponses, PostTripsByTripIdMembersByMembershipIdApproveErrors, ThrowOnError> {
+        return (options.client ?? this.client).post<
+            PostTripsByTripIdMembersByMembershipIdApproveResponses,
+            PostTripsByTripIdMembersByMembershipIdApproveErrors,
+            ThrowOnError
+        >({ url: '/trips/{tripId}/members/{membershipId}/approve', ...options });
     }
 
     public tripsServiceOpenapiRejectMembership<ThrowOnError extends boolean = false>(
-        options: Options<TripsServiceOpenapiRejectMembershipData, ThrowOnError>,
-    ): RequestResult<TripsServiceOpenapiRejectMembershipResponses, TripsServiceOpenapiRejectMembershipErrors, ThrowOnError> {
-        return (options.client ?? this.client).post<TripsServiceOpenapiRejectMembershipResponses, TripsServiceOpenapiRejectMembershipErrors, ThrowOnError>({
-            url: '/trips/{tripId}/members/{membershipId}/reject',
-            ...options,
-        });
+        options: Options<PostTripsByTripIdMembersByMembershipIdRejectData, ThrowOnError>,
+    ): RequestResult<PostTripsByTripIdMembersByMembershipIdRejectResponses, PostTripsByTripIdMembersByMembershipIdRejectErrors, ThrowOnError> {
+        return (options.client ?? this.client).post<
+            PostTripsByTripIdMembersByMembershipIdRejectResponses,
+            PostTripsByTripIdMembersByMembershipIdRejectErrors,
+            ThrowOnError
+        >({ url: '/trips/{tripId}/members/{membershipId}/reject', ...options });
     }
 
     public tripsServiceOpenapiRemoveMembership<ThrowOnError extends boolean = false>(
-        options: Options<TripsServiceOpenapiRemoveMembershipData, ThrowOnError>,
-    ): RequestResult<TripsServiceOpenapiRemoveMembershipResponses, TripsServiceOpenapiRemoveMembershipErrors, ThrowOnError> {
-        return (options.client ?? this.client).delete<TripsServiceOpenapiRemoveMembershipResponses, TripsServiceOpenapiRemoveMembershipErrors, ThrowOnError>({
-            url: '/trips/{tripId}/members/{membershipId}',
-            ...options,
-        });
+        options: Options<DeleteTripsByTripIdMembersByMembershipIdData, ThrowOnError>,
+    ): RequestResult<DeleteTripsByTripIdMembersByMembershipIdResponses, DeleteTripsByTripIdMembersByMembershipIdErrors, ThrowOnError> {
+        return (options.client ?? this.client).delete<
+            DeleteTripsByTripIdMembersByMembershipIdResponses,
+            DeleteTripsByTripIdMembersByMembershipIdErrors,
+            ThrowOnError
+        >({ url: '/trips/{tripId}/members/{membershipId}', ...options });
     }
 
     public tripsServiceOpenapiGetTrip<ThrowOnError extends boolean = false>(
-        options: Options<TripsServiceOpenapiGetTripData, ThrowOnError>,
-    ): RequestResult<TripsServiceOpenapiGetTripResponses, TripsServiceOpenapiGetTripErrors, ThrowOnError> {
-        return (options.client ?? this.client).get<TripsServiceOpenapiGetTripResponses, TripsServiceOpenapiGetTripErrors, ThrowOnError>({
-            url: '/trips/{tripId}',
-            ...options,
-        });
+        options: Options<GetTripsByTripIdData, ThrowOnError>,
+    ): RequestResult<GetTripsByTripIdResponses, GetTripsByTripIdErrors, ThrowOnError> {
+        return (options.client ?? this.client).get<GetTripsByTripIdResponses, GetTripsByTripIdErrors, ThrowOnError>({ url: '/trips/{tripId}', ...options });
     }
 
     public tripsServiceOpenapiUpdateTrip<ThrowOnError extends boolean = false>(
-        options: Options<TripsServiceOpenapiUpdateTripData, ThrowOnError>,
-    ): RequestResult<TripsServiceOpenapiUpdateTripResponses, TripsServiceOpenapiUpdateTripErrors, ThrowOnError> {
-        return (options.client ?? this.client).patch<TripsServiceOpenapiUpdateTripResponses, TripsServiceOpenapiUpdateTripErrors, ThrowOnError>({
+        options: Options<PatchTripsByTripIdData, ThrowOnError>,
+    ): RequestResult<PatchTripsByTripIdResponses, PatchTripsByTripIdErrors, ThrowOnError> {
+        return (options.client ?? this.client).patch<PatchTripsByTripIdResponses, PatchTripsByTripIdErrors, ThrowOnError>({
             url: '/trips/{tripId}',
             ...options,
             headers: {
@@ -524,23 +506,15 @@ export class ApiService extends HeyApiClient {
     }
 
     public messagingServiceOpenapiListConversations<ThrowOnError extends boolean = false>(
-        options?: Options<MessagingServiceOpenapiListConversationsData, ThrowOnError>,
-    ): RequestResult<MessagingServiceOpenapiListConversationsResponses, MessagingServiceOpenapiListConversationsErrors, ThrowOnError> {
-        return (options?.client ?? this.client).get<
-            MessagingServiceOpenapiListConversationsResponses,
-            MessagingServiceOpenapiListConversationsErrors,
-            ThrowOnError
-        >({ url: '/conversations', ...options });
+        options?: Options<GetConversationsData, ThrowOnError>,
+    ): RequestResult<GetConversationsResponses, GetConversationsErrors, ThrowOnError> {
+        return (options?.client ?? this.client).get<GetConversationsResponses, GetConversationsErrors, ThrowOnError>({ url: '/conversations', ...options });
     }
 
     public messagingServiceOpenapiCreateDirectConversation<ThrowOnError extends boolean = false>(
-        options: Options<MessagingServiceOpenapiCreateDirectConversationData, ThrowOnError>,
-    ): RequestResult<MessagingServiceOpenapiCreateDirectConversationResponses, MessagingServiceOpenapiCreateDirectConversationErrors, ThrowOnError> {
-        return (options.client ?? this.client).post<
-            MessagingServiceOpenapiCreateDirectConversationResponses,
-            MessagingServiceOpenapiCreateDirectConversationErrors,
-            ThrowOnError
-        >({
+        options: Options<PostConversationsData, ThrowOnError>,
+    ): RequestResult<PostConversationsResponses, PostConversationsErrors, ThrowOnError> {
+        return (options.client ?? this.client).post<PostConversationsResponses, PostConversationsErrors, ThrowOnError>({
             url: '/conversations',
             ...options,
             headers: {
@@ -551,31 +525,29 @@ export class ApiService extends HeyApiClient {
     }
 
     public messagingServiceOpenapiGetTripConversation<ThrowOnError extends boolean = false>(
-        options: Options<MessagingServiceOpenapiGetTripConversationData, ThrowOnError>,
-    ): RequestResult<MessagingServiceOpenapiGetTripConversationResponses, MessagingServiceOpenapiGetTripConversationErrors, ThrowOnError> {
-        return (options.client ?? this.client).get<
-            MessagingServiceOpenapiGetTripConversationResponses,
-            MessagingServiceOpenapiGetTripConversationErrors,
-            ThrowOnError
-        >({ url: '/conversations/trips/{tripId}', ...options });
+        options: Options<GetConversationsTripsByTripIdData, ThrowOnError>,
+    ): RequestResult<GetConversationsTripsByTripIdResponses, GetConversationsTripsByTripIdErrors, ThrowOnError> {
+        return (options.client ?? this.client).get<GetConversationsTripsByTripIdResponses, GetConversationsTripsByTripIdErrors, ThrowOnError>({
+            url: '/conversations/trips/{tripId}',
+            ...options,
+        });
     }
 
     public messagingServiceOpenapiListTripMessages<ThrowOnError extends boolean = false>(
-        options: Options<MessagingServiceOpenapiListTripMessagesData, ThrowOnError>,
-    ): RequestResult<MessagingServiceOpenapiListTripMessagesResponses, MessagingServiceOpenapiListTripMessagesErrors, ThrowOnError> {
-        return (options.client ?? this.client).get<
-            MessagingServiceOpenapiListTripMessagesResponses,
-            MessagingServiceOpenapiListTripMessagesErrors,
-            ThrowOnError
-        >({ url: '/conversations/trips/{tripId}/messages', ...options });
+        options: Options<GetConversationsTripsByTripIdMessagesData, ThrowOnError>,
+    ): RequestResult<GetConversationsTripsByTripIdMessagesResponses, GetConversationsTripsByTripIdMessagesErrors, ThrowOnError> {
+        return (options.client ?? this.client).get<GetConversationsTripsByTripIdMessagesResponses, GetConversationsTripsByTripIdMessagesErrors, ThrowOnError>({
+            url: '/conversations/trips/{tripId}/messages',
+            ...options,
+        });
     }
 
     public messagingServiceOpenapiSendTripMessage<ThrowOnError extends boolean = false>(
-        options: Options<MessagingServiceOpenapiSendTripMessageData, ThrowOnError>,
-    ): RequestResult<MessagingServiceOpenapiSendTripMessageResponses, MessagingServiceOpenapiSendTripMessageErrors, ThrowOnError> {
+        options: Options<PostConversationsTripsByTripIdMessagesData, ThrowOnError>,
+    ): RequestResult<PostConversationsTripsByTripIdMessagesResponses, PostConversationsTripsByTripIdMessagesErrors, ThrowOnError> {
         return (options.client ?? this.client).post<
-            MessagingServiceOpenapiSendTripMessageResponses,
-            MessagingServiceOpenapiSendTripMessageErrors,
+            PostConversationsTripsByTripIdMessagesResponses,
+            PostConversationsTripsByTripIdMessagesErrors,
             ThrowOnError
         >({
             url: '/conversations/trips/{tripId}/messages',
@@ -588,11 +560,11 @@ export class ApiService extends HeyApiClient {
     }
 
     public messagingServiceOpenapiUploadTripMessageAttachment<ThrowOnError extends boolean = false>(
-        options: Options<MessagingServiceOpenapiUploadTripMessageAttachmentData, ThrowOnError>,
-    ): RequestResult<MessagingServiceOpenapiUploadTripMessageAttachmentResponses, MessagingServiceOpenapiUploadTripMessageAttachmentErrors, ThrowOnError> {
+        options: Options<PostConversationsTripsByTripIdMessagesAttachmentData, ThrowOnError>,
+    ): RequestResult<PostConversationsTripsByTripIdMessagesAttachmentResponses, PostConversationsTripsByTripIdMessagesAttachmentErrors, ThrowOnError> {
         return (options.client ?? this.client).post<
-            MessagingServiceOpenapiUploadTripMessageAttachmentResponses,
-            MessagingServiceOpenapiUploadTripMessageAttachmentErrors,
+            PostConversationsTripsByTripIdMessagesAttachmentResponses,
+            PostConversationsTripsByTripIdMessagesAttachmentErrors,
             ThrowOnError
         >({
             ...formDataBodySerializer,
@@ -606,11 +578,11 @@ export class ApiService extends HeyApiClient {
     }
 
     public messagingServiceOpenapiPostTripSystemEvent<ThrowOnError extends boolean = false>(
-        options: Options<MessagingServiceOpenapiPostTripSystemEventData, ThrowOnError>,
-    ): RequestResult<MessagingServiceOpenapiPostTripSystemEventResponses, MessagingServiceOpenapiPostTripSystemEventErrors, ThrowOnError> {
+        options: Options<PostConversationsInternalTripsByTripIdSystemEventsData, ThrowOnError>,
+    ): RequestResult<PostConversationsInternalTripsByTripIdSystemEventsResponses, PostConversationsInternalTripsByTripIdSystemEventsErrors, ThrowOnError> {
         return (options.client ?? this.client).post<
-            MessagingServiceOpenapiPostTripSystemEventResponses,
-            MessagingServiceOpenapiPostTripSystemEventErrors,
+            PostConversationsInternalTripsByTripIdSystemEventsResponses,
+            PostConversationsInternalTripsByTripIdSystemEventsErrors,
             ThrowOnError
         >({
             url: '/conversations/internal/trips/{tripId}/system-events',
@@ -623,18 +595,23 @@ export class ApiService extends HeyApiClient {
     }
 
     public messagingServiceOpenapiListMessages<ThrowOnError extends boolean = false>(
-        options: Options<MessagingServiceOpenapiListMessagesData, ThrowOnError>,
-    ): RequestResult<MessagingServiceOpenapiListMessagesResponses, MessagingServiceOpenapiListMessagesErrors, ThrowOnError> {
-        return (options.client ?? this.client).get<MessagingServiceOpenapiListMessagesResponses, MessagingServiceOpenapiListMessagesErrors, ThrowOnError>({
-            url: '/conversations/{conversationId}/messages',
-            ...options,
-        });
+        options: Options<GetConversationsByConversationIdMessagesData, ThrowOnError>,
+    ): RequestResult<GetConversationsByConversationIdMessagesResponses, GetConversationsByConversationIdMessagesErrors, ThrowOnError> {
+        return (options.client ?? this.client).get<
+            GetConversationsByConversationIdMessagesResponses,
+            GetConversationsByConversationIdMessagesErrors,
+            ThrowOnError
+        >({ url: '/conversations/{conversationId}/messages', ...options });
     }
 
     public messagingServiceOpenapiSendMessage<ThrowOnError extends boolean = false>(
-        options: Options<MessagingServiceOpenapiSendMessageData, ThrowOnError>,
-    ): RequestResult<MessagingServiceOpenapiSendMessageResponses, MessagingServiceOpenapiSendMessageErrors, ThrowOnError> {
-        return (options.client ?? this.client).post<MessagingServiceOpenapiSendMessageResponses, MessagingServiceOpenapiSendMessageErrors, ThrowOnError>({
+        options: Options<PostConversationsByConversationIdMessagesData, ThrowOnError>,
+    ): RequestResult<PostConversationsByConversationIdMessagesResponses, PostConversationsByConversationIdMessagesErrors, ThrowOnError> {
+        return (options.client ?? this.client).post<
+            PostConversationsByConversationIdMessagesResponses,
+            PostConversationsByConversationIdMessagesErrors,
+            ThrowOnError
+        >({
             url: '/conversations/{conversationId}/messages',
             ...options,
             headers: {
@@ -645,11 +622,11 @@ export class ApiService extends HeyApiClient {
     }
 
     public messagingServiceOpenapiUploadMessageAttachment<ThrowOnError extends boolean = false>(
-        options: Options<MessagingServiceOpenapiUploadMessageAttachmentData, ThrowOnError>,
-    ): RequestResult<MessagingServiceOpenapiUploadMessageAttachmentResponses, MessagingServiceOpenapiUploadMessageAttachmentErrors, ThrowOnError> {
+        options: Options<PostConversationsByConversationIdMessagesAttachmentData, ThrowOnError>,
+    ): RequestResult<PostConversationsByConversationIdMessagesAttachmentResponses, PostConversationsByConversationIdMessagesAttachmentErrors, ThrowOnError> {
         return (options.client ?? this.client).post<
-            MessagingServiceOpenapiUploadMessageAttachmentResponses,
-            MessagingServiceOpenapiUploadMessageAttachmentErrors,
+            PostConversationsByConversationIdMessagesAttachmentResponses,
+            PostConversationsByConversationIdMessagesAttachmentErrors,
             ThrowOnError
         >({
             ...formDataBodySerializer,
@@ -663,23 +640,15 @@ export class ApiService extends HeyApiClient {
     }
 
     public notificationsServiceOpenapiListNotifications<ThrowOnError extends boolean = false>(
-        options?: Options<NotificationsServiceOpenapiListNotificationsData, ThrowOnError>,
-    ): RequestResult<NotificationsServiceOpenapiListNotificationsResponses, NotificationsServiceOpenapiListNotificationsErrors, ThrowOnError> {
-        return (options?.client ?? this.client).get<
-            NotificationsServiceOpenapiListNotificationsResponses,
-            NotificationsServiceOpenapiListNotificationsErrors,
-            ThrowOnError
-        >({ url: '/notifications', ...options });
+        options?: Options<GetNotificationsData, ThrowOnError>,
+    ): RequestResult<GetNotificationsResponses, GetNotificationsErrors, ThrowOnError> {
+        return (options?.client ?? this.client).get<GetNotificationsResponses, GetNotificationsErrors, ThrowOnError>({ url: '/notifications', ...options });
     }
 
     public notificationsServiceOpenapiCreateNotification<ThrowOnError extends boolean = false>(
-        options: Options<NotificationsServiceOpenapiCreateNotificationData, ThrowOnError>,
-    ): RequestResult<NotificationsServiceOpenapiCreateNotificationResponses, NotificationsServiceOpenapiCreateNotificationErrors, ThrowOnError> {
-        return (options.client ?? this.client).post<
-            NotificationsServiceOpenapiCreateNotificationResponses,
-            NotificationsServiceOpenapiCreateNotificationErrors,
-            ThrowOnError
-        >({
+        options: Options<PostNotificationsInternalData, ThrowOnError>,
+    ): RequestResult<PostNotificationsInternalResponses, PostNotificationsInternalErrors, ThrowOnError> {
+        return (options.client ?? this.client).post<PostNotificationsInternalResponses, PostNotificationsInternalErrors, ThrowOnError>({
             url: '/notifications/internal',
             ...options,
             headers: {
@@ -690,12 +659,17 @@ export class ApiService extends HeyApiClient {
     }
 
     public notificationsServiceOpenapiMarkNotificationRead<ThrowOnError extends boolean = false>(
-        options: Options<NotificationsServiceOpenapiMarkNotificationReadData, ThrowOnError>,
-    ): RequestResult<NotificationsServiceOpenapiMarkNotificationReadResponses, NotificationsServiceOpenapiMarkNotificationReadErrors, ThrowOnError> {
+        options: Options<PatchNotificationsByNotificationIdReadData, ThrowOnError>,
+    ): RequestResult<PatchNotificationsByNotificationIdReadResponses, PatchNotificationsByNotificationIdReadErrors, ThrowOnError> {
         return (options.client ?? this.client).patch<
-            NotificationsServiceOpenapiMarkNotificationReadResponses,
-            NotificationsServiceOpenapiMarkNotificationReadErrors,
+            PatchNotificationsByNotificationIdReadResponses,
+            PatchNotificationsByNotificationIdReadErrors,
             ThrowOnError
         >({ url: '/notifications/{notificationId}/read', ...options });
+    }
+
+    private _authServiceOpenapiAuth?: AuthServiceOpenapiAuth;
+    get authServiceOpenapiAuth(): AuthServiceOpenapiAuth {
+        return (this._authServiceOpenapiAuth ??= new AuthServiceOpenapiAuth({ client: this.client }));
     }
 }
