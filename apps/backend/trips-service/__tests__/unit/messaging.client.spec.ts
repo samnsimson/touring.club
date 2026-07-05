@@ -15,8 +15,8 @@ describe('MessagingClient', () => {
     beforeEach(() => {
         config = { get: jest.fn().mockReturnValue('http://messaging-service:3003') };
         postTripSystemEvent = jest.fn();
-        (MessagingServiceApi as jest.Mock).mockImplementation(() => ({ postTripSystemEvent }));
-        client = new MessagingClient(config as ConfigService);
+        (MessagingServiceApi as unknown as jest.Mock).mockImplementation(() => ({ postTripSystemEvent }));
+        client = new MessagingClient(config as unknown as ConfigService);
     });
 
     describe('postTripSystemEvent', () => {

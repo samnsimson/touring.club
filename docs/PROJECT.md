@@ -240,7 +240,7 @@ library/
     common                       # HTTP client (axios) and S3 object storage (StorageModule/StorageService)
   frontend                        # Web + mobile UI/state, nothing backend-aware (future)
   shared                          # Contracts shared by backend and frontend — types, API client/SDK
-    api-client                     # Generated hey-api SDKs per backend service + ApiClient wrapper
+    api-client                     # Generated hey-api SDK + Api wrapper class per backend service
 
 packages/                      # Client packages (future, may fold into library/shared instead)
   ui
