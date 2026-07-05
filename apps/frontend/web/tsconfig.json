@@ -55,9 +55,6 @@
         },
         {
             "path": "../../../library/frontend/mocks"
-        },
-        {
-            "path": "../../../library/shared/api-client"
         }
     ]
 }
