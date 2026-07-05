@@ -1,3 +1,5 @@
-import { ApiClient } from '@tc/api-client';
+import { ApiClientUtils, ApiService, createClient } from '@tc/api-client';
 
-export const apiClient = new ApiClient({ baseUrl: process.env.NEXT_PUBLIC_API_GATEWAY_URL });
+export const apiClient = new ApiService({
+    client: createClient({ baseUrl: ApiClientUtils.buildBaseUrl(process.env.NEXT_PUBLIC_API_GATEWAY_URL ?? ''), throwOnError: true }),
+});
