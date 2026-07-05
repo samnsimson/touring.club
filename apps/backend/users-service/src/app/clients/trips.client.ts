@@ -10,7 +10,7 @@ export class TripsClient {
         this.api = new TripsServiceApi({ baseUrl: `${this.config.get('TRIPS_SERVICE_URL')}/api/v1` });
     }
 
-    async getTravelHistory(userId: string, authorization: string) {
+    async getTravelHistory(userId: string, authorization: string): Promise<Awaited<ReturnType<TripsServiceApi['getUserTravelHistory']>>['data']> {
         try {
             const { data } = await this.api.getUserTravelHistory({
                 path: { userId },
