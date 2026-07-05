@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ApiClientUtils, createMessagingClient, MessagingApi } from '@tc/api-client';
+import { MessagingServiceApi } from '@tc/api-client';
 import { ConfigService } from '@tc/config';
 
 export type TripSystemEventType = 'member_joined' | 'join_requested' | 'member_left' | 'member_approved' | 'member_removed';
@@ -13,11 +13,10 @@ export type PostTripSystemEventPayload = {
 @Injectable()
 export class MessagingClient {
     private readonly logger = new Logger(MessagingClient.name);
-    private readonly api: MessagingApi.MessagingServiceApi;
+    private readonly api: MessagingServiceApi;
 
     constructor(private readonly config: ConfigService) {
-        const baseUrl = ApiClientUtils.buildBaseUrl(this.config.get('MESSAGING_SERVICE_URL'));
-        this.api = new MessagingApi.MessagingServiceApi({ client: createMessagingClient({ baseUrl, throwOnError: true }) });
+        this.api = new MessagingServiceApi({ baseUrl: `${this.config.get('MESSAGING_SERVICE_URL')}/api/v1` });
     }
 
     async postTripSystemEvent(tripId: string, payload: PostTripSystemEventPayload, authorization: string): Promise<void> {

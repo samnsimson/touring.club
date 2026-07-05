@@ -1,6 +1,6 @@
 import { env } from '../config/auth.datasource';
 
-export const AUTH_BASE_URL = env.AUTH_APP_URL;
+export const AUTH_BASE_URL = env.AUTH_SERVICE_URL;
 export const AUTH_BASE_PATH = '/api/auth';
 
 export const AUTH_ACCESS_TOKEN_COOKIE = 'access-token';

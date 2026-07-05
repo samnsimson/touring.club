@@ -1,11 +1,10 @@
-import { createMessagingClient, MessagingApi } from '@tc/api-client';
+import { MessagingServiceApi } from '@tc/api-client';
 import { ConfigService } from '@tc/config';
 import { MessagingClient } from '../../src/app/clients/messaging.client';
 
 jest.mock('@tc/api-client', () => ({
     ...jest.requireActual('@tc/api-client'),
-    createMessagingClient: jest.fn(),
-    MessagingApi: { MessagingServiceApi: jest.fn() },
+    MessagingServiceApi: jest.fn(),
 }));
 
 describe('MessagingClient', () => {
@@ -16,7 +15,7 @@ describe('MessagingClient', () => {
     beforeEach(() => {
         config = { get: jest.fn().mockReturnValue('http://messaging-service:3003') };
         postTripSystemEvent = jest.fn();
-        (MessagingApi.MessagingServiceApi as jest.Mock).mockImplementation(() => ({ postTripSystemEvent }));
+        (MessagingServiceApi as jest.Mock).mockImplementation(() => ({ postTripSystemEvent }));
         client = new MessagingClient(config as ConfigService);
     });
 
@@ -25,7 +24,7 @@ describe('MessagingClient', () => {
             postTripSystemEvent.mockResolvedValue({ data: {} });
             const payload = { event: 'member_joined' as const, actorUserId: 'user-a', subjectUserId: 'user-b' };
             await client.postTripSystemEvent('trip-1', payload, 'Bearer token');
-            expect(createMessagingClient).toHaveBeenCalledWith({ baseUrl: 'http://messaging-service:3003/api/v1', throwOnError: true });
+            expect(MessagingServiceApi).toHaveBeenCalledWith({ baseUrl: 'http://messaging-service:3003/api/v1' });
             expect(postTripSystemEvent).toHaveBeenCalledWith({
                 path: { tripId: 'trip-1' },
                 body: payload,

@@ -1,12 +1,11 @@
 import { ServiceUnavailableException } from '@nestjs/common';
-import { createTripsClient, TripsApi } from '@tc/api-client';
+import { TripsServiceApi } from '@tc/api-client';
 import { ConfigService } from '@tc/config';
 import { TripsClient } from '../../src/app/clients/trips.client';
 
 jest.mock('@tc/api-client', () => ({
     ...jest.requireActual('@tc/api-client'),
-    createTripsClient: jest.fn(),
-    TripsApi: { TripsServiceApi: jest.fn() },
+    TripsServiceApi: jest.fn(),
 }));
 
 describe('TripsClient', () => {
@@ -17,7 +16,7 @@ describe('TripsClient', () => {
     beforeEach(() => {
         config = { get: jest.fn().mockReturnValue('http://trips-service:3003') };
         getUserTravelHistory = jest.fn();
-        (TripsApi.TripsServiceApi as jest.Mock).mockImplementation(() => ({ getUserTravelHistory }));
+        (TripsServiceApi as jest.Mock).mockImplementation(() => ({ getUserTravelHistory }));
         client = new TripsClient(config as ConfigService);
     });
 
@@ -27,7 +26,7 @@ describe('TripsClient', () => {
             getUserTravelHistory.mockResolvedValue({ data: payload });
             const result = await client.getTravelHistory('user-1', 'Bearer token');
             expect(config.get).toHaveBeenCalledWith('TRIPS_SERVICE_URL');
-            expect(createTripsClient).toHaveBeenCalledWith({ baseUrl: 'http://trips-service:3003/api/v1', throwOnError: true });
+            expect(TripsServiceApi).toHaveBeenCalledWith({ baseUrl: 'http://trips-service:3003/api/v1' });
             expect(getUserTravelHistory).toHaveBeenCalledWith({
                 path: { userId: 'user-1' },
                 headers: { Authorization: 'Bearer token' },
