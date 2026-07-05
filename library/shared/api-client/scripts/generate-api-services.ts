@@ -2,11 +2,11 @@ import { readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import Handlebars from 'handlebars';
 import prettier from 'prettier';
-import { SERVICE_REGISTRY } from '../src/lib/api-client.registry';
+import { CLIENT_REGISTRY } from '../src/client.registry';
 import { ApiClientUtils } from '../src/utils/api-client.utils';
 
 export async function generateApiServices() {
-    console.log(`📝 [api-client] Generating ${SERVICE_REGISTRY.length} service API wrappers...`);
+    console.log(`📝 [api-client] Generating ${CLIENT_REGISTRY.length} service API wrappers...`);
 
     const templatePath = join(__dirname, 'templates', 'api-service.template.hbs');
     const template = Handlebars.compile(readFileSync(templatePath, 'utf-8'));
@@ -14,7 +14,7 @@ export async function generateApiServices() {
     const barrelExports: string[] = [];
 
     let index = 0;
-    for (const { name: service } of SERVICE_REGISTRY) {
+    for (const { name: service } of CLIENT_REGISTRY) {
         index += 1;
         const pascalService = ApiClientUtils.pascalCase(service);
         const content = template({ service, pascalService });
@@ -25,7 +25,7 @@ export async function generateApiServices() {
         writeFileSync(outputPath, formatted);
         barrelExports.push(`export { ${pascalService}Api } from './${service}.api';`);
 
-        console.log(`  [${index}/${SERVICE_REGISTRY.length}] ✓ apis/${service}.api.ts`);
+        console.log(`  [${index}/${CLIENT_REGISTRY.length}] ✓ apis/${service}.api.ts`);
     }
 
     const barrelPath = join(apisDir, 'index.ts');
@@ -35,7 +35,7 @@ export async function generateApiServices() {
     writeFileSync(barrelPath, formattedBarrel);
     console.log('  ✓ apis/index.ts (barrel)');
 
-    console.log(`✅ [api-client] Generated ${SERVICE_REGISTRY.length} service API wrappers.`);
+    console.log(`✅ [api-client] Generated ${CLIENT_REGISTRY.length} service API wrappers.`);
 }
 
 generateApiServices();

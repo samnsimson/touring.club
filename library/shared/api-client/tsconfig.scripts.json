@@ -5,6 +5,6 @@
         "noEmit": true,
         "types": ["node"]
     },
-    "include": ["client.config.ts", "scripts/**/*.ts"],
+    "include": ["src/client.config.ts", "src/client.registry.ts", "src/utils/api-client.utils.ts", "scripts/**/*.ts"],
     "references": []
 }

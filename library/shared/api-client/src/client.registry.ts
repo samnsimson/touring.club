@@ -1,4 +1,4 @@
-export const SERVICE_REGISTRY = [
+export const CLIENT_REGISTRY = [
     { name: 'auth-service', endpoint: process.env.AUTH_SERVICE_URL },
     { name: 'users-service', endpoint: process.env.USER_SERVICE_URL },
     { name: 'trips-service', endpoint: process.env.TRIPS_SERVICE_URL },

@@ -20,7 +20,7 @@
             "executor": "nx:run-commands",
             "dependsOn": ["api-client:build"],
             "options": {
-                "commands": ["bun library/shared/api-client/client.config.ts", "bun library/shared/api-client/scripts/generate-api-services.ts"],
+                "commands": ["bun library/shared/api-client/src/client.config.ts", "bun library/shared/api-client/scripts/generate-api-services.ts"],
                 "cwd": "{workspaceRoot}",
                 "parallel": false
             }

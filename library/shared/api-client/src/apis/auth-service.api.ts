@@ -1,10 +1,8 @@
-import { Injectable } from '@nestjs/common';
 import { createClient } from '../clients/auth-service/client';
 import { AuthServiceSdk } from '../clients/auth-service';
 import { ApiClientOptions } from '../contract/api-client.contract';
 import { ApiClientUtils } from '../utils/api-client.utils';
 
-@Injectable()
 export class AuthServiceApi extends AuthServiceSdk {
     constructor(options: ApiClientOptions) {
         super({

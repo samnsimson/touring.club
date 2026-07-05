@@ -1,9 +1,9 @@
 import { createClient } from '@hey-api/openapi-ts';
-import { ApiClientUtils } from './src/utils/api-client.utils';
-import { SERVICE_REGISTRY } from './src/lib/api-client.registry';
+import { ApiClientUtils } from './utils/api-client.utils';
+import { CLIENT_REGISTRY } from './client.registry';
 
 createClient(
-    SERVICE_REGISTRY.map(({ name: service }) => ({
+    CLIENT_REGISTRY.map(({ name: service }) => ({
         input: { path: `apps/backend/${service}/openapi/${service}.openapi.json` },
         plugins: [
             { name: '@hey-api/typescript' },
