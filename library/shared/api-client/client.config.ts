@@ -12,7 +12,7 @@ createClient(
                 name: '@hey-api/sdk',
                 operations: {
                     strategy: 'single',
-                    containerName: `${ApiClientUtils.pascalCase(service)}Api`,
+                    containerName: `${ApiClientUtils.pascalCase(service)}Sdk`,
                 },
             },
         ],

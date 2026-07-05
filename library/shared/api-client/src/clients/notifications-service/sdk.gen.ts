@@ -48,7 +48,7 @@ class HeyApiRegistry<T> {
     get(key?: string): T {
         const instance = this.instances.get(key ?? this.defaultKey);
         if (!instance) {
-            throw new Error(`No SDK client found. Create one with "new NotificationsServiceApi()" to fix this error.`);
+            throw new Error(`No SDK client found. Create one with "new NotificationsServiceSdk()" to fix this error.`);
         }
         return instance;
     }
@@ -58,12 +58,12 @@ class HeyApiRegistry<T> {
     }
 }
 
-export class NotificationsServiceApi extends HeyApiClient {
-    public static readonly __registry: HeyApiRegistry<NotificationsServiceApi> = new HeyApiRegistry<NotificationsServiceApi>();
+export class NotificationsServiceSdk extends HeyApiClient {
+    public static readonly __registry: HeyApiRegistry<NotificationsServiceSdk> = new HeyApiRegistry<NotificationsServiceSdk>();
 
     constructor(args?: { client?: Client; key?: string }) {
         super(args);
-        NotificationsServiceApi.__registry.set(this, args?.key);
+        NotificationsServiceSdk.__registry.set(this, args?.key);
     }
 
     public listNotifications<ThrowOnError extends boolean = false>(

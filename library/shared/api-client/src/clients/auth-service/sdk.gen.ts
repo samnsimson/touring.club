@@ -66,7 +66,7 @@ class HeyApiRegistry<T> {
     get(key?: string): T {
         const instance = this.instances.get(key ?? this.defaultKey);
         if (!instance) {
-            throw new Error(`No SDK client found. Create one with "new AuthServiceApi()" to fix this error.`);
+            throw new Error(`No SDK client found. Create one with "new AuthServiceSdk()" to fix this error.`);
         }
         return instance;
     }
@@ -76,12 +76,12 @@ class HeyApiRegistry<T> {
     }
 }
 
-export class AuthServiceApi extends HeyApiClient {
-    public static readonly __registry: HeyApiRegistry<AuthServiceApi> = new HeyApiRegistry<AuthServiceApi>();
+export class AuthServiceSdk extends HeyApiClient {
+    public static readonly __registry: HeyApiRegistry<AuthServiceSdk> = new HeyApiRegistry<AuthServiceSdk>();
 
     constructor(args?: { client?: Client; key?: string }) {
         super(args);
-        AuthServiceApi.__registry.set(this, args?.key);
+        AuthServiceSdk.__registry.set(this, args?.key);
     }
 
     public getMe<ThrowOnError extends boolean = false>(options?: Options<GetMeData, ThrowOnError>): RequestResult<GetMeResponses, GetMeErrors, ThrowOnError> {

@@ -69,7 +69,7 @@ class HeyApiRegistry<T> {
     get(key?: string): T {
         const instance = this.instances.get(key ?? this.defaultKey);
         if (!instance) {
-            throw new Error(`No SDK client found. Create one with "new MessagingServiceApi()" to fix this error.`);
+            throw new Error(`No SDK client found. Create one with "new MessagingServiceSdk()" to fix this error.`);
         }
         return instance;
     }
@@ -79,12 +79,12 @@ class HeyApiRegistry<T> {
     }
 }
 
-export class MessagingServiceApi extends HeyApiClient {
-    public static readonly __registry: HeyApiRegistry<MessagingServiceApi> = new HeyApiRegistry<MessagingServiceApi>();
+export class MessagingServiceSdk extends HeyApiClient {
+    public static readonly __registry: HeyApiRegistry<MessagingServiceSdk> = new HeyApiRegistry<MessagingServiceSdk>();
 
     constructor(args?: { client?: Client; key?: string }) {
         super(args);
-        MessagingServiceApi.__registry.set(this, args?.key);
+        MessagingServiceSdk.__registry.set(this, args?.key);
     }
 
     public listConversations<ThrowOnError extends boolean = false>(

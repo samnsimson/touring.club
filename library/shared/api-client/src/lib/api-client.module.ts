@@ -1,7 +1,7 @@
 import { DynamicModule, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ApiClientModuleOptions } from '../contract/api-client.contract';
-import { ApiClientService } from './api-client.service';
+import { AuthServiceApi } from '../apis/auth-service.api';
 
 @Module({})
 export class ApiClientModule {
@@ -10,8 +10,8 @@ export class ApiClientModule {
             global,
             module: ApiClientModule,
             imports: [ConfigModule],
-            providers: [ApiClientService],
-            exports: [ApiClientService],
+            providers: [AuthServiceApi],
+            exports: [AuthServiceApi],
         };
     }
 }
