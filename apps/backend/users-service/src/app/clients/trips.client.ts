@@ -1,37 +1,24 @@
 import { Injectable, ServiceUnavailableException } from '@nestjs/common';
-import { HttpClient, isHttpError } from '@tc/common';
+import { TripsServiceApi } from '@tc/api-client';
 import { ConfigService } from '@tc/config';
-
-type TravelHistoryTripSummary = {
-    id: string;
-    title: string;
-    destination: string;
-    startDate: string;
-    endDate: string;
-};
-
-type TravelHistoryApiResponse = {
-    trips: TravelHistoryTripSummary[];
-};
 
 @Injectable()
 export class TripsClient {
-    constructor(
-        private readonly config: ConfigService,
-        private readonly http: HttpClient,
-    ) {}
+    private readonly api: TripsServiceApi;
 
-    async getTravelHistory(userId: string, authorization: string): Promise<TravelHistoryApiResponse> {
-        const baseUrl = this.config.get('TRIPS_SERVICE_URL');
+    constructor(private readonly config: ConfigService) {
+        this.api = new TripsServiceApi({ baseUrl: `${this.config.get('TRIPS_SERVICE_URL')}/api/v1` });
+    }
+
+    async getTravelHistory(userId: string, authorization: string) {
         try {
-            const url = `${baseUrl}/api/v1/trips/users/${encodeURIComponent(userId)}/travel-history`;
-            const response = await this.http.get<TravelHistoryApiResponse>(url, { headers: { Authorization: authorization } });
-            return response.data;
-        } catch (error) {
-            if (isHttpError(error) && error.response) {
-                throw new ServiceUnavailableException('Unable to load travel history');
-            }
-            throw error;
+            const { data } = await this.api.getUserTravelHistory({
+                path: { userId },
+                headers: { Authorization: authorization },
+            });
+            return data;
+        } catch {
+            throw new ServiceUnavailableException('Unable to load travel history');
         }
     }
 }

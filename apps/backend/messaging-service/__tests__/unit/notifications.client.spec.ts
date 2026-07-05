@@ -1,31 +1,38 @@
-import { HttpClient } from '@tc/common';
+import { NotificationsServiceApi } from '@tc/api-client';
 import { ConfigService } from '@tc/config';
 import { NotificationsClient } from '../../src/app/clients/notifications.client';
+
+jest.mock('@tc/api-client', () => ({
+    ...jest.requireActual('@tc/api-client'),
+    NotificationsServiceApi: jest.fn(),
+}));
 
 describe('NotificationsClient', () => {
     let client: NotificationsClient;
     let config: jest.Mocked<Pick<ConfigService, 'get'>>;
-    let http: jest.Mocked<Pick<HttpClient, 'post'>>;
+    let createNotification: jest.Mock;
 
     beforeEach(() => {
         config = { get: jest.fn().mockReturnValue('http://notifications-service:3004') };
-        http = { post: jest.fn() };
-        client = new NotificationsClient(config as ConfigService, http as HttpClient);
+        createNotification = jest.fn();
+        (NotificationsServiceApi as jest.Mock).mockImplementation(() => ({ createNotification }));
+        client = new NotificationsClient(config as ConfigService);
     });
 
     describe('createNotification', () => {
         it('posts a notification to the notifications service', async () => {
-            http.post.mockResolvedValue({ data: {} } as Awaited<ReturnType<HttpClient['post']>>);
+            createNotification.mockResolvedValue({ data: {} });
             const payload = { userId: 'user-b', type: 'new_message' as const, title: 'New message' };
             await client.createNotification(payload, 'Bearer token');
-            expect(config.get).toHaveBeenCalledWith('NOTIFICATIONS_SERVICE_URL');
-            expect(http.post).toHaveBeenCalledWith('http://notifications-service:3004/api/v1/notifications/internal', payload, {
+            expect(NotificationsServiceApi).toHaveBeenCalledWith({ baseUrl: 'http://notifications-service:3004/api/v1' });
+            expect(createNotification).toHaveBeenCalledWith({
+                body: payload,
                 headers: { Authorization: 'Bearer token' },
             });
         });
 
-        it('swallows http errors so the caller is not blocked', async () => {
-            http.post.mockRejectedValue(new Error('network failure'));
+        it('swallows errors so the caller is not blocked', async () => {
+            createNotification.mockRejectedValue(new Error('network failure'));
             await expect(client.createNotification({ userId: 'user-b', type: 'new_message', title: 'New message' }, 'Bearer token')).resolves.toBeUndefined();
         });
     });

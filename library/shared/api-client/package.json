@@ -15,5 +15,7 @@
             "default": "./dist/index.js"
         }
     },
-    "dependencies": {}
+    "dependencies": {
+        "lodash": "^4.18.1"
+    }
 }

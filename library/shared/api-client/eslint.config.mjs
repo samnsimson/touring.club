@@ -11,7 +11,7 @@ export default [
                     ignoredFiles: [
                         '{projectRoot}/eslint.config.{js,cjs,mjs,ts,cts,mts}',
                         '{projectRoot}/esbuild.config.{js,ts,mjs,mts}',
-                        '{projectRoot}/client.config.ts',
+                        '{projectRoot}/src/client.config.ts',
                         '{projectRoot}/scripts/**/*',
                     ],
                 },
