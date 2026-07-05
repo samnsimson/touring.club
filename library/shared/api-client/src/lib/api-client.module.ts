@@ -1,6 +1,6 @@
 import { DynamicModule, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { ApiClientModuleOptions } from './contract/api-client.contract';
+import { ApiClientModuleOptions } from '../contract/api-client.contract';
 import { ApiClientService } from './api-client.service';
 
 @Module({})

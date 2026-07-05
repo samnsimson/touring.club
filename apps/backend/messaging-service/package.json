@@ -9,6 +9,7 @@
         "@nestjs/swagger": "^11.4.4",
         "@nestjs/typeorm": "^11.0.2",
         "@nestjs/websockets": "^11.0.0",
+        "@tc/api-client": "workspace:*",
         "@tc/auth": "workspace:*",
         "@tc/common": "workspace:*",
         "@tc/config": "workspace:*",

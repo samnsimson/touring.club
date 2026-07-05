@@ -1,10 +1,9 @@
 import { createClient } from '@hey-api/openapi-ts';
 import { ApiClientUtils } from './src/utils/api-client.utils';
-
-const SERVICES = ['auth-service', 'users-service', 'trips-service', 'messaging-service', 'notifications-service'] as const;
+import { SERVICE_REGISTRY } from './src/lib/api-client.registry';
 
 createClient(
-    SERVICES.map((service) => ({
+    SERVICE_REGISTRY.map(({ name: service }) => ({
         input: { path: `apps/backend/${service}/openapi/${service}.openapi.json` },
         plugins: [
             { name: '@hey-api/typescript' },
@@ -19,7 +18,7 @@ createClient(
         ],
         output: {
             postProcess: ['eslint', 'prettier'],
-            path: `library/shared/api-client/src/lib/${service}`,
+            path: `library/shared/api-client/src/clients/${service}`,
             header: (ctx) => ['/* eslint-disable @typescript-eslint/no-empty-interface */', ...ctx.defaultValue],
         },
     })),

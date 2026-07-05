@@ -1,8 +1,0 @@
-[2026-07-04T08:27:14.632Z] Error: Post-processor "ESLint" failed to run: Executable not found in $PATH: "eslint"
-Stack:
-ConfigError: Post-processor "ESLint" failed to run: Executable not found in $PATH: "eslint"
-    at postprocessOutput (/Users/samsimson/Development/touring.club/touring.club/node_modules/.bun/@hey-api+shared@0.5.0/node_modules/@hey-api/shared/dist/index.mjs:858:31)
-    at createClient$1 (/Users/samsimson/Development/touring.club/touring.club/node_modules/.bun/@hey-api+openapi-ts@0.99.0+1fb4c65d43e298b9/node_modules/@hey-api/openapi-ts/dist/src-CI9riJdm.mjs:159:4)
-    at async <anonymous> (/Users/samsimson/Development/touring.club/touring.club/node_modules/.bun/@hey-api+openapi-ts@0.99.0+1fb4c65d43e298b9/node_modules/@hey-api/openapi-ts/dist/src-CI9riJdm.mjs:213:18)
-    at async createClient (/Users/samsimson/Development/touring.club/touring.club/node_modules/.bun/@hey-api+openapi-ts@0.99.0+1fb4c65d43e298b9/node_modules/@hey-api/openapi-ts/dist/src-CI9riJdm.mjs:211:35)
-    at processTicksAndRejections (native:7:39)
