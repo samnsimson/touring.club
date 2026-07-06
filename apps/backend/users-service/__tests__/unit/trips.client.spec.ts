@@ -30,6 +30,7 @@ describe('TripsClient', () => {
             expect(getUserTravelHistory).toHaveBeenCalledWith({
                 path: { userId: 'user-1' },
                 headers: { Authorization: 'Bearer token' },
+                throwOnError: true,
             });
             expect(result).toBe(payload);
         });

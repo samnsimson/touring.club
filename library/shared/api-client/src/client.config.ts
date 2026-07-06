@@ -6,7 +6,9 @@ createClient(
     CLIENT_REGISTRY.map(({ name: service }) => ({
         input: { path: `apps/backend/${service}/openapi/${service}.openapi.json` },
         plugins: [
-            { name: '@hey-api/typescript' },
+            {
+                name: '@hey-api/typescript',
+            },
             {
                 auth: true,
                 name: '@hey-api/sdk',
