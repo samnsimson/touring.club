@@ -13,7 +13,8 @@
                 "main": "library/shared/api-client/src/index.ts",
                 "tsConfig": "library/shared/api-client/tsconfig.lib.json",
                 "format": ["esm"],
-                "declarationRootDir": "library/shared/api-client/src"
+                "declarationRootDir": "library/shared/api-client/src",
+                "bundle": false
             }
         },
         "api:generate": {

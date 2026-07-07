@@ -13,6 +13,12 @@
             "types": "./dist/index.d.ts",
             "import": "./dist/index.js",
             "default": "./dist/index.js"
+        },
+        "./clients/*": {
+            "@touring.club/source": "./src/clients/*/index.ts",
+            "types": "./dist/clients/*/index.d.ts",
+            "import": "./dist/clients/*/index.js",
+            "default": "./dist/clients/*/index.js"
         }
     },
     "dependencies": {

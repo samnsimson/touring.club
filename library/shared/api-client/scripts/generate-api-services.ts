@@ -14,7 +14,7 @@ export async function generateApiServices() {
     const barrelExports: string[] = [];
 
     let index = 0;
-    for (const { name: service } of CLIENT_REGISTRY) {
+    for (const service of CLIENT_REGISTRY) {
         index += 1;
         const pascalService = ApiClientUtils.pascalCase(service);
         const content = template({ service, pascalService });

@@ -24,7 +24,7 @@ describe('MessagingClient', () => {
             postTripSystemEvent.mockResolvedValue({ data: {} });
             const payload = { event: 'member_joined' as const, actorUserId: 'user-a', subjectUserId: 'user-b' };
             await client.postTripSystemEvent('trip-1', payload, 'Bearer token');
-            expect(MessagingServiceApi).toHaveBeenCalledWith({ baseUrl: 'http://messaging-service:3003/api/v1' });
+            expect(MessagingServiceApi).toHaveBeenCalledWith({ baseUrl: 'http://messaging-service:3003' });
             expect(postTripSystemEvent).toHaveBeenCalledWith({
                 path: { tripId: 'trip-1' },
                 body: payload,

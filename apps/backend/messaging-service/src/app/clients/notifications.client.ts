@@ -16,7 +16,7 @@ export class NotificationsClient {
     private readonly api: NotificationsServiceApi;
 
     constructor(private readonly config: ConfigService) {
-        this.api = new NotificationsServiceApi({ baseUrl: `${this.config.get('NOTIFICATIONS_SERVICE_URL')}/api/v1` });
+        this.api = new NotificationsServiceApi({ baseUrl: this.config.get('NOTIFICATIONS_SERVICE_URL') });
     }
 
     async createNotification(payload: CreateNotificationPayload, authorization: string): Promise<void> {
