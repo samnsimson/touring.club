@@ -26,7 +26,7 @@ describe('TripsClient', () => {
             getUserTravelHistory.mockResolvedValue({ data: payload });
             const result = await client.getTravelHistory('user-1', 'Bearer token');
             expect(config.get).toHaveBeenCalledWith('TRIPS_SERVICE_URL');
-            expect(TripsServiceApi).toHaveBeenCalledWith({ baseUrl: 'http://trips-service:3003/api/v1' });
+            expect(TripsServiceApi).toHaveBeenCalledWith({ baseUrl: 'http://trips-service:3003' });
             expect(getUserTravelHistory).toHaveBeenCalledWith({
                 path: { userId: 'user-1' },
                 headers: { Authorization: 'Bearer token' },

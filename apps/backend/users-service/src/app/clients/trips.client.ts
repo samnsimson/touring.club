@@ -8,7 +8,7 @@ export class TripsClient {
     private readonly api: TripsServiceApi;
 
     constructor(private readonly config: ConfigService) {
-        this.api = new TripsServiceApi({ baseUrl: `${this.config.get('TRIPS_SERVICE_URL')}/api/v1` });
+        this.api = new TripsServiceApi({ baseUrl: this.config.get('TRIPS_SERVICE_URL') });
     }
 
     async getTravelHistory(userId: string, authorization: string): Promise<TravelHistoryResponseDto> {

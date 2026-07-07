@@ -17,11 +17,11 @@ export const EnvSchema = z.object({
 
     // EDNPOINTS
     GATEWAY_SERVICE_URL: z.url().default('http://localhost:3000'),
-    AUTH_SERVICE_URL: z.url().default('http://localhost:3000'),
-    USER_SERVICE_URL: z.url().default('http://localhost:3001'),
-    TRIPS_SERVICE_URL: z.url().default('http://localhost:3002'),
-    MESSAGING_SERVICE_URL: z.url().default('http://localhost:3003'),
-    NOTIFICATIONS_SERVICE_URL: z.url().default('http://localhost:3004'),
+    AUTH_SERVICE_URL: z.url().default('http://localhost:3000/api/v1'),
+    USER_SERVICE_URL: z.url().default('http://localhost:3001/api/v1'),
+    TRIPS_SERVICE_URL: z.url().default('http://localhost:3002/api/v1'),
+    MESSAGING_SERVICE_URL: z.url().default('http://localhost:3003/api/v1'),
+    NOTIFICATIONS_SERVICE_URL: z.url().default('http://localhost:3004/api/v1'),
 
     EMAIL_PROVIDER: z.enum(['console', 'resend']).default('console'),
     EMAIL_FROM: z.string().min(1).default('Touring Club <noreply@touring.club>'),

@@ -24,7 +24,7 @@ describe('NotificationsClient', () => {
             createNotification.mockResolvedValue({ data: {} });
             const payload = { userId: 'user-b', type: 'trip_approved' as const, title: 'Approved' };
             await client.createNotification(payload, 'Bearer token');
-            expect(NotificationsServiceApi).toHaveBeenCalledWith({ baseUrl: 'http://notifications-service:3004/api/v1' });
+            expect(NotificationsServiceApi).toHaveBeenCalledWith({ baseUrl: 'http://notifications-service:3004' });
             expect(createNotification).toHaveBeenCalledWith({
                 body: payload,
                 headers: { Authorization: 'Bearer token' },

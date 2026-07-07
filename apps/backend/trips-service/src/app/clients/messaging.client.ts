@@ -16,7 +16,7 @@ export class MessagingClient {
     private readonly api: MessagingServiceApi;
 
     constructor(private readonly config: ConfigService) {
-        this.api = new MessagingServiceApi({ baseUrl: `${this.config.get('MESSAGING_SERVICE_URL')}/api/v1` });
+        this.api = new MessagingServiceApi({ baseUrl: this.config.get('MESSAGING_SERVICE_URL') });
     }
 
     async postTripSystemEvent(tripId: string, payload: PostTripSystemEventPayload, authorization: string): Promise<void> {
