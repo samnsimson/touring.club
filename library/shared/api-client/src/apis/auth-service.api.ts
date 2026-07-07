@@ -2,13 +2,12 @@
 import { createClient } from '../clients/auth-service/client';
 import { AuthServiceSdk } from '../clients/auth-service';
 import { ApiClientOptions } from '../contract/api-client.contract';
-import { ApiClientUtils } from '../utils/api-client.utils';
 
 export class AuthServiceApi extends AuthServiceSdk {
-    constructor(options: ApiClientOptions = {}) {
+    constructor(options: ApiClientOptions) {
         super({
             client: createClient({
-                baseUrl: options.baseUrl ?? ApiClientUtils.getServiceEndpoint('auth-service'),
+                baseUrl: options.baseUrl,
                 throwOnError: true,
             }),
         });

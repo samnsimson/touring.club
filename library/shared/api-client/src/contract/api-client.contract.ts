@@ -1,3 +1,3 @@
 export interface ApiClientOptions {
-    baseUrl?: string;
+    baseUrl: string;
 }

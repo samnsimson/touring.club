@@ -3,7 +3,7 @@ import { ApiClientUtils } from './utils/api-client.utils';
 import { CLIENT_REGISTRY } from './client.registry';
 
 createClient(
-    CLIENT_REGISTRY.map(({ name: service }) => ({
+    CLIENT_REGISTRY.map((service) => ({
         input: { path: `apps/backend/${service}/openapi/${service}.openapi.json` },
         plugins: [
             {
