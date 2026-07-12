@@ -40,7 +40,7 @@
             "path": "./apps/frontend/web"
         },
         {
-            "path": "./library/shared/api-client"
+            "path": "./library/shared/api-sdk"
         },
         {
             "path": "./library/frontend/ui"
@@ -50,6 +50,12 @@
         },
         {
             "path": "./library/frontend/mocks"
+        },
+        {
+            "path": "./library/backend/server-api"
+        },
+        {
+            "path": "./library/frontend/client-api"
         }
     ]
 }

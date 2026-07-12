@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { MessagingServiceApi } from '@tc/api-client';
+import { MessagingServiceApi } from '@tc/server-api';
 import { ConfigService } from '@tc/config';
 
 export type TripSystemEventType = 'member_joined' | 'join_requested' | 'member_left' | 'member_approved' | 'member_removed';

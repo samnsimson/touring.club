@@ -16,6 +16,7 @@
         "start:prod": "docker compose up -d postgres kong && nx run-many --target=serve --configuration=production",
         "auth:generate": "nx run auth:generate",
         "api:generate": "nx run-many --target=api:generate",
+        "sdk:generate": "nx run-many --target=sdk:generate",
         "openapi:generate": "nx run-many --target=openapi:generate",
         "migration:run": "nx run database:migration:run",
         "migration:generate": "nx run database:migration:generate --name=Migration",

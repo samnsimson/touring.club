@@ -1,9 +1,9 @@
-import { NotificationsServiceApi } from '@tc/api-client';
+import { NotificationsServiceApi } from '@tc/server-api';
 import { ConfigService } from '@tc/config';
 import { NotificationsClient } from '../../src/app/clients/notifications.client';
 
-jest.mock('@tc/api-client', () => ({
-    ...jest.requireActual('@tc/api-client'),
+jest.mock('@tc/server-api', () => ({
+    ...jest.requireActual('@tc/server-api'),
     NotificationsServiceApi: jest.fn(),
 }));
 

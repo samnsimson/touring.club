@@ -1,0 +1,30 @@
+{
+    "name": "server-api",
+    "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+    "sourceRoot": "library/backend/server-api/src",
+    "projectType": "library",
+    "tags": ["scope:shared", "type:server-api"],
+    "targets": {
+        "build": {
+            "executor": "@nx/esbuild:esbuild",
+            "outputs": ["{options.outputPath}"],
+            "options": {
+                "outputPath": "library/backend/server-api/dist",
+                "main": "library/backend/server-api/src/index.ts",
+                "tsConfig": "library/backend/server-api/tsconfig.lib.json",
+                "format": ["esm"],
+                "declarationRootDir": "library/backend/server-api/src",
+                "bundle": false
+            }
+        },
+        "api:generate": {
+            "executor": "nx:run-commands",
+            "dependsOn": ["api-sdk:sdk:generate"],
+            "options": {
+                "commands": ["bun library/backend/server-api/scripts/generate-server-apis.ts"],
+                "cwd": "{workspaceRoot}",
+                "parallel": false
+            }
+        }
+    }
+}

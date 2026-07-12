@@ -1,0 +1,30 @@
+{
+    "name": "api-sdk",
+    "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+    "sourceRoot": "library/shared/api-sdk/src",
+    "projectType": "library",
+    "tags": ["type:api-sdk"],
+    "targets": {
+        "build": {
+            "executor": "@nx/esbuild:esbuild",
+            "outputs": ["{options.outputPath}"],
+            "options": {
+                "outputPath": "library/shared/api-sdk/dist",
+                "main": "library/shared/api-sdk/src/index.ts",
+                "tsConfig": "library/shared/api-sdk/tsconfig.lib.json",
+                "format": ["esm"],
+                "declarationRootDir": "library/shared/api-sdk/src",
+                "bundle": false
+            }
+        },
+        "sdk:generate": {
+            "executor": "nx:run-commands",
+            "dependsOn": ["api-sdk:build"],
+            "options": {
+                "commands": ["bun library/shared/api-sdk/src/client.config.ts"],
+                "cwd": "{workspaceRoot}",
+                "parallel": false
+            }
+        }
+    }
+}

@@ -1,9 +1,9 @@
-import { MessagingServiceApi } from '@tc/api-client';
+import { MessagingServiceApi } from '@tc/server-api';
 import { ConfigService } from '@tc/config';
 import { MessagingClient } from '../../src/app/clients/messaging.client';
 
-jest.mock('@tc/api-client', () => ({
-    ...jest.requireActual('@tc/api-client'),
+jest.mock('@tc/server-api', () => ({
+    ...jest.requireActual('@tc/server-api'),
     MessagingServiceApi: jest.fn(),
 }));
 
