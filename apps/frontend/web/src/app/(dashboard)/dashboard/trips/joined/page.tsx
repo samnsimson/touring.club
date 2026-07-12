@@ -1,14 +1,16 @@
 import { Compass } from 'lucide-react';
 import { AppEmptyState, PageHeader, SimpleGrid, TripCard } from '@tc/ui';
-import { currentUser, mockTrips } from '@tc/mocks';
+import { discoverTrips } from '@/lib/trips-service-client';
 
 export const metadata = {
     title: 'Joined trips — touring.club',
 };
 
-export default function JoinedTripsPage() {
-    // @tc/mocks has no TripMembership fixtures yet — stand in with a few trips currentUser doesn't organize.
-    const trips = mockTrips.filter((trip) => trip.status === 'published' && trip.organizerId !== currentUser.id).slice(0, 3);
+export default async function JoinedTripsPage() {
+    // trips-service has no "my joined trips" endpoint yet (only organizer-owned `listMyTrips` and public
+    // `discoverTrips`) — stand in with a few public trips until trip membership is queryable per-user.
+    const { data } = await discoverTrips({});
+    const trips = (data?.trips ?? []).slice(0, 3);
 
     return (
         <>
@@ -18,17 +20,14 @@ export default function JoinedTripsPage() {
                     {trips.map((trip) => (
                         <TripCard
                             key={trip.id}
-                            href={`/trips/${trip.slug}`}
+                            href={`/trips/${trip.id}`}
                             title={trip.title}
                             destination={trip.destination}
-                            coverImageUrl={trip.coverImageUrl}
+                            coverImageUrl={trip.coverImageUrls[0]}
                             startDate={trip.startDate}
                             endDate={trip.endDate}
                             capacity={trip.capacity}
-                            joinedCount={trip.joinedCount}
-                            difficulty={trip.difficulty}
                             categories={trip.categories}
-                            priceLabel={trip.priceLabel}
                         />
                     ))}
                 </SimpleGrid>

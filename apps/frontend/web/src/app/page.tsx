@@ -1,9 +1,9 @@
 import NextLink from 'next/link';
 import { Compass, MessagesSquare, Users } from 'lucide-react';
 import { Box, Button, Container, DestinationCard, Heading, Pill, SimpleGrid, Stack, Text, TripCard } from '@tc/ui';
-import { mockDestinations, mockTrips, tripCategories } from '@tc/mocks';
+import { mockDestinations } from '@tc/mocks';
+import { discoverTrips } from '@/lib/trips-service-client';
 
-const featuredTrips = mockTrips.filter((trip) => trip.status === 'published').slice(0, 6);
 const featuredDestinations = mockDestinations.slice(0, 4);
 
 const valueProps = [
@@ -24,7 +24,12 @@ const valueProps = [
     },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+    const { data } = await discoverTrips({});
+    const trips = data?.trips ?? [];
+    const categories = [...new Set(trips.flatMap((trip) => trip.categories))].sort();
+    const featuredTrips = trips.slice(0, 6);
+
     return (
         <Box>
             <Box bg="ocean.900" color="white">
@@ -49,15 +54,17 @@ export default function HomePage() {
                 </Container>
             </Box>
 
-            <Container maxW="7xl" py="10">
-                <Stack direction="row" gap="3" wrap="wrap" justify="center">
-                    {tripCategories.map((category) => (
-                        <Pill key={category} colorPalette="teal" variant="surface">
-                            <NextLink href={`/trips?category=${encodeURIComponent(category)}`}>{category}</NextLink>
-                        </Pill>
-                    ))}
-                </Stack>
-            </Container>
+            {categories.length > 0 ? (
+                <Container maxW="7xl" py="10">
+                    <Stack direction="row" gap="3" wrap="wrap" justify="center">
+                        {categories.map((category) => (
+                            <Pill key={category} colorPalette="teal" variant="surface">
+                                <NextLink href={`/trips?category=${encodeURIComponent(category)}`}>{category}</NextLink>
+                            </Pill>
+                        ))}
+                    </Stack>
+                </Container>
+            ) : null}
 
             <Container maxW="7xl" py="10">
                 <Stack direction={{ base: 'column', md: 'row' }} justify="space-between" align={{ base: 'start', md: 'center' }} mb="8">
@@ -66,24 +73,25 @@ export default function HomePage() {
                         <NextLink href="/trips">View all trips →</NextLink>
                     </Button>
                 </Stack>
-                <SimpleGrid columns={{ base: 1, sm: 2, lg: 3 }} gap="6">
-                    {featuredTrips.map((trip) => (
-                        <TripCard
-                            key={trip.id}
-                            href={`/trips/${trip.slug}`}
-                            title={trip.title}
-                            destination={trip.destination}
-                            coverImageUrl={trip.coverImageUrl}
-                            startDate={trip.startDate}
-                            endDate={trip.endDate}
-                            capacity={trip.capacity}
-                            joinedCount={trip.joinedCount}
-                            difficulty={trip.difficulty}
-                            categories={trip.categories}
-                            priceLabel={trip.priceLabel}
-                        />
-                    ))}
-                </SimpleGrid>
+                {featuredTrips.length > 0 ? (
+                    <SimpleGrid columns={{ base: 1, sm: 2, lg: 3 }} gap="6">
+                        {featuredTrips.map((trip) => (
+                            <TripCard
+                                key={trip.id}
+                                href={`/trips/${trip.id}`}
+                                title={trip.title}
+                                destination={trip.destination}
+                                coverImageUrl={trip.coverImageUrls[0]}
+                                startDate={trip.startDate}
+                                endDate={trip.endDate}
+                                capacity={trip.capacity}
+                                categories={trip.categories}
+                            />
+                        ))}
+                    </SimpleGrid>
+                ) : (
+                    <Text color="gray.600">No published trips yet — check back soon.</Text>
+                )}
             </Container>
 
             <Container maxW="7xl" py="10">
