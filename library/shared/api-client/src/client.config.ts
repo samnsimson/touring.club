@@ -17,6 +17,12 @@ createClient(
                     containerName: `${ApiClientUtils.pascalCase(service)}Sdk`,
                 },
             },
+            {
+                name: '@tanstack/react-query',
+                queryOptions: true,
+                mutationOptions: true,
+                auth: true,
+            },
         ],
         output: {
             postProcess: ['eslint', 'prettier'],
