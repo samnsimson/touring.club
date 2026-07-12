@@ -7,7 +7,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Alert, Button, Link as ChakraLink, Stack, TextField } from '@tc/ui';
-import { registerAction } from './actions';
+import { registerAction } from './register-actions';
 
 const registerSchema = z
     .object({

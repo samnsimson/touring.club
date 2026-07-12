@@ -1,5 +1,5 @@
 import { AuthCard } from '@tc/ui';
-import { LoginForm } from './login-form';
+import { LoginForm } from '@/components/auth/login-form';
 
 export const metadata = {
     title: 'Sign in — touring.club',

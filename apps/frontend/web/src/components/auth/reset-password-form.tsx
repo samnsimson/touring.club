@@ -7,7 +7,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Alert, Button, Link as ChakraLink, Stack, TextField } from '@tc/ui';
-import { resetPasswordAction } from './actions';
+import { resetPasswordAction } from './reset-password-actions';
 
 const resetPasswordSchema = z
     .object({

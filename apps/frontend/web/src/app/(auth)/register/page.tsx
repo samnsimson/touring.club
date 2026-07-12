@@ -1,5 +1,5 @@
 import { AuthCard } from '@tc/ui';
-import { RegisterForm } from './register-form';
+import { RegisterForm } from '@/components/auth/register-form';
 
 export const metadata = {
     title: 'Create your account — touring.club',

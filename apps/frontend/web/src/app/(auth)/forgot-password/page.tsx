@@ -1,5 +1,5 @@
 import { AuthCard } from '@tc/ui';
-import { ForgotPasswordForm } from './forgot-password-form';
+import { ForgotPasswordForm } from '@/components/auth/forgot-password-form';
 
 export const metadata = {
     title: 'Reset your password — touring.club',

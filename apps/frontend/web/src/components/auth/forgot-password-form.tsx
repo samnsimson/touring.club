@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Alert, Button, Link as ChakraLink, Stack, TextField } from '@tc/ui';
-import { forgotPasswordAction } from './actions';
+import { forgotPasswordAction } from './forgot-password-actions';
 
 const forgotPasswordSchema = z.object({
     email: z.string().min(1, 'Email is required').email('Enter a valid email address'),

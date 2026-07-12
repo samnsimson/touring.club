@@ -7,7 +7,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Alert, Button, Link as ChakraLink, Stack, TextField } from '@tc/ui';
-import { verifyEmailAction } from './actions';
+import { verifyEmailAction } from './verify-email-actions';
 
 const verifyEmailSchema = z.object({
     email: z.string().min(1, 'Email is required').email('Enter a valid email address'),

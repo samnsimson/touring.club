@@ -1,5 +1,5 @@
 import { AuthCard } from '@tc/ui';
-import { VerifyEmailForm } from './verify-email-form';
+import { VerifyEmailForm } from '@/components/auth/verify-email-form';
 
 export const metadata = {
     title: 'Verify your email — touring.club',
