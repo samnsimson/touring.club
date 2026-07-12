@@ -1,8 +1,6 @@
 import NextAuth from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
-import { configureAuthServiceClient, signIn as signInWithAuthService } from '@tc/client-api/services/auth-service';
-
-configureAuthServiceClient({ baseUrl: `${process.env.NEXT_PUBLIC_API_GATEWAY_URL}/api/v1` });
+import { signIn as signInWithAuthService } from '@/lib/auth-service-client';
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
     pages: { signIn: '/login' },

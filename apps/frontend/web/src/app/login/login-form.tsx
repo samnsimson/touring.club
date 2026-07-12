@@ -16,9 +16,17 @@ const loginSchema = z.object({
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
+function useSuccessMessage(): string | undefined {
+    const searchParams = useSearchParams();
+    if (searchParams.get('verified')) return 'Email verified — you can now sign in.';
+    if (searchParams.get('reset')) return 'Password reset — you can now sign in with your new password.';
+    return undefined;
+}
+
 export function LoginForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
+    const successMessage = useSuccessMessage();
     const [formError, setFormError] = useState<string | undefined>();
     const {
         register,
@@ -42,6 +50,12 @@ export function LoginForm() {
     return (
         <Stack asChild gap="5">
             <form onSubmit={handleSubmit(onSubmit)} noValidate>
+                {successMessage ? (
+                    <Alert.Root status="success">
+                        <Alert.Indicator />
+                        <Alert.Title>{successMessage}</Alert.Title>
+                    </Alert.Root>
+                ) : null}
                 {formError ? (
                     <Alert.Root status="error">
                         <Alert.Indicator />
@@ -57,6 +71,9 @@ export function LoginForm() {
                     error={errors.password?.message}
                     {...register('password')}
                 />
+                <ChakraLink asChild fontSize="sm" alignSelf="flex-end">
+                    <NextLink href="/forgot-password">Forgot password?</NextLink>
+                </ChakraLink>
                 <Button type="submit" colorPalette="orange" loading={isSubmitting} w="full">
                     Sign in
                 </Button>

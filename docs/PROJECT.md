@@ -273,10 +273,10 @@ Services communicate over HTTP (and WebSockets where needed) — e.g. `trips-ser
 
 ### Frontend
 
-| Client | Stack                    | Status                                                                                                                                                                                                                                                                |
-| ------ | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Web    | Next.js, TypeScript      | In progress — `apps/frontend/web` (`@nx/next:app`, App Router, tag `scope:frontend`); Chakra UI shell + mock-data-driven browsing pages; `/login` wired to real `auth-service` via `@tc/client-api`; other product pages (register, trips, profile) still mock-backed |
-| Mobile | React Native, TypeScript | Not started                                                                                                                                                                                                                                                           |
+| Client | Stack                    | Status                                                                                                                                                                                                                                                                                                                                                             |
+| ------ | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Web    | Next.js, TypeScript      | In progress — `apps/frontend/web` (`@nx/next:app`, App Router, tag `scope:frontend`); Chakra UI shell + mock-data-driven browsing pages; full auth flow (`/login`, `/register`, `/verify-email`, `/forgot-password`, `/reset-password`) wired to real `auth-service` via `@tc/client-api`; account settings and other product pages (trips, profile) still pending |
+| Mobile | React Native, TypeScript | Not started                                                                                                                                                                                                                                                                                                                                                        |
 
 ### Database
 
