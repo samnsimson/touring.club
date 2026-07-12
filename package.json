@@ -21,6 +21,7 @@
         "openapi:generate": "nx run-many --target=openapi:generate",
         "migration:run": "nx run database:migration:run",
         "migration:generate": "nx run database:migration:generate --name=Migration",
+        "seed:trips": "nx run database:seed:trips",
         "openapi-ts": "openapi-ts",
         "prepare": "husky"
     },

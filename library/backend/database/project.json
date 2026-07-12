@@ -48,6 +48,30 @@
                 "cwd": "{workspaceRoot}"
             }
         },
+        "seed:trips": {
+            "executor": "nx:run-commands",
+            "dependsOn": ["database:build-seed-trips"],
+            "options": {
+                "command": "bun --env-file=.env library/backend/database/dist/scripts/seed-trips.cjs",
+                "cwd": "{workspaceRoot}"
+            }
+        },
+        "build-seed-trips": {
+            "executor": "@nx/esbuild:esbuild",
+            "outputs": ["{options.outputPath}"],
+            "dependsOn": ["config:build", "utils:build"],
+            "options": {
+                "outputPath": "library/backend/database/dist/scripts",
+                "main": "library/backend/database/scripts/seed-trips.ts",
+                "tsConfig": "library/backend/database/scripts/tsconfig.json",
+                "bundle": true,
+                "platform": "node",
+                "format": ["cjs"],
+                "outputFileName": "seed-trips.js",
+                "thirdParty": true,
+                "external": ["@tc/config", "@tc/utils", "typeorm", "pg", "pg-native", "reflect-metadata"]
+            }
+        },
         "test": {
             "executor": "@nx/jest:jest",
             "options": {
