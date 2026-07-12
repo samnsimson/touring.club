@@ -1,0 +1,31 @@
+{
+    "name": "@tc/server-api",
+    "version": "0.0.1",
+    "private": true,
+    "type": "module",
+    "main": "./dist/index.js",
+    "module": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        "./package.json": "./package.json",
+        ".": {
+            "@touring.club/source": "./src/index.ts",
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js",
+            "default": "./dist/index.js"
+        },
+        "./services/*": {
+            "@touring.club/source": "./src/apis/*.server-api.ts",
+            "types": "./dist/apis/*.server-api.d.ts",
+            "import": "./dist/apis/*.server-api.js",
+            "default": "./dist/apis/*.server-api.js"
+        }
+    },
+    "dependencies": {
+        "@tc/api-sdk": "workspace:*"
+    },
+    "devDependencies": {
+        "handlebars": "^4.7.9",
+        "prettier": "~3.6.2"
+    }
+}

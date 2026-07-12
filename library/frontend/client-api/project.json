@@ -1,0 +1,30 @@
+{
+    "name": "client-api",
+    "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+    "sourceRoot": "library/frontend/client-api/src",
+    "projectType": "library",
+    "tags": ["scope:shared", "type:client-api"],
+    "targets": {
+        "build": {
+            "executor": "@nx/esbuild:esbuild",
+            "outputs": ["{options.outputPath}"],
+            "options": {
+                "outputPath": "library/frontend/client-api/dist",
+                "main": "library/frontend/client-api/src/index.ts",
+                "tsConfig": "library/frontend/client-api/tsconfig.lib.json",
+                "format": ["esm"],
+                "declarationRootDir": "library/frontend/client-api/src",
+                "bundle": false
+            }
+        },
+        "api:generate": {
+            "executor": "nx:run-commands",
+            "dependsOn": ["api-sdk:sdk:generate"],
+            "options": {
+                "commands": ["bun library/frontend/client-api/scripts/generate-client-apis.ts"],
+                "cwd": "{workspaceRoot}",
+                "parallel": false
+            }
+        }
+    }
+}

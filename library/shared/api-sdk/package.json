@@ -1,0 +1,46 @@
+{
+    "name": "@tc/api-sdk",
+    "version": "0.0.1",
+    "private": true,
+    "type": "module",
+    "main": "./dist/index.js",
+    "module": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        "./package.json": "./package.json",
+        ".": {
+            "@touring.club/source": "./src/index.ts",
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js",
+            "default": "./dist/index.js"
+        },
+        "./clients/*": {
+            "@touring.club/source": "./src/clients/*/index.ts",
+            "types": "./dist/clients/*/index.d.ts",
+            "import": "./dist/clients/*/index.js",
+            "default": "./dist/clients/*/index.js"
+        },
+        "./clients/*/client": {
+            "@touring.club/source": "./src/clients/*/client/index.ts",
+            "types": "./dist/clients/*/client/index.d.ts",
+            "import": "./dist/clients/*/client/index.js",
+            "default": "./dist/clients/*/client/index.js"
+        },
+        "./clients/*/client.gen": {
+            "@touring.club/source": "./src/clients/*/client.gen.ts",
+            "types": "./dist/clients/*/client.gen.d.ts",
+            "import": "./dist/clients/*/client.gen.js",
+            "default": "./dist/clients/*/client.gen.js"
+        },
+        "./clients/*/react-query": {
+            "@touring.club/source": "./src/clients/*/@tanstack/react-query.gen.ts",
+            "types": "./dist/clients/*/@tanstack/react-query.gen.d.ts",
+            "import": "./dist/clients/*/@tanstack/react-query.gen.js",
+            "default": "./dist/clients/*/@tanstack/react-query.gen.js"
+        }
+    },
+    "dependencies": {
+        "@tanstack/react-query": "^5.101.2",
+        "lodash": "^4.18.1"
+    }
+}

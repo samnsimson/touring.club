@@ -1,10 +1,10 @@
 import { ServiceUnavailableException } from '@nestjs/common';
-import { TripsServiceApi } from '@tc/api-client';
+import { TripsServiceApi } from '@tc/server-api';
 import { ConfigService } from '@tc/config';
 import { TripsClient } from '../../src/app/clients/trips.client';
 
-jest.mock('@tc/api-client', () => ({
-    ...jest.requireActual('@tc/api-client'),
+jest.mock('@tc/server-api', () => ({
+    ...jest.requireActual('@tc/server-api'),
     TripsServiceApi: jest.fn(),
 }));
 

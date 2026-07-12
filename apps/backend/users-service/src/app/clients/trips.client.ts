@@ -1,6 +1,6 @@
 import { Injectable, ServiceUnavailableException } from '@nestjs/common';
-import { TripsServiceApi } from '@tc/api-client';
-import { TravelHistoryResponseDto } from '@tc/api-client/clients/trips-service';
+import { TripsServiceApi } from '@tc/server-api';
+import { TravelHistoryResponseDto } from '@tc/server-api/services/trips-service';
 import { ConfigService } from '@tc/config';
 
 @Injectable()

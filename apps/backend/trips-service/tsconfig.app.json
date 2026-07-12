@@ -34,7 +34,7 @@
             "path": "../../../library/backend/config/tsconfig.lib.json"
         },
         {
-            "path": "../../../library/shared/api-client/tsconfig.lib.json"
+            "path": "../../../library/backend/server-api/tsconfig.lib.json"
         },
         {
             "path": "../../../library/backend/database/tsconfig.lib.json"

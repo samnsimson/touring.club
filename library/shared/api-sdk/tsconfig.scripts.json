@@ -1,0 +1,10 @@
+{
+    "extends": "../../../tsconfig.base.json",
+    "compilerOptions": {
+        "rootDir": ".",
+        "noEmit": true,
+        "types": ["node"]
+    },
+    "include": ["src/client.config.ts", "src/client.registry.ts", "src/utils/api-sdk.utils.ts"],
+    "references": []
+}

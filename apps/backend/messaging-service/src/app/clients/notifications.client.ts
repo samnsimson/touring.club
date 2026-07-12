@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { NotificationsServiceApi } from '@tc/api-client';
+import { NotificationsServiceApi } from '@tc/server-api';
 import { ConfigService } from '@tc/config';
 import type { NotificationType } from '@tc/database';
 
