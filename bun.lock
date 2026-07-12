@@ -248,6 +248,7 @@
       "version": "0.0.1",
       "dependencies": {
         "@hookform/resolvers": "^5.4.0",
+        "@tc/client-api": "workspace:*",
         "@tc/mocks": "workspace:*",
         "@tc/state": "workspace:*",
         "@tc/ui": "workspace:*",

@@ -12,6 +12,7 @@
         "start:trips": "nx serve trips-service",
         "start:messaging": "nx serve messaging-service",
         "start:notifications": "nx serve notifications-service",
+        "start:web": "nx dev web",
         "start": "nx run-many --target=serve",
         "start:prod": "docker compose up -d postgres kong && nx run-many --target=serve --configuration=production",
         "auth:generate": "nx run auth:generate",

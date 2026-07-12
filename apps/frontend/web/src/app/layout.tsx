@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { Footer } from '@tc/ui';
 import { auth } from '@/auth';
 import { Providers } from './providers';
-import { AppNavbar } from './_components/app-navbar';
+import { AppNavbar } from '@/components/shell/app-navbar';
 
 export const metadata = {
     title: 'touring.club — Discover group trips and travel communities',

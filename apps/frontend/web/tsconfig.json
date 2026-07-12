@@ -48,6 +48,9 @@
     ],
     "references": [
         {
+            "path": "../../../library/frontend/client-api"
+        },
+        {
             "path": "../../../library/frontend/ui"
         },
         {
