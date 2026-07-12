@@ -227,7 +227,7 @@ apps/
     messaging-service            # Direct and trip group chat
     notifications-service        # In-app and push notifications
   frontend/                      # One client app per platform
-    web                            # Next.js, App Router — scaffolded shell (Nx-generated, no product pages yet)
+    web                            # Next.js, App Router — Chakra UI shell, mock-data browsing, /login wired to auth-service
     mobile                         # React Native (future)
 
 library/
@@ -238,13 +238,14 @@ library/
     database                     # TypeORM module, entities, migrations
     utils                        # Cross-cutting utilities
     common                       # HTTP client (axios) and S3 object storage (StorageModule/StorageService)
-  frontend                        # Web + mobile UI/state, nothing backend-aware (future)
-  shared                          # Contracts shared by backend and frontend — types, API client/SDK
-    api-client                     # Generated hey-api SDK + Api wrapper class per backend service
-
-packages/                      # Client packages (future, may fold into library/shared instead)
-  ui
-  types
+    server-api                   # Backend-only <Service>Api wrapper classes for interservice calls that bypass Kong
+  frontend                       # Web UI/state consumed by web (mobile future)
+    ui                            # Shared Chakra UI v3 component library
+    state                         # Shared Zustand stores
+    mocks                         # Placeholder mock data pending real service wiring
+    client-api                    # Frontend-only configure*Client() + react-query hooks routed through Kong
+  shared                          # Contracts shared by backend and frontend — types, API SDK
+    api-sdk                        # Raw generated hey-api SDK per backend service (never imported by apps directly)
 ```
 
 Do **not** create domain libraries (e.g. `library/backend/users`, `library/backend/trips`). Each domain is a **service** under `apps/backend/`.
@@ -272,10 +273,10 @@ Services communicate over HTTP (and WebSockets where needed) — e.g. `trips-ser
 
 ### Frontend
 
-| Client | Stack                    | Status                                                                                                         |
-| ------ | ------------------------ | -------------------------------------------------------------------------------------------------------------- |
-| Web    | Next.js, TypeScript      | Scaffolded — `apps/frontend/web` (`@nx/next:app`, App Router, tag `scope:frontend`), default starter page only |
-| Mobile | React Native, TypeScript | Not started                                                                                                    |
+| Client | Stack                    | Status                                                                                                                                                                                                                                                                |
+| ------ | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Web    | Next.js, TypeScript      | In progress — `apps/frontend/web` (`@nx/next:app`, App Router, tag `scope:frontend`); Chakra UI shell + mock-data-driven browsing pages; `/login` wired to real `auth-service` via `@tc/client-api`; other product pages (register, trips, profile) still mock-backed |
+| Mobile | React Native, TypeScript | Not started                                                                                                                                                                                                                                                           |
 
 ### Database
 
