@@ -1,2 +1,3 @@
-export * from './apis';
-export * from './contract/server-api.contract';
+export * from './client.contract';
+export * from './client.module';
+export * from './client.service';

@@ -340,6 +340,8 @@
       "name": "@tc/server-api",
       "version": "0.0.1",
       "dependencies": {
+        "@nestjs/common": "^11.0.0",
+        "@nestjs/config": "^4.0.4",
         "@tc/api-sdk": "workspace:*",
       },
       "devDependencies": {
