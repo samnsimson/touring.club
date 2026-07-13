@@ -1,8 +1,6 @@
-import { configureTripsServiceClient, TripsServiceSdk } from '@tc/client-api/services/trips-service';
+import { clientApi } from './client-api';
 
-configureTripsServiceClient({ baseUrl: `${process.env.NEXT_PUBLIC_API_GATEWAY_URL}/api/v1` });
-
-const tripsServiceSdk = new TripsServiceSdk();
+const tripsServiceSdk = clientApi.tripsService;
 
 export const discoverTrips = tripsServiceSdk.discoverTrips.bind(tripsServiceSdk);
 export const getPublicTrip = tripsServiceSdk.getPublicTrip.bind(tripsServiceSdk);

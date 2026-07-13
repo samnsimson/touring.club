@@ -14,11 +14,11 @@
             "import": "./dist/index.js",
             "default": "./dist/index.js"
         },
-        "./services/*": {
-            "@touring.club/source": "./src/apis/*.client-api.ts",
-            "types": "./dist/apis/*.client-api.d.ts",
-            "import": "./dist/apis/*.client-api.js",
-            "default": "./dist/apis/*.client-api.js"
+        "./types/*": {
+            "@touring.club/source": "./src/types/*.ts",
+            "types": "./dist/types/*.d.ts",
+            "import": "./dist/types/*.js",
+            "default": "./dist/types/*.js"
         }
     },
     "dependencies": {
