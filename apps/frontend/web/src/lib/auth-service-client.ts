@@ -1,8 +1,6 @@
-import { configureAuthServiceClient, AuthServiceSdk } from '@tc/client-api/services/auth-service';
+import { clientApi } from './client-api';
 
-configureAuthServiceClient({ baseUrl: `${process.env.NEXT_PUBLIC_API_GATEWAY_URL}/api/v1` });
-
-const authServiceSdk = new AuthServiceSdk();
+const authServiceSdk = clientApi.authService;
 
 export const signIn = authServiceSdk.signIn.bind(authServiceSdk);
 export const signUp = authServiceSdk.signUp.bind(authServiceSdk);
