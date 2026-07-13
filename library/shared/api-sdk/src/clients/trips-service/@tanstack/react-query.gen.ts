@@ -3,26 +3,7 @@
 import { type DefaultError, queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen';
-import {
-    approveMembership,
-    archiveTrip,
-    cancelTrip,
-    createTrip,
-    discoverTrips,
-    getPublicTrip,
-    getTrip,
-    getUserTravelHistory,
-    joinTrip,
-    leaveTrip,
-    listMyTrips,
-    listTripMembers,
-    type Options,
-    publishTrip,
-    rejectMembership,
-    removeMembership,
-    updateTrip,
-    uploadTripCoverImage,
-} from '../sdk.gen';
+import { type Options, TripsServiceSdk } from '../sdk.gen';
 import type {
     ApproveMembershipData,
     ApproveMembershipResponse,
@@ -101,7 +82,7 @@ export const listMyTripsQueryKey = (options?: Options<ListMyTripsData>) => creat
 export const listMyTripsOptions = (options?: Options<ListMyTripsData>) =>
     queryOptions<ListMyTripsResponse, DefaultError, ListMyTripsResponse, ReturnType<typeof listMyTripsQueryKey>>({
         queryFn: async ({ queryKey, signal }) => {
-            const { data } = await listMyTrips({
+            const { data } = await TripsServiceSdk.__registry.get().listMyTrips({
                 ...options,
                 ...queryKey[0],
                 signal,
@@ -117,7 +98,7 @@ export const createTripMutation = (
 ): UseMutationOptions<CreateTripResponse, DefaultError, Options<CreateTripData>> => {
     const mutationOptions: UseMutationOptions<CreateTripResponse, DefaultError, Options<CreateTripData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await createTrip({
+            const { data } = await TripsServiceSdk.__registry.get().createTrip({
                 ...options,
                 ...fnOptions,
                 throwOnError: true,
@@ -133,7 +114,7 @@ export const discoverTripsQueryKey = (options?: Options<DiscoverTripsData>) => c
 export const discoverTripsOptions = (options?: Options<DiscoverTripsData>) =>
     queryOptions<DiscoverTripsResponse, DefaultError, DiscoverTripsResponse, ReturnType<typeof discoverTripsQueryKey>>({
         queryFn: async ({ queryKey, signal }) => {
-            const { data } = await discoverTrips({
+            const { data } = await TripsServiceSdk.__registry.get().discoverTrips({
                 ...options,
                 ...queryKey[0],
                 signal,
@@ -149,7 +130,7 @@ export const getUserTravelHistoryQueryKey = (options: Options<GetUserTravelHisto
 export const getUserTravelHistoryOptions = (options: Options<GetUserTravelHistoryData>) =>
     queryOptions<GetUserTravelHistoryResponse, DefaultError, GetUserTravelHistoryResponse, ReturnType<typeof getUserTravelHistoryQueryKey>>({
         queryFn: async ({ queryKey, signal }) => {
-            const { data } = await getUserTravelHistory({
+            const { data } = await TripsServiceSdk.__registry.get().getUserTravelHistory({
                 ...options,
                 ...queryKey[0],
                 signal,
@@ -165,7 +146,7 @@ export const getPublicTripQueryKey = (options: Options<GetPublicTripData>) => cr
 export const getPublicTripOptions = (options: Options<GetPublicTripData>) =>
     queryOptions<GetPublicTripResponse, DefaultError, GetPublicTripResponse, ReturnType<typeof getPublicTripQueryKey>>({
         queryFn: async ({ queryKey, signal }) => {
-            const { data } = await getPublicTrip({
+            const { data } = await TripsServiceSdk.__registry.get().getPublicTrip({
                 ...options,
                 ...queryKey[0],
                 signal,
@@ -181,7 +162,7 @@ export const publishTripMutation = (
 ): UseMutationOptions<PublishTripResponse, DefaultError, Options<PublishTripData>> => {
     const mutationOptions: UseMutationOptions<PublishTripResponse, DefaultError, Options<PublishTripData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await publishTrip({
+            const { data } = await TripsServiceSdk.__registry.get().publishTrip({
                 ...options,
                 ...fnOptions,
                 throwOnError: true,
@@ -197,7 +178,7 @@ export const cancelTripMutation = (
 ): UseMutationOptions<CancelTripResponse, DefaultError, Options<CancelTripData>> => {
     const mutationOptions: UseMutationOptions<CancelTripResponse, DefaultError, Options<CancelTripData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await cancelTrip({
+            const { data } = await TripsServiceSdk.__registry.get().cancelTrip({
                 ...options,
                 ...fnOptions,
                 throwOnError: true,
@@ -213,7 +194,7 @@ export const archiveTripMutation = (
 ): UseMutationOptions<ArchiveTripResponse, DefaultError, Options<ArchiveTripData>> => {
     const mutationOptions: UseMutationOptions<ArchiveTripResponse, DefaultError, Options<ArchiveTripData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await archiveTrip({
+            const { data } = await TripsServiceSdk.__registry.get().archiveTrip({
                 ...options,
                 ...fnOptions,
                 throwOnError: true,
@@ -229,7 +210,7 @@ export const uploadTripCoverImageMutation = (
 ): UseMutationOptions<UploadTripCoverImageResponse, DefaultError, Options<UploadTripCoverImageData>> => {
     const mutationOptions: UseMutationOptions<UploadTripCoverImageResponse, DefaultError, Options<UploadTripCoverImageData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await uploadTripCoverImage({
+            const { data } = await TripsServiceSdk.__registry.get().uploadTripCoverImage({
                 ...options,
                 ...fnOptions,
                 throwOnError: true,
@@ -243,7 +224,7 @@ export const uploadTripCoverImageMutation = (
 export const joinTripMutation = (options?: Partial<Options<JoinTripData>>): UseMutationOptions<JoinTripResponse, DefaultError, Options<JoinTripData>> => {
     const mutationOptions: UseMutationOptions<JoinTripResponse, DefaultError, Options<JoinTripData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await joinTrip({
+            const { data } = await TripsServiceSdk.__registry.get().joinTrip({
                 ...options,
                 ...fnOptions,
                 throwOnError: true,
@@ -257,7 +238,7 @@ export const joinTripMutation = (options?: Partial<Options<JoinTripData>>): UseM
 export const leaveTripMutation = (options?: Partial<Options<LeaveTripData>>): UseMutationOptions<LeaveTripResponse, DefaultError, Options<LeaveTripData>> => {
     const mutationOptions: UseMutationOptions<LeaveTripResponse, DefaultError, Options<LeaveTripData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await leaveTrip({
+            const { data } = await TripsServiceSdk.__registry.get().leaveTrip({
                 ...options,
                 ...fnOptions,
                 throwOnError: true,
@@ -273,7 +254,7 @@ export const listTripMembersQueryKey = (options: Options<ListTripMembersData>) =
 export const listTripMembersOptions = (options: Options<ListTripMembersData>) =>
     queryOptions<ListTripMembersResponse, DefaultError, ListTripMembersResponse, ReturnType<typeof listTripMembersQueryKey>>({
         queryFn: async ({ queryKey, signal }) => {
-            const { data } = await listTripMembers({
+            const { data } = await TripsServiceSdk.__registry.get().listTripMembers({
                 ...options,
                 ...queryKey[0],
                 signal,
@@ -289,7 +270,7 @@ export const approveMembershipMutation = (
 ): UseMutationOptions<ApproveMembershipResponse, DefaultError, Options<ApproveMembershipData>> => {
     const mutationOptions: UseMutationOptions<ApproveMembershipResponse, DefaultError, Options<ApproveMembershipData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await approveMembership({
+            const { data } = await TripsServiceSdk.__registry.get().approveMembership({
                 ...options,
                 ...fnOptions,
                 throwOnError: true,
@@ -305,7 +286,7 @@ export const rejectMembershipMutation = (
 ): UseMutationOptions<RejectMembershipResponse, DefaultError, Options<RejectMembershipData>> => {
     const mutationOptions: UseMutationOptions<RejectMembershipResponse, DefaultError, Options<RejectMembershipData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await rejectMembership({
+            const { data } = await TripsServiceSdk.__registry.get().rejectMembership({
                 ...options,
                 ...fnOptions,
                 throwOnError: true,
@@ -321,7 +302,7 @@ export const removeMembershipMutation = (
 ): UseMutationOptions<RemoveMembershipResponse, DefaultError, Options<RemoveMembershipData>> => {
     const mutationOptions: UseMutationOptions<RemoveMembershipResponse, DefaultError, Options<RemoveMembershipData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await removeMembership({
+            const { data } = await TripsServiceSdk.__registry.get().removeMembership({
                 ...options,
                 ...fnOptions,
                 throwOnError: true,
@@ -337,7 +318,7 @@ export const getTripQueryKey = (options: Options<GetTripData>) => createQueryKey
 export const getTripOptions = (options: Options<GetTripData>) =>
     queryOptions<GetTripResponse, DefaultError, GetTripResponse, ReturnType<typeof getTripQueryKey>>({
         queryFn: async ({ queryKey, signal }) => {
-            const { data } = await getTrip({
+            const { data } = await TripsServiceSdk.__registry.get().getTrip({
                 ...options,
                 ...queryKey[0],
                 signal,
@@ -353,7 +334,7 @@ export const updateTripMutation = (
 ): UseMutationOptions<UpdateTripResponse, DefaultError, Options<UpdateTripData>> => {
     const mutationOptions: UseMutationOptions<UpdateTripResponse, DefaultError, Options<UpdateTripData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await updateTrip({
+            const { data } = await TripsServiceSdk.__registry.get().updateTrip({
                 ...options,
                 ...fnOptions,
                 throwOnError: true,

@@ -74,168 +74,220 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
     meta?: keyof ClientMeta extends never ? Record<string, unknown> : ClientMeta;
 };
 
-export const listMyTrips = <ThrowOnError extends boolean = false>(
-    options?: Options<ListMyTripsData, ThrowOnError>,
-): RequestResult<ListMyTripsResponses, ListMyTripsErrors, ThrowOnError> =>
-    (options?.client ?? client).get<ListMyTripsResponses, ListMyTripsErrors, ThrowOnError>({
-        security: [{ scheme: 'bearer', type: 'http' }],
-        url: '/trips',
-        ...options,
-    });
+class HeyApiClient {
+    protected client: Client;
 
-export const createTrip = <ThrowOnError extends boolean = false>(
-    options: Options<CreateTripData, ThrowOnError>,
-): RequestResult<CreateTripResponses, CreateTripErrors, ThrowOnError> =>
-    (options.client ?? client).post<CreateTripResponses, CreateTripErrors, ThrowOnError>({
-        security: [{ scheme: 'bearer', type: 'http' }],
-        url: '/trips',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers,
-        },
-    });
+    constructor(args?: { client?: Client }) {
+        this.client = args?.client ?? client;
+    }
+}
 
-export const discoverTrips = <ThrowOnError extends boolean = false>(
-    options?: Options<DiscoverTripsData, ThrowOnError>,
-): RequestResult<DiscoverTripsResponses, DiscoverTripsErrors, ThrowOnError> =>
-    (options?.client ?? client).get<DiscoverTripsResponses, DiscoverTripsErrors, ThrowOnError>({
-        security: [{ scheme: 'bearer', type: 'http' }],
-        url: '/trips/discover',
-        ...options,
-    });
+class HeyApiRegistry<T> {
+    private readonly defaultKey = 'default';
 
-export const getUserTravelHistory = <ThrowOnError extends boolean = false>(
-    options: Options<GetUserTravelHistoryData, ThrowOnError>,
-): RequestResult<GetUserTravelHistoryResponses, GetUserTravelHistoryErrors, ThrowOnError> =>
-    (options.client ?? client).get<GetUserTravelHistoryResponses, GetUserTravelHistoryErrors, ThrowOnError>({
-        security: [{ scheme: 'bearer', type: 'http' }],
-        url: '/trips/users/{userId}/travel-history',
-        ...options,
-    });
+    private readonly instances: Map<string, T> = new Map();
 
-export const getPublicTrip = <ThrowOnError extends boolean = false>(
-    options: Options<GetPublicTripData, ThrowOnError>,
-): RequestResult<GetPublicTripResponses, GetPublicTripErrors, ThrowOnError> =>
-    (options.client ?? client).get<GetPublicTripResponses, GetPublicTripErrors, ThrowOnError>({
-        security: [{ scheme: 'bearer', type: 'http' }],
-        url: '/trips/discover/{tripId}',
-        ...options,
-    });
+    get(key?: string): T {
+        const instance = this.instances.get(key ?? this.defaultKey);
+        if (!instance) {
+            throw new Error(`No SDK client found. Create one with "new TripsServiceSdk()" to fix this error.`);
+        }
+        return instance;
+    }
 
-export const publishTrip = <ThrowOnError extends boolean = false>(
-    options: Options<PublishTripData, ThrowOnError>,
-): RequestResult<PublishTripResponses, PublishTripErrors, ThrowOnError> =>
-    (options.client ?? client).post<PublishTripResponses, PublishTripErrors, ThrowOnError>({
-        security: [{ scheme: 'bearer', type: 'http' }],
-        url: '/trips/{tripId}/publish',
-        ...options,
-    });
+    set(value: T, key?: string): void {
+        this.instances.set(key ?? this.defaultKey, value);
+    }
+}
 
-export const cancelTrip = <ThrowOnError extends boolean = false>(
-    options: Options<CancelTripData, ThrowOnError>,
-): RequestResult<CancelTripResponses, CancelTripErrors, ThrowOnError> =>
-    (options.client ?? client).post<CancelTripResponses, CancelTripErrors, ThrowOnError>({
-        security: [{ scheme: 'bearer', type: 'http' }],
-        url: '/trips/{tripId}/cancel',
-        ...options,
-    });
+export class TripsServiceSdk extends HeyApiClient {
+    public static readonly __registry: HeyApiRegistry<TripsServiceSdk> = new HeyApiRegistry<TripsServiceSdk>();
 
-export const archiveTrip = <ThrowOnError extends boolean = false>(
-    options: Options<ArchiveTripData, ThrowOnError>,
-): RequestResult<ArchiveTripResponses, ArchiveTripErrors, ThrowOnError> =>
-    (options.client ?? client).post<ArchiveTripResponses, ArchiveTripErrors, ThrowOnError>({
-        security: [{ scheme: 'bearer', type: 'http' }],
-        url: '/trips/{tripId}/archive',
-        ...options,
-    });
+    constructor(args?: { client?: Client; key?: string }) {
+        super(args);
+        TripsServiceSdk.__registry.set(this, args?.key);
+    }
 
-export const uploadTripCoverImage = <ThrowOnError extends boolean = false>(
-    options: Options<UploadTripCoverImageData, ThrowOnError>,
-): RequestResult<UploadTripCoverImageResponses, UploadTripCoverImageErrors, ThrowOnError> =>
-    (options.client ?? client).post<UploadTripCoverImageResponses, UploadTripCoverImageErrors, ThrowOnError>({
-        ...formDataBodySerializer,
-        security: [{ scheme: 'bearer', type: 'http' }],
-        url: '/trips/{tripId}/cover-image',
-        ...options,
-        headers: {
-            'Content-Type': null,
-            ...options.headers,
-        },
-    });
+    public listMyTrips<ThrowOnError extends boolean = false>(
+        options?: Options<ListMyTripsData, ThrowOnError>,
+    ): RequestResult<ListMyTripsResponses, ListMyTripsErrors, ThrowOnError> {
+        return (options?.client ?? this.client).get<ListMyTripsResponses, ListMyTripsErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/trips',
+            ...options,
+        });
+    }
 
-export const joinTrip = <ThrowOnError extends boolean = false>(
-    options: Options<JoinTripData, ThrowOnError>,
-): RequestResult<JoinTripResponses, JoinTripErrors, ThrowOnError> =>
-    (options.client ?? client).post<JoinTripResponses, JoinTripErrors, ThrowOnError>({
-        security: [{ scheme: 'bearer', type: 'http' }],
-        url: '/trips/{tripId}/join',
-        ...options,
-    });
+    public createTrip<ThrowOnError extends boolean = false>(
+        options: Options<CreateTripData, ThrowOnError>,
+    ): RequestResult<CreateTripResponses, CreateTripErrors, ThrowOnError> {
+        return (options.client ?? this.client).post<CreateTripResponses, CreateTripErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/trips',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers,
+            },
+        });
+    }
 
-export const leaveTrip = <ThrowOnError extends boolean = false>(
-    options: Options<LeaveTripData, ThrowOnError>,
-): RequestResult<LeaveTripResponses, LeaveTripErrors, ThrowOnError> =>
-    (options.client ?? client).post<LeaveTripResponses, LeaveTripErrors, ThrowOnError>({
-        security: [{ scheme: 'bearer', type: 'http' }],
-        url: '/trips/{tripId}/leave',
-        ...options,
-    });
+    public discoverTrips<ThrowOnError extends boolean = false>(
+        options?: Options<DiscoverTripsData, ThrowOnError>,
+    ): RequestResult<DiscoverTripsResponses, DiscoverTripsErrors, ThrowOnError> {
+        return (options?.client ?? this.client).get<DiscoverTripsResponses, DiscoverTripsErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/trips/discover',
+            ...options,
+        });
+    }
 
-export const listTripMembers = <ThrowOnError extends boolean = false>(
-    options: Options<ListTripMembersData, ThrowOnError>,
-): RequestResult<ListTripMembersResponses, ListTripMembersErrors, ThrowOnError> =>
-    (options.client ?? client).get<ListTripMembersResponses, ListTripMembersErrors, ThrowOnError>({
-        security: [{ scheme: 'bearer', type: 'http' }],
-        url: '/trips/{tripId}/members',
-        ...options,
-    });
+    public getUserTravelHistory<ThrowOnError extends boolean = false>(
+        options: Options<GetUserTravelHistoryData, ThrowOnError>,
+    ): RequestResult<GetUserTravelHistoryResponses, GetUserTravelHistoryErrors, ThrowOnError> {
+        return (options.client ?? this.client).get<GetUserTravelHistoryResponses, GetUserTravelHistoryErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/trips/users/{userId}/travel-history',
+            ...options,
+        });
+    }
 
-export const approveMembership = <ThrowOnError extends boolean = false>(
-    options: Options<ApproveMembershipData, ThrowOnError>,
-): RequestResult<ApproveMembershipResponses, ApproveMembershipErrors, ThrowOnError> =>
-    (options.client ?? client).post<ApproveMembershipResponses, ApproveMembershipErrors, ThrowOnError>({
-        security: [{ scheme: 'bearer', type: 'http' }],
-        url: '/trips/{tripId}/members/{membershipId}/approve',
-        ...options,
-    });
+    public getPublicTrip<ThrowOnError extends boolean = false>(
+        options: Options<GetPublicTripData, ThrowOnError>,
+    ): RequestResult<GetPublicTripResponses, GetPublicTripErrors, ThrowOnError> {
+        return (options.client ?? this.client).get<GetPublicTripResponses, GetPublicTripErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/trips/discover/{tripId}',
+            ...options,
+        });
+    }
 
-export const rejectMembership = <ThrowOnError extends boolean = false>(
-    options: Options<RejectMembershipData, ThrowOnError>,
-): RequestResult<RejectMembershipResponses, RejectMembershipErrors, ThrowOnError> =>
-    (options.client ?? client).post<RejectMembershipResponses, RejectMembershipErrors, ThrowOnError>({
-        security: [{ scheme: 'bearer', type: 'http' }],
-        url: '/trips/{tripId}/members/{membershipId}/reject',
-        ...options,
-    });
+    public publishTrip<ThrowOnError extends boolean = false>(
+        options: Options<PublishTripData, ThrowOnError>,
+    ): RequestResult<PublishTripResponses, PublishTripErrors, ThrowOnError> {
+        return (options.client ?? this.client).post<PublishTripResponses, PublishTripErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/trips/{tripId}/publish',
+            ...options,
+        });
+    }
 
-export const removeMembership = <ThrowOnError extends boolean = false>(
-    options: Options<RemoveMembershipData, ThrowOnError>,
-): RequestResult<RemoveMembershipResponses, RemoveMembershipErrors, ThrowOnError> =>
-    (options.client ?? client).delete<RemoveMembershipResponses, RemoveMembershipErrors, ThrowOnError>({
-        security: [{ scheme: 'bearer', type: 'http' }],
-        url: '/trips/{tripId}/members/{membershipId}',
-        ...options,
-    });
+    public cancelTrip<ThrowOnError extends boolean = false>(
+        options: Options<CancelTripData, ThrowOnError>,
+    ): RequestResult<CancelTripResponses, CancelTripErrors, ThrowOnError> {
+        return (options.client ?? this.client).post<CancelTripResponses, CancelTripErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/trips/{tripId}/cancel',
+            ...options,
+        });
+    }
 
-export const getTrip = <ThrowOnError extends boolean = false>(
-    options: Options<GetTripData, ThrowOnError>,
-): RequestResult<GetTripResponses, GetTripErrors, ThrowOnError> =>
-    (options.client ?? client).get<GetTripResponses, GetTripErrors, ThrowOnError>({
-        security: [{ scheme: 'bearer', type: 'http' }],
-        url: '/trips/{tripId}',
-        ...options,
-    });
+    public archiveTrip<ThrowOnError extends boolean = false>(
+        options: Options<ArchiveTripData, ThrowOnError>,
+    ): RequestResult<ArchiveTripResponses, ArchiveTripErrors, ThrowOnError> {
+        return (options.client ?? this.client).post<ArchiveTripResponses, ArchiveTripErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/trips/{tripId}/archive',
+            ...options,
+        });
+    }
 
-export const updateTrip = <ThrowOnError extends boolean = false>(
-    options: Options<UpdateTripData, ThrowOnError>,
-): RequestResult<UpdateTripResponses, UpdateTripErrors, ThrowOnError> =>
-    (options.client ?? client).patch<UpdateTripResponses, UpdateTripErrors, ThrowOnError>({
-        security: [{ scheme: 'bearer', type: 'http' }],
-        url: '/trips/{tripId}',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers,
-        },
-    });
+    public uploadTripCoverImage<ThrowOnError extends boolean = false>(
+        options: Options<UploadTripCoverImageData, ThrowOnError>,
+    ): RequestResult<UploadTripCoverImageResponses, UploadTripCoverImageErrors, ThrowOnError> {
+        return (options.client ?? this.client).post<UploadTripCoverImageResponses, UploadTripCoverImageErrors, ThrowOnError>({
+            ...formDataBodySerializer,
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/trips/{tripId}/cover-image',
+            ...options,
+            headers: {
+                'Content-Type': null,
+                ...options.headers,
+            },
+        });
+    }
+
+    public joinTrip<ThrowOnError extends boolean = false>(
+        options: Options<JoinTripData, ThrowOnError>,
+    ): RequestResult<JoinTripResponses, JoinTripErrors, ThrowOnError> {
+        return (options.client ?? this.client).post<JoinTripResponses, JoinTripErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/trips/{tripId}/join',
+            ...options,
+        });
+    }
+
+    public leaveTrip<ThrowOnError extends boolean = false>(
+        options: Options<LeaveTripData, ThrowOnError>,
+    ): RequestResult<LeaveTripResponses, LeaveTripErrors, ThrowOnError> {
+        return (options.client ?? this.client).post<LeaveTripResponses, LeaveTripErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/trips/{tripId}/leave',
+            ...options,
+        });
+    }
+
+    public listTripMembers<ThrowOnError extends boolean = false>(
+        options: Options<ListTripMembersData, ThrowOnError>,
+    ): RequestResult<ListTripMembersResponses, ListTripMembersErrors, ThrowOnError> {
+        return (options.client ?? this.client).get<ListTripMembersResponses, ListTripMembersErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/trips/{tripId}/members',
+            ...options,
+        });
+    }
+
+    public approveMembership<ThrowOnError extends boolean = false>(
+        options: Options<ApproveMembershipData, ThrowOnError>,
+    ): RequestResult<ApproveMembershipResponses, ApproveMembershipErrors, ThrowOnError> {
+        return (options.client ?? this.client).post<ApproveMembershipResponses, ApproveMembershipErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/trips/{tripId}/members/{membershipId}/approve',
+            ...options,
+        });
+    }
+
+    public rejectMembership<ThrowOnError extends boolean = false>(
+        options: Options<RejectMembershipData, ThrowOnError>,
+    ): RequestResult<RejectMembershipResponses, RejectMembershipErrors, ThrowOnError> {
+        return (options.client ?? this.client).post<RejectMembershipResponses, RejectMembershipErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/trips/{tripId}/members/{membershipId}/reject',
+            ...options,
+        });
+    }
+
+    public removeMembership<ThrowOnError extends boolean = false>(
+        options: Options<RemoveMembershipData, ThrowOnError>,
+    ): RequestResult<RemoveMembershipResponses, RemoveMembershipErrors, ThrowOnError> {
+        return (options.client ?? this.client).delete<RemoveMembershipResponses, RemoveMembershipErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/trips/{tripId}/members/{membershipId}',
+            ...options,
+        });
+    }
+
+    public getTrip<ThrowOnError extends boolean = false>(
+        options: Options<GetTripData, ThrowOnError>,
+    ): RequestResult<GetTripResponses, GetTripErrors, ThrowOnError> {
+        return (options.client ?? this.client).get<GetTripResponses, GetTripErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/trips/{tripId}',
+            ...options,
+        });
+    }
+
+    public updateTrip<ThrowOnError extends boolean = false>(
+        options: Options<UpdateTripData, ThrowOnError>,
+    ): RequestResult<UpdateTripResponses, UpdateTripErrors, ThrowOnError> {
+        return (options.client ?? this.client).patch<UpdateTripResponses, UpdateTripErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/trips/{tripId}',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers,
+            },
+        });
+    }
+}

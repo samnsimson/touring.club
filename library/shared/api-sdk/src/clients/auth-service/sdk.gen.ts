@@ -50,111 +50,153 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
     meta?: keyof ClientMeta extends never ? Record<string, unknown> : ClientMeta;
 };
 
-export const getMe = <ThrowOnError extends boolean = false>(
-    options?: Options<GetMeData, ThrowOnError>,
-): RequestResult<GetMeResponses, GetMeErrors, ThrowOnError> =>
-    (options?.client ?? client).get<GetMeResponses, GetMeErrors, ThrowOnError>({
-        security: [{ scheme: 'bearer', type: 'http' }],
-        url: '/auth/me',
-        ...options,
-    });
+class HeyApiClient {
+    protected client: Client;
 
-export const updateProfile = <ThrowOnError extends boolean = false>(
-    options: Options<UpdateProfileData, ThrowOnError>,
-): RequestResult<UpdateProfileResponses, UpdateProfileErrors, ThrowOnError> =>
-    (options.client ?? client).patch<UpdateProfileResponses, UpdateProfileErrors, ThrowOnError>({
-        security: [{ scheme: 'bearer', type: 'http' }],
-        url: '/auth/me',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers,
-        },
-    });
+    constructor(args?: { client?: Client }) {
+        this.client = args?.client ?? client;
+    }
+}
 
-export const changePassword = <ThrowOnError extends boolean = false>(
-    options: Options<ChangePasswordData, ThrowOnError>,
-): RequestResult<ChangePasswordResponses, ChangePasswordErrors, ThrowOnError> =>
-    (options.client ?? client).post<ChangePasswordResponses, ChangePasswordErrors, ThrowOnError>({
-        security: [{ scheme: 'bearer', type: 'http' }],
-        url: '/auth/change-password',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers,
-        },
-    });
+class HeyApiRegistry<T> {
+    private readonly defaultKey = 'default';
 
-export const signOut = <ThrowOnError extends boolean = false>(
-    options?: Options<SignOutData, ThrowOnError>,
-): RequestResult<SignOutResponses, SignOutErrors, ThrowOnError> =>
-    (options?.client ?? client).post<SignOutResponses, SignOutErrors, ThrowOnError>({
-        security: [{ scheme: 'bearer', type: 'http' }],
-        url: '/auth/sign-out',
-        ...options,
-    });
+    private readonly instances: Map<string, T> = new Map();
 
-export const signUp = <ThrowOnError extends boolean = false>(
-    options: Options<SignUpData, ThrowOnError>,
-): RequestResult<SignUpResponses, SignUpErrors, ThrowOnError> =>
-    (options.client ?? client).post<SignUpResponses, SignUpErrors, ThrowOnError>({
-        security: [{ scheme: 'bearer', type: 'http' }],
-        url: '/auth/sign-up',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers,
-        },
-    });
+    get(key?: string): T {
+        const instance = this.instances.get(key ?? this.defaultKey);
+        if (!instance) {
+            throw new Error(`No SDK client found. Create one with "new AuthServiceSdk()" to fix this error.`);
+        }
+        return instance;
+    }
 
-export const signIn = <ThrowOnError extends boolean = false>(
-    options: Options<SignInData, ThrowOnError>,
-): RequestResult<SignInResponses, SignInErrors, ThrowOnError> =>
-    (options.client ?? client).post<SignInResponses, SignInErrors, ThrowOnError>({
-        security: [{ scheme: 'bearer', type: 'http' }],
-        url: '/auth/sign-in',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers,
-        },
-    });
+    set(value: T, key?: string): void {
+        this.instances.set(key ?? this.defaultKey, value);
+    }
+}
 
-export const verifyEmail = <ThrowOnError extends boolean = false>(
-    options: Options<VerifyEmailData, ThrowOnError>,
-): RequestResult<VerifyEmailResponses, VerifyEmailErrors, ThrowOnError> =>
-    (options.client ?? client).post<VerifyEmailResponses, VerifyEmailErrors, ThrowOnError>({
-        security: [{ scheme: 'bearer', type: 'http' }],
-        url: '/auth/verify-email',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers,
-        },
-    });
+export class AuthServiceSdk extends HeyApiClient {
+    public static readonly __registry: HeyApiRegistry<AuthServiceSdk> = new HeyApiRegistry<AuthServiceSdk>();
 
-export const forgotPassword = <ThrowOnError extends boolean = false>(
-    options: Options<ForgotPasswordData, ThrowOnError>,
-): RequestResult<ForgotPasswordResponses, ForgotPasswordErrors, ThrowOnError> =>
-    (options.client ?? client).post<ForgotPasswordResponses, ForgotPasswordErrors, ThrowOnError>({
-        security: [{ scheme: 'bearer', type: 'http' }],
-        url: '/auth/forgot-password',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers,
-        },
-    });
+    constructor(args?: { client?: Client; key?: string }) {
+        super(args);
+        AuthServiceSdk.__registry.set(this, args?.key);
+    }
 
-export const resetPassword = <ThrowOnError extends boolean = false>(
-    options: Options<ResetPasswordData, ThrowOnError>,
-): RequestResult<ResetPasswordResponses, ResetPasswordErrors, ThrowOnError> =>
-    (options.client ?? client).post<ResetPasswordResponses, ResetPasswordErrors, ThrowOnError>({
-        security: [{ scheme: 'bearer', type: 'http' }],
-        url: '/auth/reset-password',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers,
-        },
-    });
+    public getMe<ThrowOnError extends boolean = false>(options?: Options<GetMeData, ThrowOnError>): RequestResult<GetMeResponses, GetMeErrors, ThrowOnError> {
+        return (options?.client ?? this.client).get<GetMeResponses, GetMeErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/auth/me',
+            ...options,
+        });
+    }
+
+    public updateProfile<ThrowOnError extends boolean = false>(
+        options: Options<UpdateProfileData, ThrowOnError>,
+    ): RequestResult<UpdateProfileResponses, UpdateProfileErrors, ThrowOnError> {
+        return (options.client ?? this.client).patch<UpdateProfileResponses, UpdateProfileErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/auth/me',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers,
+            },
+        });
+    }
+
+    public changePassword<ThrowOnError extends boolean = false>(
+        options: Options<ChangePasswordData, ThrowOnError>,
+    ): RequestResult<ChangePasswordResponses, ChangePasswordErrors, ThrowOnError> {
+        return (options.client ?? this.client).post<ChangePasswordResponses, ChangePasswordErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/auth/change-password',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers,
+            },
+        });
+    }
+
+    public signOut<ThrowOnError extends boolean = false>(
+        options?: Options<SignOutData, ThrowOnError>,
+    ): RequestResult<SignOutResponses, SignOutErrors, ThrowOnError> {
+        return (options?.client ?? this.client).post<SignOutResponses, SignOutErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/auth/sign-out',
+            ...options,
+        });
+    }
+
+    public signUp<ThrowOnError extends boolean = false>(
+        options: Options<SignUpData, ThrowOnError>,
+    ): RequestResult<SignUpResponses, SignUpErrors, ThrowOnError> {
+        return (options.client ?? this.client).post<SignUpResponses, SignUpErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/auth/sign-up',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers,
+            },
+        });
+    }
+
+    public signIn<ThrowOnError extends boolean = false>(
+        options: Options<SignInData, ThrowOnError>,
+    ): RequestResult<SignInResponses, SignInErrors, ThrowOnError> {
+        return (options.client ?? this.client).post<SignInResponses, SignInErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/auth/sign-in',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers,
+            },
+        });
+    }
+
+    public verifyEmail<ThrowOnError extends boolean = false>(
+        options: Options<VerifyEmailData, ThrowOnError>,
+    ): RequestResult<VerifyEmailResponses, VerifyEmailErrors, ThrowOnError> {
+        return (options.client ?? this.client).post<VerifyEmailResponses, VerifyEmailErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/auth/verify-email',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers,
+            },
+        });
+    }
+
+    public forgotPassword<ThrowOnError extends boolean = false>(
+        options: Options<ForgotPasswordData, ThrowOnError>,
+    ): RequestResult<ForgotPasswordResponses, ForgotPasswordErrors, ThrowOnError> {
+        return (options.client ?? this.client).post<ForgotPasswordResponses, ForgotPasswordErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/auth/forgot-password',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers,
+            },
+        });
+    }
+
+    public resetPassword<ThrowOnError extends boolean = false>(
+        options: Options<ResetPasswordData, ThrowOnError>,
+    ): RequestResult<ResetPasswordResponses, ResetPasswordErrors, ThrowOnError> {
+        return (options.client ?? this.client).post<ResetPasswordResponses, ResetPasswordErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/auth/reset-password',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers,
+            },
+        });
+    }
+}
