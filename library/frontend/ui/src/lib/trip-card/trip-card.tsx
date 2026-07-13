@@ -7,14 +7,15 @@ export interface TripCardProps {
     href: string;
     title: string;
     destination: string;
-    coverImageUrl: string;
+    coverImageUrl?: string;
     startDate: string;
     endDate: string;
     capacity: number;
-    joinedCount: number;
-    difficulty: string;
+    /** Omit when member counts aren't available (e.g. public discovery, which doesn't expose membership data). */
+    joinedCount?: number;
+    difficulty?: string;
     categories: string[];
-    priceLabel: string;
+    priceLabel?: string;
 }
 
 function formatDateRange(startDate: string, endDate: string): string {
@@ -40,11 +41,19 @@ export function TripCard({
     return (
         <LinkBox>
             <Card.Root overflow="hidden" variant="outline" h="full" transition="all 0.2s" _hover={{ shadow: 'lg', transform: 'translateY(-2px)' }}>
-                <Box position="relative" h="190px" overflow="hidden">
-                    <Image src={coverImageUrl} alt={title} w="full" h="full" objectFit="cover" />
-                    <Box position="absolute" top="3" left="3">
-                        <DifficultyPill difficulty={difficulty} />
-                    </Box>
+                <Box position="relative" h="190px" overflow="hidden" bg="gray.100">
+                    {coverImageUrl ? (
+                        <Image src={coverImageUrl} alt={title} w="full" h="full" objectFit="cover" />
+                    ) : (
+                        <Box w="full" h="full" display="flex" alignItems="center" justifyContent="center" color="gray.400">
+                            <MapPin size={32} />
+                        </Box>
+                    )}
+                    {difficulty ? (
+                        <Box position="absolute" top="3" left="3">
+                            <DifficultyPill difficulty={difficulty} />
+                        </Box>
+                    ) : null}
                 </Box>
                 <Card.Body gap="3">
                     <HStack gap="2" wrap="wrap">
@@ -68,13 +77,13 @@ export function TripCard({
                 <Card.Footer justifyContent="space-between" borderTopWidth="1px" pt="3">
                     <HStack color="gray.600" fontSize="sm" gap="1">
                         <Users size={16} />
-                        <Text>
-                            {joinedCount}/{capacity} joined
-                        </Text>
+                        <Text>{joinedCount !== undefined ? `${joinedCount}/${capacity} joined` : `Capacity: ${capacity}`}</Text>
                     </HStack>
-                    <Text fontWeight="semibold" color="brand.fg">
-                        {priceLabel}
-                    </Text>
+                    {priceLabel ? (
+                        <Text fontWeight="semibold" color="brand.fg">
+                            {priceLabel}
+                        </Text>
+                    ) : null}
                 </Card.Footer>
             </Card.Root>
         </LinkBox>

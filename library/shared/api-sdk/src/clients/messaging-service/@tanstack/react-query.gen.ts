@@ -3,19 +3,7 @@
 import { type DefaultError, queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen';
-import {
-    createDirectConversation,
-    getTripConversation,
-    listConversations,
-    listMessages,
-    listTripMessages,
-    type Options,
-    postTripSystemEvent,
-    sendMessage,
-    sendTripMessage,
-    uploadMessageAttachment,
-    uploadTripMessageAttachment,
-} from '../sdk.gen';
+import { MessagingServiceSdk, type Options } from '../sdk.gen';
 import type {
     CreateDirectConversationData,
     CreateDirectConversationResponse,
@@ -80,7 +68,7 @@ export const listConversationsQueryKey = (options?: Options<ListConversationsDat
 export const listConversationsOptions = (options?: Options<ListConversationsData>) =>
     queryOptions<ListConversationsResponse, DefaultError, ListConversationsResponse, ReturnType<typeof listConversationsQueryKey>>({
         queryFn: async ({ queryKey, signal }) => {
-            const { data } = await listConversations({
+            const { data } = await MessagingServiceSdk.__registry.get().listConversations({
                 ...options,
                 ...queryKey[0],
                 signal,
@@ -96,7 +84,7 @@ export const createDirectConversationMutation = (
 ): UseMutationOptions<CreateDirectConversationResponse, DefaultError, Options<CreateDirectConversationData>> => {
     const mutationOptions: UseMutationOptions<CreateDirectConversationResponse, DefaultError, Options<CreateDirectConversationData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await createDirectConversation({
+            const { data } = await MessagingServiceSdk.__registry.get().createDirectConversation({
                 ...options,
                 ...fnOptions,
                 throwOnError: true,
@@ -112,7 +100,7 @@ export const getTripConversationQueryKey = (options: Options<GetTripConversation
 export const getTripConversationOptions = (options: Options<GetTripConversationData>) =>
     queryOptions<GetTripConversationResponse, DefaultError, GetTripConversationResponse, ReturnType<typeof getTripConversationQueryKey>>({
         queryFn: async ({ queryKey, signal }) => {
-            const { data } = await getTripConversation({
+            const { data } = await MessagingServiceSdk.__registry.get().getTripConversation({
                 ...options,
                 ...queryKey[0],
                 signal,
@@ -128,7 +116,7 @@ export const listTripMessagesQueryKey = (options: Options<ListTripMessagesData>)
 export const listTripMessagesOptions = (options: Options<ListTripMessagesData>) =>
     queryOptions<ListTripMessagesResponse, DefaultError, ListTripMessagesResponse, ReturnType<typeof listTripMessagesQueryKey>>({
         queryFn: async ({ queryKey, signal }) => {
-            const { data } = await listTripMessages({
+            const { data } = await MessagingServiceSdk.__registry.get().listTripMessages({
                 ...options,
                 ...queryKey[0],
                 signal,
@@ -144,7 +132,7 @@ export const sendTripMessageMutation = (
 ): UseMutationOptions<SendTripMessageResponse, DefaultError, Options<SendTripMessageData>> => {
     const mutationOptions: UseMutationOptions<SendTripMessageResponse, DefaultError, Options<SendTripMessageData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await sendTripMessage({
+            const { data } = await MessagingServiceSdk.__registry.get().sendTripMessage({
                 ...options,
                 ...fnOptions,
                 throwOnError: true,
@@ -160,7 +148,7 @@ export const uploadTripMessageAttachmentMutation = (
 ): UseMutationOptions<UploadTripMessageAttachmentResponse, DefaultError, Options<UploadTripMessageAttachmentData>> => {
     const mutationOptions: UseMutationOptions<UploadTripMessageAttachmentResponse, DefaultError, Options<UploadTripMessageAttachmentData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await uploadTripMessageAttachment({
+            const { data } = await MessagingServiceSdk.__registry.get().uploadTripMessageAttachment({
                 ...options,
                 ...fnOptions,
                 throwOnError: true,
@@ -176,7 +164,7 @@ export const postTripSystemEventMutation = (
 ): UseMutationOptions<PostTripSystemEventResponse, DefaultError, Options<PostTripSystemEventData>> => {
     const mutationOptions: UseMutationOptions<PostTripSystemEventResponse, DefaultError, Options<PostTripSystemEventData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await postTripSystemEvent({
+            const { data } = await MessagingServiceSdk.__registry.get().postTripSystemEvent({
                 ...options,
                 ...fnOptions,
                 throwOnError: true,
@@ -192,7 +180,7 @@ export const listMessagesQueryKey = (options: Options<ListMessagesData>) => crea
 export const listMessagesOptions = (options: Options<ListMessagesData>) =>
     queryOptions<ListMessagesResponse, DefaultError, ListMessagesResponse, ReturnType<typeof listMessagesQueryKey>>({
         queryFn: async ({ queryKey, signal }) => {
-            const { data } = await listMessages({
+            const { data } = await MessagingServiceSdk.__registry.get().listMessages({
                 ...options,
                 ...queryKey[0],
                 signal,
@@ -208,7 +196,7 @@ export const sendMessageMutation = (
 ): UseMutationOptions<SendMessageResponse, DefaultError, Options<SendMessageData>> => {
     const mutationOptions: UseMutationOptions<SendMessageResponse, DefaultError, Options<SendMessageData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await sendMessage({
+            const { data } = await MessagingServiceSdk.__registry.get().sendMessage({
                 ...options,
                 ...fnOptions,
                 throwOnError: true,
@@ -224,7 +212,7 @@ export const uploadMessageAttachmentMutation = (
 ): UseMutationOptions<UploadMessageAttachmentResponse, DefaultError, Options<UploadMessageAttachmentData>> => {
     const mutationOptions: UseMutationOptions<UploadMessageAttachmentResponse, DefaultError, Options<UploadMessageAttachmentData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await uploadMessageAttachment({
+            const { data } = await MessagingServiceSdk.__registry.get().uploadMessageAttachment({
                 ...options,
                 ...fnOptions,
                 throwOnError: true,

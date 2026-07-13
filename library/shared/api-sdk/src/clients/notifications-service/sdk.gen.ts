@@ -32,33 +32,71 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
     meta?: keyof ClientMeta extends never ? Record<string, unknown> : ClientMeta;
 };
 
-export const listNotifications = <ThrowOnError extends boolean = false>(
-    options?: Options<ListNotificationsData, ThrowOnError>,
-): RequestResult<ListNotificationsResponses, ListNotificationsErrors, ThrowOnError> =>
-    (options?.client ?? client).get<ListNotificationsResponses, ListNotificationsErrors, ThrowOnError>({
-        security: [{ scheme: 'bearer', type: 'http' }],
-        url: '/notifications',
-        ...options,
-    });
+class HeyApiClient {
+    protected client: Client;
 
-export const createNotification = <ThrowOnError extends boolean = false>(
-    options: Options<CreateNotificationData, ThrowOnError>,
-): RequestResult<CreateNotificationResponses, CreateNotificationErrors, ThrowOnError> =>
-    (options.client ?? client).post<CreateNotificationResponses, CreateNotificationErrors, ThrowOnError>({
-        security: [{ scheme: 'bearer', type: 'http' }],
-        url: '/notifications/internal',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers,
-        },
-    });
+    constructor(args?: { client?: Client }) {
+        this.client = args?.client ?? client;
+    }
+}
 
-export const markNotificationRead = <ThrowOnError extends boolean = false>(
-    options: Options<MarkNotificationReadData, ThrowOnError>,
-): RequestResult<MarkNotificationReadResponses, MarkNotificationReadErrors, ThrowOnError> =>
-    (options.client ?? client).patch<MarkNotificationReadResponses, MarkNotificationReadErrors, ThrowOnError>({
-        security: [{ scheme: 'bearer', type: 'http' }],
-        url: '/notifications/{notificationId}/read',
-        ...options,
-    });
+class HeyApiRegistry<T> {
+    private readonly defaultKey = 'default';
+
+    private readonly instances: Map<string, T> = new Map();
+
+    get(key?: string): T {
+        const instance = this.instances.get(key ?? this.defaultKey);
+        if (!instance) {
+            throw new Error(`No SDK client found. Create one with "new NotificationsServiceSdk()" to fix this error.`);
+        }
+        return instance;
+    }
+
+    set(value: T, key?: string): void {
+        this.instances.set(key ?? this.defaultKey, value);
+    }
+}
+
+export class NotificationsServiceSdk extends HeyApiClient {
+    public static readonly __registry: HeyApiRegistry<NotificationsServiceSdk> = new HeyApiRegistry<NotificationsServiceSdk>();
+
+    constructor(args?: { client?: Client; key?: string }) {
+        super(args);
+        NotificationsServiceSdk.__registry.set(this, args?.key);
+    }
+
+    public listNotifications<ThrowOnError extends boolean = false>(
+        options?: Options<ListNotificationsData, ThrowOnError>,
+    ): RequestResult<ListNotificationsResponses, ListNotificationsErrors, ThrowOnError> {
+        return (options?.client ?? this.client).get<ListNotificationsResponses, ListNotificationsErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/notifications',
+            ...options,
+        });
+    }
+
+    public createNotification<ThrowOnError extends boolean = false>(
+        options: Options<CreateNotificationData, ThrowOnError>,
+    ): RequestResult<CreateNotificationResponses, CreateNotificationErrors, ThrowOnError> {
+        return (options.client ?? this.client).post<CreateNotificationResponses, CreateNotificationErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/notifications/internal',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers,
+            },
+        });
+    }
+
+    public markNotificationRead<ThrowOnError extends boolean = false>(
+        options: Options<MarkNotificationReadData, ThrowOnError>,
+    ): RequestResult<MarkNotificationReadResponses, MarkNotificationReadErrors, ThrowOnError> {
+        return (options.client ?? this.client).patch<MarkNotificationReadResponses, MarkNotificationReadErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/notifications/{notificationId}/read',
+            ...options,
+        });
+    }
+}

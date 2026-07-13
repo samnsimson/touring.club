@@ -1,7 +1,8 @@
 import NextLink from 'next/link';
 import { notFound } from 'next/navigation';
 import { Box, Container, Heading, Image, Link as ChakraLink, SimpleGrid, Stack, Text, TripCard } from '@tc/ui';
-import { mockDestinations, mockTrips } from '@tc/mocks';
+import { mockDestinations } from '@tc/mocks';
+import { discoverTrips } from '@/lib/trips-service-client';
 
 export function generateStaticParams() {
     return mockDestinations.map((destination) => ({ id: destination.id }));
@@ -18,7 +19,8 @@ export default async function DestinationDetailPage({ params }: { params: Promis
     const destination = mockDestinations.find((candidate) => candidate.id === id);
     if (!destination) notFound();
 
-    const trips = mockTrips.filter((trip) => trip.status === 'published' && trip.destination.includes(destination.name));
+    const { data } = await discoverTrips({ query: { destination: destination.name } });
+    const trips = data?.trips ?? [];
 
     return (
         <Container maxW="7xl" py="10">
@@ -47,17 +49,14 @@ export default async function DestinationDetailPage({ params }: { params: Promis
                     {trips.map((trip) => (
                         <TripCard
                             key={trip.id}
-                            href={`/trips/${trip.slug}`}
+                            href={`/trips/${trip.id}`}
                             title={trip.title}
                             destination={trip.destination}
-                            coverImageUrl={trip.coverImageUrl}
+                            coverImageUrl={trip.coverImageUrls[0]}
                             startDate={trip.startDate}
                             endDate={trip.endDate}
                             capacity={trip.capacity}
-                            joinedCount={trip.joinedCount}
-                            difficulty={trip.difficulty}
                             categories={trip.categories}
-                            priceLabel={trip.priceLabel}
                         />
                     ))}
                 </SimpleGrid>

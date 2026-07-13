@@ -1,6 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { NotificationsServiceApi } from '@tc/server-api';
-import { ConfigService } from '@tc/config';
+import { ServerApi } from '@tc/server-api';
 import type { NotificationType } from '@tc/database';
 
 export type CreateNotificationPayload = {
@@ -13,15 +12,12 @@ export type CreateNotificationPayload = {
 @Injectable()
 export class NotificationsClient {
     private readonly logger = new Logger(NotificationsClient.name);
-    private readonly api: NotificationsServiceApi;
 
-    constructor(private readonly config: ConfigService) {
-        this.api = new NotificationsServiceApi({ baseUrl: this.config.get('NOTIFICATIONS_SERVICE_URL') });
-    }
+    constructor(private readonly serverApi: ServerApi) {}
 
     async createNotification(payload: CreateNotificationPayload, authorization: string): Promise<void> {
         try {
-            await this.api.createNotification({
+            await this.serverApi.notificationsService.createNotification({
                 body: payload,
                 headers: { Authorization: authorization },
             });

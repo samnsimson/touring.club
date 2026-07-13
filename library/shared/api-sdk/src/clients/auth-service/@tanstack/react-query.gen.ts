@@ -3,7 +3,7 @@
 import { type DefaultError, queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen';
-import { changePassword, forgotPassword, getMe, type Options, resetPassword, signIn, signOut, signUp, updateProfile, verifyEmail } from '../sdk.gen';
+import { AuthServiceSdk, type Options } from '../sdk.gen';
 import type {
     ChangePasswordData,
     ChangePasswordResponse,
@@ -66,7 +66,7 @@ export const getMeQueryKey = (options?: Options<GetMeData>) => createQueryKey('g
 export const getMeOptions = (options?: Options<GetMeData>) =>
     queryOptions<GetMeResponse2, DefaultError, GetMeResponse2, ReturnType<typeof getMeQueryKey>>({
         queryFn: async ({ queryKey, signal }) => {
-            const { data } = await getMe({
+            const { data } = await AuthServiceSdk.__registry.get().getMe({
                 ...options,
                 ...queryKey[0],
                 signal,
@@ -82,7 +82,7 @@ export const updateProfileMutation = (
 ): UseMutationOptions<UpdateProfileResponse, DefaultError, Options<UpdateProfileData>> => {
     const mutationOptions: UseMutationOptions<UpdateProfileResponse, DefaultError, Options<UpdateProfileData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await updateProfile({
+            const { data } = await AuthServiceSdk.__registry.get().updateProfile({
                 ...options,
                 ...fnOptions,
                 throwOnError: true,
@@ -98,7 +98,7 @@ export const changePasswordMutation = (
 ): UseMutationOptions<ChangePasswordResponse, DefaultError, Options<ChangePasswordData>> => {
     const mutationOptions: UseMutationOptions<ChangePasswordResponse, DefaultError, Options<ChangePasswordData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await changePassword({
+            const { data } = await AuthServiceSdk.__registry.get().changePassword({
                 ...options,
                 ...fnOptions,
                 throwOnError: true,
@@ -112,7 +112,7 @@ export const changePasswordMutation = (
 export const signOutMutation = (options?: Partial<Options<SignOutData>>): UseMutationOptions<SignOutResponse, DefaultError, Options<SignOutData>> => {
     const mutationOptions: UseMutationOptions<SignOutResponse, DefaultError, Options<SignOutData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await signOut({
+            const { data } = await AuthServiceSdk.__registry.get().signOut({
                 ...options,
                 ...fnOptions,
                 throwOnError: true,
@@ -126,7 +126,7 @@ export const signOutMutation = (options?: Partial<Options<SignOutData>>): UseMut
 export const signUpMutation = (options?: Partial<Options<SignUpData>>): UseMutationOptions<SignUpResponse2, DefaultError, Options<SignUpData>> => {
     const mutationOptions: UseMutationOptions<SignUpResponse2, DefaultError, Options<SignUpData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await signUp({
+            const { data } = await AuthServiceSdk.__registry.get().signUp({
                 ...options,
                 ...fnOptions,
                 throwOnError: true,
@@ -140,7 +140,7 @@ export const signUpMutation = (options?: Partial<Options<SignUpData>>): UseMutat
 export const signInMutation = (options?: Partial<Options<SignInData>>): UseMutationOptions<SignInResponse2, DefaultError, Options<SignInData>> => {
     const mutationOptions: UseMutationOptions<SignInResponse2, DefaultError, Options<SignInData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await signIn({
+            const { data } = await AuthServiceSdk.__registry.get().signIn({
                 ...options,
                 ...fnOptions,
                 throwOnError: true,
@@ -156,7 +156,7 @@ export const verifyEmailMutation = (
 ): UseMutationOptions<VerifyEmailResponse2, DefaultError, Options<VerifyEmailData>> => {
     const mutationOptions: UseMutationOptions<VerifyEmailResponse2, DefaultError, Options<VerifyEmailData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await verifyEmail({
+            const { data } = await AuthServiceSdk.__registry.get().verifyEmail({
                 ...options,
                 ...fnOptions,
                 throwOnError: true,
@@ -172,7 +172,7 @@ export const forgotPasswordMutation = (
 ): UseMutationOptions<ForgotPasswordResponse, DefaultError, Options<ForgotPasswordData>> => {
     const mutationOptions: UseMutationOptions<ForgotPasswordResponse, DefaultError, Options<ForgotPasswordData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await forgotPassword({
+            const { data } = await AuthServiceSdk.__registry.get().forgotPassword({
                 ...options,
                 ...fnOptions,
                 throwOnError: true,
@@ -188,7 +188,7 @@ export const resetPasswordMutation = (
 ): UseMutationOptions<ResetPasswordResponse, DefaultError, Options<ResetPasswordData>> => {
     const mutationOptions: UseMutationOptions<ResetPasswordResponse, DefaultError, Options<ResetPasswordData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await resetPassword({
+            const { data } = await AuthServiceSdk.__registry.get().resetPassword({
                 ...options,
                 ...fnOptions,
                 throwOnError: true,

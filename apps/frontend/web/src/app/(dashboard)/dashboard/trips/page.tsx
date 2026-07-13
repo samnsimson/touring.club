@@ -1,14 +1,18 @@
 import NextLink from 'next/link';
 import { Compass } from 'lucide-react';
 import { AppEmptyState, Button, PageHeader, SimpleGrid, TripCard } from '@tc/ui';
-import { currentUser, getTripsByOrganizer } from '@tc/mocks';
+import { auth } from '@/auth';
+import { listMyTrips } from '@/lib/trips-service-client';
 
 export const metadata = {
     title: 'My trips — touring.club',
 };
 
-export default function MyTripsPage() {
-    const trips = getTripsByOrganizer(currentUser.id);
+export default async function MyTripsPage() {
+    const session = await auth();
+    const accessToken = session?.user?.accessToken;
+    const { data } = accessToken ? await listMyTrips({ headers: { Authorization: `Bearer ${accessToken}` } }) : { data: undefined };
+    const trips = data?.trips ?? [];
 
     return (
         <>
@@ -21,22 +25,21 @@ export default function MyTripsPage() {
                     </Button>
                 }
             />
-            {trips.length > 0 ? (
+            {!accessToken ? (
+                <AppEmptyState title="Sign in to see your trips" description="Sign in to view and manage the trips you're organizing." />
+            ) : trips.length > 0 ? (
                 <SimpleGrid columns={{ base: 1, sm: 2, lg: 3 }} gap="6">
                     {trips.map((trip) => (
                         <TripCard
                             key={trip.id}
-                            href={`/trips/${trip.slug}`}
+                            href={`/trips/${trip.id}`}
                             title={trip.title}
                             destination={trip.destination}
-                            coverImageUrl={trip.coverImageUrl}
+                            coverImageUrl={trip.coverImageUrls[0]}
                             startDate={trip.startDate}
                             endDate={trip.endDate}
                             capacity={trip.capacity}
-                            joinedCount={trip.joinedCount}
-                            difficulty={trip.difficulty}
                             categories={trip.categories}
-                            priceLabel={trip.priceLabel}
                         />
                     ))}
                 </SimpleGrid>

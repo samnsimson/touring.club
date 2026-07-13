@@ -14,14 +14,16 @@
             "import": "./dist/index.js",
             "default": "./dist/index.js"
         },
-        "./services/*": {
-            "@touring.club/source": "./src/apis/*.server-api.ts",
-            "types": "./dist/apis/*.server-api.d.ts",
-            "import": "./dist/apis/*.server-api.js",
-            "default": "./dist/apis/*.server-api.js"
+        "./types/*": {
+            "@touring.club/source": "./src/types/*.ts",
+            "types": "./dist/types/*.d.ts",
+            "import": "./dist/types/*.js",
+            "default": "./dist/types/*.js"
         }
     },
     "dependencies": {
+        "@nestjs/common": "^11.0.0",
+        "@nestjs/config": "^4.0.4",
         "@tc/api-sdk": "workspace:*"
     },
     "devDependencies": {

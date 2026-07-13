@@ -3,7 +3,7 @@
 import { type DefaultError, queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen';
-import { getMyProfile, getMyTravelHistory, getPublicProfile, type Options, updateMyProfile, uploadMyAvatar } from '../sdk.gen';
+import { type Options, UsersServiceSdk } from '../sdk.gen';
 import type {
     GetMyProfileData,
     GetMyProfileResponse,
@@ -58,7 +58,7 @@ export const getMyProfileQueryKey = (options?: Options<GetMyProfileData>) => cre
 export const getMyProfileOptions = (options?: Options<GetMyProfileData>) =>
     queryOptions<GetMyProfileResponse, DefaultError, GetMyProfileResponse, ReturnType<typeof getMyProfileQueryKey>>({
         queryFn: async ({ queryKey, signal }) => {
-            const { data } = await getMyProfile({
+            const { data } = await UsersServiceSdk.__registry.get().getMyProfile({
                 ...options,
                 ...queryKey[0],
                 signal,
@@ -74,7 +74,7 @@ export const updateMyProfileMutation = (
 ): UseMutationOptions<UpdateMyProfileResponse, DefaultError, Options<UpdateMyProfileData>> => {
     const mutationOptions: UseMutationOptions<UpdateMyProfileResponse, DefaultError, Options<UpdateMyProfileData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await updateMyProfile({
+            const { data } = await UsersServiceSdk.__registry.get().updateMyProfile({
                 ...options,
                 ...fnOptions,
                 throwOnError: true,
@@ -90,7 +90,7 @@ export const uploadMyAvatarMutation = (
 ): UseMutationOptions<UploadMyAvatarResponse, DefaultError, Options<UploadMyAvatarData>> => {
     const mutationOptions: UseMutationOptions<UploadMyAvatarResponse, DefaultError, Options<UploadMyAvatarData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await uploadMyAvatar({
+            const { data } = await UsersServiceSdk.__registry.get().uploadMyAvatar({
                 ...options,
                 ...fnOptions,
                 throwOnError: true,
@@ -106,7 +106,7 @@ export const getMyTravelHistoryQueryKey = (options: Options<GetMyTravelHistoryDa
 export const getMyTravelHistoryOptions = (options: Options<GetMyTravelHistoryData>) =>
     queryOptions<GetMyTravelHistoryResponse, DefaultError, GetMyTravelHistoryResponse, ReturnType<typeof getMyTravelHistoryQueryKey>>({
         queryFn: async ({ queryKey, signal }) => {
-            const { data } = await getMyTravelHistory({
+            const { data } = await UsersServiceSdk.__registry.get().getMyTravelHistory({
                 ...options,
                 ...queryKey[0],
                 signal,
@@ -122,7 +122,7 @@ export const getPublicProfileQueryKey = (options: Options<GetPublicProfileData>)
 export const getPublicProfileOptions = (options: Options<GetPublicProfileData>) =>
     queryOptions<GetPublicProfileResponse, DefaultError, GetPublicProfileResponse, ReturnType<typeof getPublicProfileQueryKey>>({
         queryFn: async ({ queryKey, signal }) => {
-            const { data } = await getPublicProfile({
+            const { data } = await UsersServiceSdk.__registry.get().getPublicProfile({
                 ...options,
                 ...queryKey[0],
                 signal,

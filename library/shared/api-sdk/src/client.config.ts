@@ -1,5 +1,6 @@
 import { createClient } from '@hey-api/openapi-ts';
 import { CLIENT_REGISTRY } from './client.registry';
+import { ApiSdkUtils } from './utils/api-sdk.utils';
 
 createClient(
     CLIENT_REGISTRY.map((service) => ({
@@ -11,12 +12,16 @@ createClient(
             {
                 auth: true,
                 name: '@hey-api/sdk',
+                operations: {
+                    strategy: 'single',
+                    containerName: `${ApiSdkUtils.pascalCase(service)}Sdk`,
+                },
             },
             {
+                auth: true,
                 name: '@tanstack/react-query',
                 queryOptions: true,
                 mutationOptions: true,
-                auth: true,
             },
         ],
         output: {

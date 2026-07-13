@@ -3,7 +3,7 @@
 import { type DefaultError, queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen';
-import { createNotification, listNotifications, markNotificationRead, type Options } from '../sdk.gen';
+import { NotificationsServiceSdk, type Options } from '../sdk.gen';
 import type {
     CreateNotificationData,
     CreateNotificationResponse,
@@ -54,7 +54,7 @@ export const listNotificationsQueryKey = (options?: Options<ListNotificationsDat
 export const listNotificationsOptions = (options?: Options<ListNotificationsData>) =>
     queryOptions<ListNotificationsResponse, DefaultError, ListNotificationsResponse, ReturnType<typeof listNotificationsQueryKey>>({
         queryFn: async ({ queryKey, signal }) => {
-            const { data } = await listNotifications({
+            const { data } = await NotificationsServiceSdk.__registry.get().listNotifications({
                 ...options,
                 ...queryKey[0],
                 signal,
@@ -70,7 +70,7 @@ export const createNotificationMutation = (
 ): UseMutationOptions<CreateNotificationResponse, DefaultError, Options<CreateNotificationData>> => {
     const mutationOptions: UseMutationOptions<CreateNotificationResponse, DefaultError, Options<CreateNotificationData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await createNotification({
+            const { data } = await NotificationsServiceSdk.__registry.get().createNotification({
                 ...options,
                 ...fnOptions,
                 throwOnError: true,
@@ -86,7 +86,7 @@ export const markNotificationReadMutation = (
 ): UseMutationOptions<MarkNotificationReadResponse, DefaultError, Options<MarkNotificationReadData>> => {
     const mutationOptions: UseMutationOptions<MarkNotificationReadResponse, DefaultError, Options<MarkNotificationReadData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await markNotificationRead({
+            const { data } = await NotificationsServiceSdk.__registry.get().markNotificationRead({
                 ...options,
                 ...fnOptions,
                 throwOnError: true,

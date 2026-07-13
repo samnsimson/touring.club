@@ -1,19 +1,14 @@
 import { Injectable, ServiceUnavailableException } from '@nestjs/common';
-import { TripsServiceApi } from '@tc/server-api';
-import { TravelHistoryResponseDto } from '@tc/server-api/services/trips-service';
-import { ConfigService } from '@tc/config';
+import { ServerApi } from '@tc/server-api';
+import type { TravelHistoryResponseDto } from '@tc/server-api/types/trips-service';
 
 @Injectable()
 export class TripsClient {
-    private readonly api: TripsServiceApi;
-
-    constructor(private readonly config: ConfigService) {
-        this.api = new TripsServiceApi({ baseUrl: this.config.get('TRIPS_SERVICE_URL') });
-    }
+    constructor(private readonly serverApi: ServerApi) {}
 
     async getTravelHistory(userId: string, authorization: string): Promise<TravelHistoryResponseDto> {
         try {
-            const { data } = await this.api.getUserTravelHistory({
+            const { data } = await this.serverApi.tripsService.getUserTravelHistory({
                 path: { userId },
                 headers: { Authorization: authorization },
                 throwOnError: true,

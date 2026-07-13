@@ -38,56 +38,96 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
     meta?: keyof ClientMeta extends never ? Record<string, unknown> : ClientMeta;
 };
 
-export const getMyProfile = <ThrowOnError extends boolean = false>(
-    options?: Options<GetMyProfileData, ThrowOnError>,
-): RequestResult<GetMyProfileResponses, GetMyProfileErrors, ThrowOnError> =>
-    (options?.client ?? client).get<GetMyProfileResponses, GetMyProfileErrors, ThrowOnError>({
-        security: [{ scheme: 'bearer', type: 'http' }],
-        url: '/profiles/me',
-        ...options,
-    });
+class HeyApiClient {
+    protected client: Client;
 
-export const updateMyProfile = <ThrowOnError extends boolean = false>(
-    options: Options<UpdateMyProfileData, ThrowOnError>,
-): RequestResult<UpdateMyProfileResponses, UpdateMyProfileErrors, ThrowOnError> =>
-    (options.client ?? client).patch<UpdateMyProfileResponses, UpdateMyProfileErrors, ThrowOnError>({
-        security: [{ scheme: 'bearer', type: 'http' }],
-        url: '/profiles/me',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers,
-        },
-    });
+    constructor(args?: { client?: Client }) {
+        this.client = args?.client ?? client;
+    }
+}
 
-export const uploadMyAvatar = <ThrowOnError extends boolean = false>(
-    options: Options<UploadMyAvatarData, ThrowOnError>,
-): RequestResult<UploadMyAvatarResponses, UploadMyAvatarErrors, ThrowOnError> =>
-    (options.client ?? client).post<UploadMyAvatarResponses, UploadMyAvatarErrors, ThrowOnError>({
-        ...formDataBodySerializer,
-        security: [{ scheme: 'bearer', type: 'http' }],
-        url: '/profiles/me/avatar',
-        ...options,
-        headers: {
-            'Content-Type': null,
-            ...options.headers,
-        },
-    });
+class HeyApiRegistry<T> {
+    private readonly defaultKey = 'default';
 
-export const getMyTravelHistory = <ThrowOnError extends boolean = false>(
-    options: Options<GetMyTravelHistoryData, ThrowOnError>,
-): RequestResult<GetMyTravelHistoryResponses, GetMyTravelHistoryErrors, ThrowOnError> =>
-    (options.client ?? client).get<GetMyTravelHistoryResponses, GetMyTravelHistoryErrors, ThrowOnError>({
-        security: [{ scheme: 'bearer', type: 'http' }],
-        url: '/profiles/me/travel-history',
-        ...options,
-    });
+    private readonly instances: Map<string, T> = new Map();
 
-export const getPublicProfile = <ThrowOnError extends boolean = false>(
-    options: Options<GetPublicProfileData, ThrowOnError>,
-): RequestResult<GetPublicProfileResponses, GetPublicProfileErrors, ThrowOnError> =>
-    (options.client ?? client).get<GetPublicProfileResponses, GetPublicProfileErrors, ThrowOnError>({
-        security: [{ scheme: 'bearer', type: 'http' }],
-        url: '/profiles/{userId}',
-        ...options,
-    });
+    get(key?: string): T {
+        const instance = this.instances.get(key ?? this.defaultKey);
+        if (!instance) {
+            throw new Error(`No SDK client found. Create one with "new UsersServiceSdk()" to fix this error.`);
+        }
+        return instance;
+    }
+
+    set(value: T, key?: string): void {
+        this.instances.set(key ?? this.defaultKey, value);
+    }
+}
+
+export class UsersServiceSdk extends HeyApiClient {
+    public static readonly __registry: HeyApiRegistry<UsersServiceSdk> = new HeyApiRegistry<UsersServiceSdk>();
+
+    constructor(args?: { client?: Client; key?: string }) {
+        super(args);
+        UsersServiceSdk.__registry.set(this, args?.key);
+    }
+
+    public getMyProfile<ThrowOnError extends boolean = false>(
+        options?: Options<GetMyProfileData, ThrowOnError>,
+    ): RequestResult<GetMyProfileResponses, GetMyProfileErrors, ThrowOnError> {
+        return (options?.client ?? this.client).get<GetMyProfileResponses, GetMyProfileErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/profiles/me',
+            ...options,
+        });
+    }
+
+    public updateMyProfile<ThrowOnError extends boolean = false>(
+        options: Options<UpdateMyProfileData, ThrowOnError>,
+    ): RequestResult<UpdateMyProfileResponses, UpdateMyProfileErrors, ThrowOnError> {
+        return (options.client ?? this.client).patch<UpdateMyProfileResponses, UpdateMyProfileErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/profiles/me',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers,
+            },
+        });
+    }
+
+    public uploadMyAvatar<ThrowOnError extends boolean = false>(
+        options: Options<UploadMyAvatarData, ThrowOnError>,
+    ): RequestResult<UploadMyAvatarResponses, UploadMyAvatarErrors, ThrowOnError> {
+        return (options.client ?? this.client).post<UploadMyAvatarResponses, UploadMyAvatarErrors, ThrowOnError>({
+            ...formDataBodySerializer,
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/profiles/me/avatar',
+            ...options,
+            headers: {
+                'Content-Type': null,
+                ...options.headers,
+            },
+        });
+    }
+
+    public getMyTravelHistory<ThrowOnError extends boolean = false>(
+        options: Options<GetMyTravelHistoryData, ThrowOnError>,
+    ): RequestResult<GetMyTravelHistoryResponses, GetMyTravelHistoryErrors, ThrowOnError> {
+        return (options.client ?? this.client).get<GetMyTravelHistoryResponses, GetMyTravelHistoryErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/profiles/me/travel-history',
+            ...options,
+        });
+    }
+
+    public getPublicProfile<ThrowOnError extends boolean = false>(
+        options: Options<GetPublicProfileData, ThrowOnError>,
+    ): RequestResult<GetPublicProfileResponses, GetPublicProfileErrors, ThrowOnError> {
+        return (options.client ?? this.client).get<GetPublicProfileResponses, GetPublicProfileErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/profiles/{userId}',
+            ...options,
+        });
+    }
+}

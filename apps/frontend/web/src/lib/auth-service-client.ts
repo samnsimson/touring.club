@@ -1,8 +1,14 @@
-import { configureAuthServiceClient } from '@tc/client-api/services/auth-service';
+import { configureAuthServiceClient, AuthServiceSdk } from '@tc/client-api/services/auth-service';
 
 configureAuthServiceClient({ baseUrl: `${process.env.NEXT_PUBLIC_API_GATEWAY_URL}/api/v1` });
 
-export { signIn, signUp, verifyEmail, forgotPassword, resetPassword } from '@tc/client-api/services/auth-service';
+const authServiceSdk = new AuthServiceSdk();
+
+export const signIn = authServiceSdk.signIn.bind(authServiceSdk);
+export const signUp = authServiceSdk.signUp.bind(authServiceSdk);
+export const verifyEmail = authServiceSdk.verifyEmail.bind(authServiceSdk);
+export const forgotPassword = authServiceSdk.forgotPassword.bind(authServiceSdk);
+export const resetPassword = authServiceSdk.resetPassword.bind(authServiceSdk);
 
 export function extractAuthErrorMessage(error: unknown, fallback: string): string {
     if (error && typeof error === 'object' && 'message' in error) {

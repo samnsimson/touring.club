@@ -53,118 +53,163 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
     meta?: keyof ClientMeta extends never ? Record<string, unknown> : ClientMeta;
 };
 
-export const listConversations = <ThrowOnError extends boolean = false>(
-    options?: Options<ListConversationsData, ThrowOnError>,
-): RequestResult<ListConversationsResponses, ListConversationsErrors, ThrowOnError> =>
-    (options?.client ?? client).get<ListConversationsResponses, ListConversationsErrors, ThrowOnError>({
-        security: [{ scheme: 'bearer', type: 'http' }],
-        url: '/conversations',
-        ...options,
-    });
+class HeyApiClient {
+    protected client: Client;
 
-export const createDirectConversation = <ThrowOnError extends boolean = false>(
-    options: Options<CreateDirectConversationData, ThrowOnError>,
-): RequestResult<CreateDirectConversationResponses, CreateDirectConversationErrors, ThrowOnError> =>
-    (options.client ?? client).post<CreateDirectConversationResponses, CreateDirectConversationErrors, ThrowOnError>({
-        security: [{ scheme: 'bearer', type: 'http' }],
-        url: '/conversations',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers,
-        },
-    });
+    constructor(args?: { client?: Client }) {
+        this.client = args?.client ?? client;
+    }
+}
 
-export const getTripConversation = <ThrowOnError extends boolean = false>(
-    options: Options<GetTripConversationData, ThrowOnError>,
-): RequestResult<GetTripConversationResponses, GetTripConversationErrors, ThrowOnError> =>
-    (options.client ?? client).get<GetTripConversationResponses, GetTripConversationErrors, ThrowOnError>({
-        security: [{ scheme: 'bearer', type: 'http' }],
-        url: '/conversations/trips/{tripId}',
-        ...options,
-    });
+class HeyApiRegistry<T> {
+    private readonly defaultKey = 'default';
 
-export const listTripMessages = <ThrowOnError extends boolean = false>(
-    options: Options<ListTripMessagesData, ThrowOnError>,
-): RequestResult<ListTripMessagesResponses, ListTripMessagesErrors, ThrowOnError> =>
-    (options.client ?? client).get<ListTripMessagesResponses, ListTripMessagesErrors, ThrowOnError>({
-        security: [{ scheme: 'bearer', type: 'http' }],
-        url: '/conversations/trips/{tripId}/messages',
-        ...options,
-    });
+    private readonly instances: Map<string, T> = new Map();
 
-export const sendTripMessage = <ThrowOnError extends boolean = false>(
-    options: Options<SendTripMessageData, ThrowOnError>,
-): RequestResult<SendTripMessageResponses, SendTripMessageErrors, ThrowOnError> =>
-    (options.client ?? client).post<SendTripMessageResponses, SendTripMessageErrors, ThrowOnError>({
-        security: [{ scheme: 'bearer', type: 'http' }],
-        url: '/conversations/trips/{tripId}/messages',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers,
-        },
-    });
+    get(key?: string): T {
+        const instance = this.instances.get(key ?? this.defaultKey);
+        if (!instance) {
+            throw new Error(`No SDK client found. Create one with "new MessagingServiceSdk()" to fix this error.`);
+        }
+        return instance;
+    }
 
-export const uploadTripMessageAttachment = <ThrowOnError extends boolean = false>(
-    options: Options<UploadTripMessageAttachmentData, ThrowOnError>,
-): RequestResult<UploadTripMessageAttachmentResponses, UploadTripMessageAttachmentErrors, ThrowOnError> =>
-    (options.client ?? client).post<UploadTripMessageAttachmentResponses, UploadTripMessageAttachmentErrors, ThrowOnError>({
-        ...formDataBodySerializer,
-        security: [{ scheme: 'bearer', type: 'http' }],
-        url: '/conversations/trips/{tripId}/messages/attachment',
-        ...options,
-        headers: {
-            'Content-Type': null,
-            ...options.headers,
-        },
-    });
+    set(value: T, key?: string): void {
+        this.instances.set(key ?? this.defaultKey, value);
+    }
+}
 
-export const postTripSystemEvent = <ThrowOnError extends boolean = false>(
-    options: Options<PostTripSystemEventData, ThrowOnError>,
-): RequestResult<PostTripSystemEventResponses, PostTripSystemEventErrors, ThrowOnError> =>
-    (options.client ?? client).post<PostTripSystemEventResponses, PostTripSystemEventErrors, ThrowOnError>({
-        security: [{ scheme: 'bearer', type: 'http' }],
-        url: '/conversations/internal/trips/{tripId}/system-events',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers,
-        },
-    });
+export class MessagingServiceSdk extends HeyApiClient {
+    public static readonly __registry: HeyApiRegistry<MessagingServiceSdk> = new HeyApiRegistry<MessagingServiceSdk>();
 
-export const listMessages = <ThrowOnError extends boolean = false>(
-    options: Options<ListMessagesData, ThrowOnError>,
-): RequestResult<ListMessagesResponses, ListMessagesErrors, ThrowOnError> =>
-    (options.client ?? client).get<ListMessagesResponses, ListMessagesErrors, ThrowOnError>({
-        security: [{ scheme: 'bearer', type: 'http' }],
-        url: '/conversations/{conversationId}/messages',
-        ...options,
-    });
+    constructor(args?: { client?: Client; key?: string }) {
+        super(args);
+        MessagingServiceSdk.__registry.set(this, args?.key);
+    }
 
-export const sendMessage = <ThrowOnError extends boolean = false>(
-    options: Options<SendMessageData, ThrowOnError>,
-): RequestResult<SendMessageResponses, SendMessageErrors, ThrowOnError> =>
-    (options.client ?? client).post<SendMessageResponses, SendMessageErrors, ThrowOnError>({
-        security: [{ scheme: 'bearer', type: 'http' }],
-        url: '/conversations/{conversationId}/messages',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers,
-        },
-    });
+    public listConversations<ThrowOnError extends boolean = false>(
+        options?: Options<ListConversationsData, ThrowOnError>,
+    ): RequestResult<ListConversationsResponses, ListConversationsErrors, ThrowOnError> {
+        return (options?.client ?? this.client).get<ListConversationsResponses, ListConversationsErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/conversations',
+            ...options,
+        });
+    }
 
-export const uploadMessageAttachment = <ThrowOnError extends boolean = false>(
-    options: Options<UploadMessageAttachmentData, ThrowOnError>,
-): RequestResult<UploadMessageAttachmentResponses, UploadMessageAttachmentErrors, ThrowOnError> =>
-    (options.client ?? client).post<UploadMessageAttachmentResponses, UploadMessageAttachmentErrors, ThrowOnError>({
-        ...formDataBodySerializer,
-        security: [{ scheme: 'bearer', type: 'http' }],
-        url: '/conversations/{conversationId}/messages/attachment',
-        ...options,
-        headers: {
-            'Content-Type': null,
-            ...options.headers,
-        },
-    });
+    public createDirectConversation<ThrowOnError extends boolean = false>(
+        options: Options<CreateDirectConversationData, ThrowOnError>,
+    ): RequestResult<CreateDirectConversationResponses, CreateDirectConversationErrors, ThrowOnError> {
+        return (options.client ?? this.client).post<CreateDirectConversationResponses, CreateDirectConversationErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/conversations',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers,
+            },
+        });
+    }
+
+    public getTripConversation<ThrowOnError extends boolean = false>(
+        options: Options<GetTripConversationData, ThrowOnError>,
+    ): RequestResult<GetTripConversationResponses, GetTripConversationErrors, ThrowOnError> {
+        return (options.client ?? this.client).get<GetTripConversationResponses, GetTripConversationErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/conversations/trips/{tripId}',
+            ...options,
+        });
+    }
+
+    public listTripMessages<ThrowOnError extends boolean = false>(
+        options: Options<ListTripMessagesData, ThrowOnError>,
+    ): RequestResult<ListTripMessagesResponses, ListTripMessagesErrors, ThrowOnError> {
+        return (options.client ?? this.client).get<ListTripMessagesResponses, ListTripMessagesErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/conversations/trips/{tripId}/messages',
+            ...options,
+        });
+    }
+
+    public sendTripMessage<ThrowOnError extends boolean = false>(
+        options: Options<SendTripMessageData, ThrowOnError>,
+    ): RequestResult<SendTripMessageResponses, SendTripMessageErrors, ThrowOnError> {
+        return (options.client ?? this.client).post<SendTripMessageResponses, SendTripMessageErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/conversations/trips/{tripId}/messages',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers,
+            },
+        });
+    }
+
+    public uploadTripMessageAttachment<ThrowOnError extends boolean = false>(
+        options: Options<UploadTripMessageAttachmentData, ThrowOnError>,
+    ): RequestResult<UploadTripMessageAttachmentResponses, UploadTripMessageAttachmentErrors, ThrowOnError> {
+        return (options.client ?? this.client).post<UploadTripMessageAttachmentResponses, UploadTripMessageAttachmentErrors, ThrowOnError>({
+            ...formDataBodySerializer,
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/conversations/trips/{tripId}/messages/attachment',
+            ...options,
+            headers: {
+                'Content-Type': null,
+                ...options.headers,
+            },
+        });
+    }
+
+    public postTripSystemEvent<ThrowOnError extends boolean = false>(
+        options: Options<PostTripSystemEventData, ThrowOnError>,
+    ): RequestResult<PostTripSystemEventResponses, PostTripSystemEventErrors, ThrowOnError> {
+        return (options.client ?? this.client).post<PostTripSystemEventResponses, PostTripSystemEventErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/conversations/internal/trips/{tripId}/system-events',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers,
+            },
+        });
+    }
+
+    public listMessages<ThrowOnError extends boolean = false>(
+        options: Options<ListMessagesData, ThrowOnError>,
+    ): RequestResult<ListMessagesResponses, ListMessagesErrors, ThrowOnError> {
+        return (options.client ?? this.client).get<ListMessagesResponses, ListMessagesErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/conversations/{conversationId}/messages',
+            ...options,
+        });
+    }
+
+    public sendMessage<ThrowOnError extends boolean = false>(
+        options: Options<SendMessageData, ThrowOnError>,
+    ): RequestResult<SendMessageResponses, SendMessageErrors, ThrowOnError> {
+        return (options.client ?? this.client).post<SendMessageResponses, SendMessageErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/conversations/{conversationId}/messages',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers,
+            },
+        });
+    }
+
+    public uploadMessageAttachment<ThrowOnError extends boolean = false>(
+        options: Options<UploadMessageAttachmentData, ThrowOnError>,
+    ): RequestResult<UploadMessageAttachmentResponses, UploadMessageAttachmentErrors, ThrowOnError> {
+        return (options.client ?? this.client).post<UploadMessageAttachmentResponses, UploadMessageAttachmentErrors, ThrowOnError>({
+            ...formDataBodySerializer,
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/conversations/{conversationId}/messages/attachment',
+            ...options,
+            headers: {
+                'Content-Type': null,
+                ...options.headers,
+            },
+        });
+    }
+}
