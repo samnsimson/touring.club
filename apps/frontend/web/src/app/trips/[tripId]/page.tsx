@@ -2,6 +2,7 @@ import NextLink from 'next/link';
 import { notFound } from 'next/navigation';
 import { Calendar, MapPin, Users } from 'lucide-react';
 import { Box, CategoryPill, Container, Heading, HStack, Image, Link as ChakraLink, Stack, Text } from '@tc/ui';
+import { TripJoinButton } from '@/components/trips/trip-join-button';
 import { getPublicTrip } from '@/lib/trips-service-client';
 
 function formatDateRange(startDate: string, endDate: string): string {
@@ -32,19 +33,22 @@ export default async function TripDetailPage({ params }: { params: Promise<{ tri
                     <Image src={trip.coverImageUrls[0]} alt={trip.title} w="full" h="full" objectFit="cover" />
                 </Box>
             ) : null}
-            <Stack gap="2" mb="4">
-                {trip.categories.length > 0 ? (
-                    <HStack gap="2" wrap="wrap">
-                        {trip.categories.map((category) => (
-                            <CategoryPill key={category} category={category} />
-                        ))}
+            <Stack direction={{ base: 'column', md: 'row' }} justify="space-between" align={{ base: 'start', md: 'center' }} gap="4" mb="4">
+                <Stack gap="2">
+                    {trip.categories.length > 0 ? (
+                        <HStack gap="2" wrap="wrap">
+                            {trip.categories.map((category) => (
+                                <CategoryPill key={category} category={category} />
+                            ))}
+                        </HStack>
+                    ) : null}
+                    <Heading size="3xl">{trip.title}</Heading>
+                    <HStack color="gray.600" gap="1">
+                        <MapPin size={18} />
+                        <Text>{trip.destination}</Text>
                     </HStack>
-                ) : null}
-                <Heading size="3xl">{trip.title}</Heading>
-                <HStack color="gray.600" gap="1">
-                    <MapPin size={18} />
-                    <Text>{trip.destination}</Text>
-                </HStack>
+                </Stack>
+                <TripJoinButton tripId={trip.id} organizerId={trip.organizerId} visibility={trip.visibility} />
             </Stack>
 
             <Stack gap="6" mt="10" maxW="3xl">
